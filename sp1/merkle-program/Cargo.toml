@@ -1,0 +1,10 @@
+[package]
+version = "0.1.0"
+name = "merkle-program"
+edition = "2021"
+
+[dependencies]
+sp1-zkvm.workspace = true
+common.workspace = true
+ethereum = { path = "../../ethereum", features = ["sp1"] }
+serde_json.workspace = true

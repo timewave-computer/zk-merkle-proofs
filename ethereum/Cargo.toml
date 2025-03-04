@@ -1,0 +1,27 @@
+[package]
+name = "ethereum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eth_trie = "0.5.0"
+common.workspace = true
+tokio = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+reqwest = { workspace = true, optional = true }
+url = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
+alloy-primitives = "0.8.12"
+alloy = { version = "0.11.1", features = ["full"], optional = true }
+alloy-rlp = { version = "0.3.11", optional = true }
+tiny-keccak = "2.0.2"
+hex = "0.4.3"
+# use precompile when running in prod
+tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patches/tiny-keccak", tag = "patch-2.0.2-sp1-4.0.0", features = [
+    "keccak",
+], optional = true }
+
+[features]
+web = ["tokio", "reqwest", "url", "dotenvy", "alloy", "alloy-rlp"]
+sp1 = ["tiny-keccak-sp1"]
