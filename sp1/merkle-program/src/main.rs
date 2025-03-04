@@ -1,6 +1,6 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
-use common::{Domain, MerkleProof, ProofInput, ProofOutput};
+use common::{Domain, ProofInput, ProofOutput};
 use ethereum::verify_merkle_proof;
 use serde_json;
 /// the logic that is to be proven
