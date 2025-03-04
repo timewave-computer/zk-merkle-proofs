@@ -19,6 +19,8 @@ pub enum Domain {
 pub struct MerkleProof {
     // a list of serialized nodes
     pub nodes: Vec<Vec<u8>>,
+    // the key that we query
+    pub key: Vec<u8>,
     // target domain
     pub domain: Domain,
     // serialized trie root
@@ -35,6 +37,8 @@ pub struct ProofInput {
 pub struct ProofOutput {
     // commit to the encoded roots
     pub roots: Vec<(Domain, Vec<u8>)>,
+    // the keys that were queried
+    pub keys: Vec<Vec<u8>>,
     // commit to the encoded values
     pub values: Vec<Vec<u8>>,
 }

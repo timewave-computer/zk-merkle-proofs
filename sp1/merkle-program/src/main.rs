@@ -9,6 +9,7 @@ use serde_json;
 pub fn main() {
     let mut output: ProofOutput = ProofOutput {
         roots: vec![],
+        keys: vec![],
         values: vec![],
     };
     let proof_batch: ProofInput = serde_json::from_slice(&sp1_zkvm::io::read::<Vec<u8>>()).unwrap();
@@ -16,7 +17,9 @@ pub fn main() {
         match proof.domain {
             Domain::ETHEREUM => {
                 // verify an ethereum proof
-                output.roots.push((proof.domain, proof.root));
+                verify_merkle_proof(proof.root.clone(), proof.nodes.clone(), &proof.key);
+                output.roots.push((proof.domain, proof.root.clone()));
+                output.keys.push(proof.key.clone());
                 output
                     .values
                     // push the leaf that contains the rlp encoded value
