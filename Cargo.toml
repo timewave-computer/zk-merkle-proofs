@@ -2,6 +2,9 @@
 members = ["common", "ethereum", "prover", "sp1/merkle-program", "ethereum"]
 resolver = "2"
 
+[profile.dev]
+opt-level = 3
+
 [workspace.dependencies]
 merkle-program = { path = "sp1/merkle-program" }
 common = { path = "common" }

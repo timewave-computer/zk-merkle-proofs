@@ -2,7 +2,8 @@ use alloy_primitives::{FixedBytes, B256};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use keccak::digest_keccak;
 use std::sync::Arc;
-mod keccak;
+pub mod keccak;
+pub mod mock;
 mod tests;
 
 #[cfg(feature = "web")]
@@ -17,7 +18,7 @@ use {
 };
 #[cfg(feature = "web")]
 pub struct EvmProver {
-    rpc_url: String,
+    pub rpc_url: String,
 }
 #[cfg(feature = "web")]
 impl MerkleProver for EvmProver {
