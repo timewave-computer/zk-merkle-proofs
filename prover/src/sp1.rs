@@ -55,6 +55,7 @@ mod tests {
                 Address::from_hex(USDT_CONTRACT_ADDRESS).unwrap(),
                 vec![FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap()],
             )
+            // add .block_id(block_id) in prod
             .await
             .expect("Failed to get proof!");
 
