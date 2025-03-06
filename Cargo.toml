@@ -1,11 +1,19 @@
 [workspace]
-members = ["common", "ethereum", "prover", "sp1/merkle-program", "ethereum"]
+members = [
+    "common",
+    "ethereum",
+    "prover",
+    "sp1/merkle-program",
+    "ethereum",
+    "verifier",
+]
 resolver = "2"
 
 [profile.dev]
 opt-level = 3
 
 [workspace.dependencies]
+verifier = { path = "verifier" }
 merkle-program = { path = "sp1/merkle-program" }
 common = { path = "common" }
 sp1-sdk = "4.0.0"

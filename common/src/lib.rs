@@ -18,6 +18,7 @@ pub enum Domain {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MerkleProof {
     // a list of serialized nodes
+    // the last node should be the queried value
     pub nodes: Vec<Vec<u8>>,
     // the key that we query
     pub key: Vec<u8>,
@@ -36,9 +37,9 @@ pub struct ProofInput {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ProofOutput {
     // commit to the encoded roots
-    pub roots: Vec<(Domain, Vec<u8>)>,
+    pub root: (Domain, Vec<u8>),
     // the keys that were queried
-    pub keys: Vec<Vec<u8>>,
+    pub key: Vec<u8>,
     // commit to the encoded values
-    pub values: Vec<Vec<u8>>,
+    pub value: Vec<u8>,
 }

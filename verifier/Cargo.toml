@@ -1,0 +1,11 @@
+[package]
+name = "verifier"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ethereum = { path = "../ethereum" }
+common.workspace = true
+
+[features]
+sp1 = ["ethereum/sp1"]
