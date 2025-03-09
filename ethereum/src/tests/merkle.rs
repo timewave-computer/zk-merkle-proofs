@@ -21,6 +21,7 @@ mod tests {
     #[tokio::test]
     // first verifies account state, then a single storage proof
     async fn test_verify_storage_proof_single() {
+        let height: u64 = 0;
         let rpc_url = read_rpc_url() + &read_api_key();
         let prover = EvmProver { rpc_url };
         let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
@@ -55,7 +56,11 @@ mod tests {
             hex::encode(&proof.storage_hash)
         );
         let storage_proof = prover
-            .get_storage_proof(vec![DEFAULT_STORAGE_KEY_ETHEREUM], USDT_CONTRACT_ADDRESS)
+            .get_storage_proof(
+                vec![DEFAULT_STORAGE_KEY_ETHEREUM],
+                USDT_CONTRACT_ADDRESS,
+                height,
+            )
             .await;
         let storage_proof_deserialized: EIP1186AccountProofResponse =
             serde_json::from_slice(&storage_proof).unwrap();
@@ -89,6 +94,6 @@ mod tests {
 
     fn read_rpc_url() -> String {
         dotenv().ok();
-        env::var("ETH_RPC").expect("Missing Infura API key!")
+        env::var("ETH_RPC").expect("Missing Ethereum RPC url!")
     }
 }

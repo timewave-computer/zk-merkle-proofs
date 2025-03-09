@@ -1,4 +1,4 @@
-use common::{Domain, MerkleProof, ProofOutput};
+use common::{types::MerkleProof, types::ProofOutput, Domain};
 use ethereum::verify_merkle_proof as verify_ethereum_merkle_proof;
 
 pub fn verify_merkle_proof(proof: MerkleProof) -> ProofOutput {

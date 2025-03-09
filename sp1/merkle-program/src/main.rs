@@ -1,6 +1,6 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
-use common::{Domain, ProofInput, ProofOutput};
+use common::{types::ProofInput, types::ProofOutput};
 use serde_json;
 use verifier::verify_merkle_proof;
 /// the logic that is to be proven

@@ -26,7 +26,7 @@ impl MerkleProver for EvmProver {
     /// that contains a list of storage proofs for the requested keys
     /// we can verify the combined proof or extract the account proof
     /// and individual storage proofs
-    async fn get_storage_proof(&self, keys: Vec<&str>, address: &str) -> Vec<u8> {
+    async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
         let address_object = Address::from_hex(&address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
@@ -36,6 +36,8 @@ impl MerkleProver for EvmProver {
                     .map(|k| FixedBytes::from_hex(k).unwrap())
                     .collect(),
             )
+            // use this in production!
+            //.block_id(height.try_into().unwrap())
             .await
             .expect("Failed to get storage proof!");
 

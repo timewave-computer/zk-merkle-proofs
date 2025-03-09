@@ -4,7 +4,7 @@ pub const MERKLE_ELF: &[u8] = include_elf!("merkle-program");
 /// entry point for the proving service
 /// this function will be used to prove the merkle-program execution
 /// the merkle-program will use verify_merkle_proof to verify one or more opening(s)
-use common::ProofInput;
+use common::types::ProofInput;
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 pub fn prove(input: ProofInput) {
     let start_time = Instant::now();
@@ -35,7 +35,7 @@ mod tests {
         serde::JsonStorageKey,
     };
     use alloy_primitives::{Address, FixedBytes};
-    use common::MerkleProof;
+    use common::types::MerkleProof;
     use dotenvy::dotenv;
     use ethereum::{keccak::digest_keccak, EvmProver};
     use url::Url;
@@ -67,7 +67,7 @@ mod tests {
             .collect();
         let nodes: Vec<Vec<u8>> = raw_storage_proofs.first().unwrap().0.clone();
         let root = proof.storage_hash.to_vec();
-        prove(common::ProofInput {
+        prove(common::types::ProofInput {
             // pass a list of storage proofs to be verified in zk
             // for now we pass only one ETHEREUM merkle proof for the SUPPLY slot of the USDT contract
             proofs: vec![MerkleProof {
@@ -83,6 +83,7 @@ mod tests {
                         .unwrap(),
                 )
                 .to_vec(),
+                value: None,
                 domain: common::Domain::ETHEREUM,
                 root: root,
             }],

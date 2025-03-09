@@ -2,10 +2,11 @@
 members = [
     "common",
     "ethereum",
+    "neutron",
     "prover",
     "sp1/merkle-program",
-    "ethereum",
     "verifier",
+    "neutron",
 ]
 resolver = "2"
 
