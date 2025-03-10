@@ -5,7 +5,7 @@ pub const MERKLE_ELF: &[u8] = include_elf!("multi-chain-merkle-guest");
 /// this function will be used to prove the merkle-program execution
 /// the merkle-program will use verify_merkle_proof to verify one or more opening(s)
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
-use verifier::MerkleProofInput;
+use verification_logic::MerkleProofInput;
 pub fn prove(input: MerkleProofInput) {
     let start_time = Instant::now();
     let client = ProverClient::new();
@@ -35,7 +35,7 @@ mod tests {
         },
         merkle_lib::types::NeutronProofWithRoot,
     };
-    use verifier::MerkleProofInput;
+    use verification_logic::MerkleProofInput;
 
     #[tokio::test]
     async fn test_generate_proof_multi_chain_merkle_program() {

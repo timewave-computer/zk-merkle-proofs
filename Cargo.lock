@@ -3357,7 +3357,7 @@ dependencies = [
  "common",
  "serde_json",
  "sp1-zkvm",
- "verifier",
+ "verification-logic",
 ]
 
 [[package]]
@@ -4339,7 +4339,7 @@ dependencies = [
  "sp1-sdk",
  "tokio",
  "url",
- "verifier",
+ "verification-logic",
 ]
 
 [[package]]
@@ -6795,7 +6795,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "verifier"
+name = "verification-logic"
 version = "0.1.0"
 dependencies = [
  "common",
