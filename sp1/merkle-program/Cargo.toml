@@ -7,5 +7,4 @@ edition = "2021"
 sp1-zkvm.workspace = true
 common.workspace = true
 verifier.workspace = true
-ethereum = { path = "../../ethereum", features = ["sp1"] }
 serde_json.workspace = true

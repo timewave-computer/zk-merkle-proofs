@@ -1,10 +1,11 @@
 use alloy_primitives::{FixedBytes, B256};
-use common::{types::MerkleProofOutput, Verifiable};
+use common::{types::MerkleProofOutput, MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use keccak::digest_keccak;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 pub mod keccak;
+pub mod test_vector;
 mod tests;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -35,6 +36,7 @@ impl MerkleProver for EvmProver {
     /// that contains a list of storage proofs for the requested keys
     /// we can verify the combined proof or extract the account proof
     /// and individual storage proofs
+    #[allow(unused)]
     async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
         let address_object = Address::from_hex(&address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
@@ -53,7 +55,7 @@ impl MerkleProver for EvmProver {
     }
 }
 
-impl Verifiable for EthereumProof {
+impl MerkleVerifiable for EthereumProof {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         let root_hash = FixedBytes::from_slice(&expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));

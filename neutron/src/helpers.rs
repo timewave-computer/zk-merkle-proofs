@@ -1,7 +1,5 @@
-#[cfg(feature = "web")]
 use {cosmrs::proto::prost, ics23::CommitmentProof, tendermint::merkle::proof::ProofOps};
 
-#[cfg(feature = "web")]
 pub fn convert_tm_to_ics_merkle_proof(tm_proof: &ProofOps) -> Vec<CommitmentProof> {
     let mut out: Vec<CommitmentProof> = vec![];
 

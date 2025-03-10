@@ -14,6 +14,7 @@ resolver = "2"
 opt-level = 3
 
 [workspace.dependencies]
+base64 = "0.22.1"
 verifier = { path = "verifier" }
 merkle-program = { path = "sp1/merkle-program" }
 common = { path = "common" }

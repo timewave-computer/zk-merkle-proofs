@@ -27,71 +27,28 @@ pub fn prove(input: MerkleProofInput) {
 
 #[cfg(test)]
 mod tests {
-    use alloy::{
-        hex::FromHex,
-        providers::{Provider, ProviderBuilder},
-        serde::JsonStorageKey,
-    };
-    use alloy_primitives::{Address, FixedBytes};
-    use dotenvy::dotenv;
-    use ethereum::{keccak::digest_keccak, EthereumProof, EvmProver};
-    use std::{env, io::Read, str::FromStr};
-    use url::Url;
-    use verifier::MerkleProofInput;
-
     use crate::sp1::prove;
-    const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-    const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
-        "0x0000000000000000000000000000000000000000000000000000000000000000";
+    use dotenvy::dotenv;
+    use ethereum::test_vector::get_ethereum_test_vector_storage_proof;
+    use neutron::{
+        test_vector::{get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root},
+        types::NeutronProofWithRoot,
+    };
+    use std::env;
+    use verifier::MerkleProofInput;
 
     #[tokio::test]
     async fn test_generate_proof() {
-        let rpc_url = read_rpc_url() + &read_api_key();
-        let prover = EvmProver { rpc_url };
-        let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
-        let proof = provider
-            .get_proof(
-                Address::from_hex(USDT_CONTRACT_ADDRESS).unwrap(),
-                vec![FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap()],
-            )
-            .await
-            .expect("Failed to get proof!");
-        let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof
-            .storage_proof
-            .iter()
-            .cloned()
-            .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
-            .collect();
-        let first_proof = raw_storage_proofs.first().unwrap();
-        let custom_proof = EthereumProof {
-            root: proof.storage_hash.to_vec(),
-            proof: first_proof.0.clone(),
-            key: digest_keccak(
-                &first_proof
-                    .1
-                    .as_b256()
-                    .bytes()
-                    .collect::<Result<Vec<u8>, _>>()
-                    .unwrap()
-                    .to_vec(),
-            )
-            .to_vec(),
-        };
+        let eth_proof = get_ethereum_test_vector_storage_proof().await;
+        let proof = get_neutron_test_vector_bank_store_supply().await;
         prove(MerkleProofInput {
             // pass a list of storage proofs to be verified in zk
             // for now we pass only one ETHEREUM merkle proof for the SUPPLY slot of the USDT contract
-            ethereum_proofs: vec![custom_proof],
-            neutron_proofs: vec![],
+            ethereum_proofs: vec![eth_proof],
+            neutron_proofs: vec![NeutronProofWithRoot {
+                proof: proof,
+                root: base64::decode(read_test_vector_merkle_root()).unwrap(),
+            }],
         });
-    }
-
-    fn read_api_key() -> String {
-        dotenv().ok();
-        env::var("INFURA").expect("Missing Infura API key!")
-    }
-
-    fn read_rpc_url() -> String {
-        dotenv().ok();
-        env::var("ETH_RPC").expect("Missing Infura API key!")
     }
 }

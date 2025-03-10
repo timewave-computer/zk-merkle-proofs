@@ -1,9 +1,12 @@
-use common::{types::MerkleProofOutput, Verifiable};
+use common::{types::MerkleProofOutput, MerkleVerifiable};
 use ethereum::EthereumProof;
-use neutron::types::NeutronProof;
+use neutron::types::NeutronProofWithRoot;
 use serde::{Deserialize, Serialize};
 
-pub fn verify_merkle_proof<T: Verifiable>(proof: T, expected_root: &[u8]) -> MerkleProofOutput {
+pub fn verify_merkle_proof<T: MerkleVerifiable>(
+    proof: T,
+    expected_root: &[u8],
+) -> MerkleProofOutput {
     proof.verify(&expected_root)
 }
 
@@ -11,5 +14,5 @@ pub fn verify_merkle_proof<T: Verifiable>(proof: T, expected_root: &[u8]) -> Mer
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MerkleProofInput {
     pub ethereum_proofs: Vec<EthereumProof>,
-    pub neutron_proofs: Vec<NeutronProof>,
+    pub neutron_proofs: Vec<NeutronProofWithRoot>,
 }

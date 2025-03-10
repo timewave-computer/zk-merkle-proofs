@@ -3323,7 +3323,6 @@ name = "merkle-program"
 version = "0.1.0"
 dependencies = [
  "common",
- "ethereum",
  "serde_json",
  "sp1-zkvm",
  "verifier",
@@ -4329,10 +4328,12 @@ dependencies = [
  "alloy",
  "alloy-primitives",
  "alloy-rlp",
+ "base64 0.22.1",
  "common",
  "dotenvy",
  "ethereum",
  "merkle-program",
+ "neutron",
  "serde_json",
  "sp1-helper",
  "sp1-sdk",

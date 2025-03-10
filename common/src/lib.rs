@@ -7,7 +7,7 @@ pub trait MerkleProver {
     async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8>;
 }
 
-pub trait Verifiable {
+pub trait MerkleVerifiable {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput;
 }
 

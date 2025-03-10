@@ -1,15 +1,13 @@
-use serde::{Deserialize, Serialize};
-use tendermint::merkle::proof::ProofOps;
-#[cfg(feature = "web")]
-use {
-    crate::helpers::convert_tm_to_ics_merkle_proof,
-    common::{types::MerkleProofOutput, MerkleProver, Verifiable},
-    ics23::{
-        calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
-        verify_membership,
-    },
-    tendermint_rpc::{Client, HttpClient},
+use crate::helpers::convert_tm_to_ics_merkle_proof;
+use common::{types::MerkleProofOutput, MerkleProver, MerkleVerifiable};
+use ics23::{
+    calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
+    verify_membership,
 };
+use serde::{Deserialize, Serialize};
+use tendermint::{block::Height, merkle::proof::ProofOps};
+#[cfg(feature = "web")]
+use tendermint_rpc::{Client, HttpClient};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronKey {
     pub prefix: String,
@@ -22,8 +20,19 @@ pub struct NeutronProof {
     pub key: NeutronKey,
     pub value: Vec<u8>,
 }
-#[cfg(feature = "web")]
-impl Verifiable for NeutronProof {
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NeutronProofWithRoot {
+    pub proof: NeutronProof,
+    pub root: Vec<u8>,
+}
+impl MerkleVerifiable for NeutronProofWithRoot {
+    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+        self.proof.verify(expected_root)
+    }
+}
+
+impl MerkleVerifiable for NeutronProof {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
         let inner_proof = proof_decoded.first().unwrap();
@@ -31,7 +40,7 @@ impl Verifiable for NeutronProof {
             panic!("Wrong proof type!");
         };
         let inner_root =
-            calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof).unwrap();
+            calculate_existence_root::<ics23::HostFunctionsManager>(&existence_proof).unwrap();
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
             &inner_proof,
             &iavl_spec(),
@@ -82,8 +91,9 @@ impl MerkleProver for NeutronProver {
             )
             .await
             .unwrap();
+        let proof = response.proof.unwrap();
         serde_json::to_vec(&NeutronProof {
-            proof: response.proof.unwrap(),
+            proof: proof.clone(),
             key: NeutronKey {
                 prefix: prefix.to_string(),
                 key: key.to_string(),
