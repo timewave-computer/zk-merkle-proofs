@@ -1,10 +1,18 @@
 use alloy_primitives::{FixedBytes, B256};
+use common::{types::MerkleProofOutput, Verifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use keccak::digest_keccak;
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 pub mod keccak;
-pub mod mock;
 mod tests;
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EthereumProof {
+    pub proof: Vec<Vec<u8>>,
+    pub key: Vec<u8>,
+    pub root: Vec<u8>,
+}
 
 #[cfg(feature = "web")]
 use {
@@ -16,6 +24,7 @@ use {
     std::str::FromStr,
     url::Url,
 };
+
 #[cfg(feature = "web")]
 pub struct EvmProver {
     pub rpc_url: String,
@@ -40,21 +49,32 @@ impl MerkleProver for EvmProver {
             //.block_id(height.try_into().unwrap())
             .await
             .expect("Failed to get storage proof!");
-
         serde_json::to_vec(&proof).expect("Failed to serialize proof!")
     }
 }
 
-pub fn verify_merkle_proof(root_hash: Vec<u8>, proof: Vec<Vec<u8>>, key: &[u8]) -> Vec<u8> {
-    let root_hash = FixedBytes::from_slice(&root_hash);
-    let proof_db = Arc::new(MemoryDB::new(true));
-    for node_encoded in proof.clone().into_iter() {
-        let hash: B256 = digest_keccak(&node_encoded).into();
-        proof_db.insert(hash.as_slice(), node_encoded).unwrap();
+impl Verifiable for EthereumProof {
+    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+        let root_hash = FixedBytes::from_slice(&expected_root);
+        let proof_db = Arc::new(MemoryDB::new(true));
+        for node_encoded in &self.proof.clone() {
+            let hash: B256 = digest_keccak(&node_encoded).into();
+            proof_db
+                .insert(hash.as_slice(), node_encoded.to_vec())
+                .unwrap();
+        }
+        let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
+        assert_eq!(root_hash, trie.root_hash().unwrap());
+        trie.verify_proof(root_hash, &self.key, self.proof.clone())
+            .expect("Failed to verify Merkle Proof")
+            .expect("Key does not exist!");
+
+        MerkleProofOutput {
+            root: expected_root.to_vec(),
+            key: self.key.clone(),
+            // for Ethereum the value is the last node (a leaf) in the proof
+            value: self.proof.last().unwrap().to_vec(),
+            domain: common::Domain::ETHEREUM,
+        }
     }
-    let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
-    assert_eq!(root_hash, trie.root_hash().unwrap());
-    trie.verify_proof(root_hash, key, proof)
-        .expect("Failed to verify Merkle Proof")
-        .expect("Key does not exist!")
 }

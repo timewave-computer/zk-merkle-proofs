@@ -1,48 +1,95 @@
-use common::MerkleProver;
 use serde::{Deserialize, Serialize};
-use tendermint::{block::Height, merkle::proof::ProofOps};
-use tendermint_rpc::{Client, HttpClient};
+use tendermint::merkle::proof::ProofOps;
+#[cfg(feature = "web")]
+use {
+    crate::helpers::convert_tm_to_ics_merkle_proof,
+    common::{types::MerkleProofOutput, MerkleProver, Verifiable},
+    ics23::{
+        calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
+        verify_membership,
+    },
+    tendermint_rpc::{Client, HttpClient},
+};
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NeutronKey {
+    pub prefix: String,
+    pub key: String,
+}
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronProof {
-    pub proofs: ProofOps,
-    pub key: (String, String),
+    pub proof: ProofOps,
+    pub key: NeutronKey,
     pub value: Vec<u8>,
 }
-#[derive(Serialize, Deserialize)]
-pub struct NeutronProofBatch {
-    pub batch: Vec<NeutronProof>,
+#[cfg(feature = "web")]
+impl Verifiable for NeutronProof {
+    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+        let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
+        let inner_proof = proof_decoded.first().unwrap();
+        let Some(Proof::Exist(existence_proof)) = &inner_proof.proof else {
+            panic!("Wrong proof type!");
+        };
+        let inner_root =
+            calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof).unwrap();
+        let is_valid = verify_membership::<ics23::HostFunctionsManager>(
+            &inner_proof,
+            &iavl_spec(),
+            &inner_root,
+            &hex::decode(&self.key.key).unwrap(),
+            &self.value,
+        );
+        assert!(is_valid);
+        let outer_proof = proof_decoded.last().unwrap();
+        let is_valid = verify_membership::<ics23::HostFunctionsManager>(
+            &outer_proof,
+            &tendermint_spec(),
+            &expected_root.to_vec(),
+            &self.key.prefix.as_bytes(),
+            &inner_root,
+        );
+        assert!(is_valid);
+        MerkleProofOutput {
+            root: expected_root.to_vec(),
+            key: serde_json::to_vec(&self.key).unwrap(),
+            value: self.value.clone(),
+            domain: common::Domain::NEUTRON,
+        }
+    }
 }
 // we might want to rename this IF this can be generalized to something like "cosmos" or "ics23-common"
 pub struct NeutronProver {
     pub rpc_url: String,
 }
 
+#[cfg(feature = "web")]
 impl MerkleProver for NeutronProver {
     // chunk[0] = prefix string, chunk[1] = hex encoded key
     #[allow(unused)]
     async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
-        let mut batch: NeutronProofBatch = NeutronProofBatch { batch: vec![] };
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
-        for encoded_key in keys.chunks(2) {
-            if let [prefix, key] = encoded_key {
-                let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
-                    .abci_query(
-                        // "store/bank/key", "store/wasm/key", ...
-                        Some(format!("{}{}{}", "store/", prefix.to_string(), "/key")),
-                        hex::decode(key).unwrap(),
-                        Some(Height::from(height as u32)),
-                        true, // Include proof
-                    )
-                    .await
-                    .unwrap();
-                batch.batch.push(NeutronProof {
-                    proofs: response.proof.unwrap(),
-                    key: (prefix.to_string(), key.to_string()),
-                    value: response.value,
-                });
-            }
-        }
-        serde_json::to_vec(&batch).unwrap()
+
+        assert_eq!(keys.len(), 2);
+        let prefix = keys.first().unwrap();
+        let key = keys.last().unwrap();
+        let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
+            .abci_query(
+                // "store/bank/key", "store/wasm/key", ...
+                Some(format!("{}{}{}", "store/", prefix.to_string(), "/key")),
+                hex::decode(key).unwrap(),
+                Some(Height::from(height as u32)),
+                true, // Include proof
+            )
+            .await
+            .unwrap();
+        serde_json::to_vec(&NeutronProof {
+            proof: response.proof.unwrap(),
+            key: NeutronKey {
+                prefix: prefix.to_string(),
+                key: key.to_string(),
+            },
+            value: response.value,
+        })
+        .unwrap()
     }
 }

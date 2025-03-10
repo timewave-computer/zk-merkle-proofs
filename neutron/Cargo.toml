@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tendermint = "=0.38.1"
-tendermint-proto = "=0.38.1"
-tendermint-rpc = { version = "=0.38.1", features = ["http-client"] }
-tokio = "1.43"
+tendermint = { version = "=0.38.1", optional = false }
+tendermint-proto = { version = "=0.38.1", optional = true }
+tendermint-rpc = { version = "=0.38.1", features = [
+    "http-client",
+], optional = true }
+tokio = { version = "1.43", optional = true }
 hex = "0.4"
-quartz-cw-proof = "0.1.0"
 base64 = "0.22.1"
 cosmrs = "0.18"
 ics23 = { version = "0.12.0", default-features = false, features = [
@@ -18,4 +19,7 @@ ics23 = { version = "0.12.0", default-features = false, features = [
 common.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-dotenvy.workspace = true
+dotenvy = { workspace = true, optional = true }
+
+[features]
+web = ["tokio", "dotenvy", "tendermint-proto", "tendermint-rpc"]

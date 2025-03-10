@@ -9,6 +9,7 @@ serde_json.workspace = true
 merkle-program.workspace = true
 common.workspace = true
 sp1-sdk.workspace = true
+verifier.workspace = true
 ethereum = { path = "../ethereum", features = ["web"] }
 dotenvy = { workspace = true }
 alloy-primitives = "0.8.12"

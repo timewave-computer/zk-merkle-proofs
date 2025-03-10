@@ -1,20 +1,15 @@
-use common::{types::MerkleProof, types::ProofOutput, Domain};
-use ethereum::verify_merkle_proof as verify_ethereum_merkle_proof;
+use common::{types::MerkleProofOutput, Verifiable};
+use ethereum::EthereumProof;
+use neutron::types::NeutronProof;
+use serde::{Deserialize, Serialize};
 
-pub fn verify_merkle_proof(proof: MerkleProof) -> ProofOutput {
-    match proof.domain {
-        Domain::ETHEREUM => {
-            // verify an ethereum proof
-            verify_ethereum_merkle_proof(proof.root.clone(), proof.nodes.clone(), &proof.key);
-            ProofOutput {
-                root: (proof.domain, proof.root.clone()),
-                key: proof.key.clone(),
-                value: proof.nodes.last().unwrap().clone(),
-            }
-        }
-        Domain::COSMOS => {
-            todo!("Cosmos support is pending, try with Ethereum for now!")
-            // verify a cosmos proof
-        }
-    }
+pub fn verify_merkle_proof<T: Verifiable>(proof: T, expected_root: &[u8]) -> MerkleProofOutput {
+    proof.verify(&expected_root)
+}
+
+/// Circuit input - multiple proofs for multiple domains
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct MerkleProofInput {
+    pub ethereum_proofs: Vec<EthereumProof>,
+    pub neutron_proofs: Vec<NeutronProof>,
 }
