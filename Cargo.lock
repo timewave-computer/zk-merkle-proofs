@@ -3355,9 +3355,9 @@ name = "multi-chain-merkle-guest"
 version = "0.1.0"
 dependencies = [
  "common",
+ "prover-utils",
  "serde_json",
  "sp1-zkvm",
- "verification-logic",
 ]
 
 [[package]]
@@ -4334,12 +4334,23 @@ dependencies = [
  "ethereum",
  "multi-chain-merkle-guest",
  "neutron",
+ "prover-utils",
  "serde_json",
  "sp1-helper",
  "sp1-sdk",
  "tokio",
  "url",
- "verification-logic",
+]
+
+[[package]]
+name = "prover-utils"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "ethereum",
+ "neutron",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -6792,17 +6803,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 dependencies = [
  "serde",
-]
-
-[[package]]
-name = "verification-logic"
-version = "0.1.0"
-dependencies = [
- "common",
- "ethereum",
- "neutron",
- "serde",
- "serde_json",
 ]
 
 [[package]]

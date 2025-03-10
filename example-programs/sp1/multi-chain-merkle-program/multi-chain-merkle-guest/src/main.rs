@@ -1,7 +1,7 @@
 #![no_main]
 sp1_zkvm::entrypoint!(main);
 use common::merkle::types::MerkleProofOutput;
-use verification_logic::{verify_merkle_proof, MerkleProofInput};
+use prover_utils::merkle::{types::MerkleProofInput, verify_merkle_proof};
 /// the logic that is to be proven
 /// will likely call external functions, primarily verify_merkle_proof
 /// enable sp1 as a feature to use keccak precompile

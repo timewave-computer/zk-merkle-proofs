@@ -10,7 +10,7 @@ base64.workspace = true
 multi-chain-merkle-guest.workspace = true
 common.workspace = true
 sp1-sdk.workspace = true
-verification-logic.workspace = true
+prover-utils.workspace = true
 ethereum = { path = "../../../../ethereum", features = ["web"] }
 neutron = { path = "../../../../neutron", features = ["web"] }
 dotenvy = { workspace = true }

@@ -1,3 +1,4 @@
+pub mod types;
 use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use ethereum::merkle_lib::types::EthereumProof;
 use neutron::merkle_lib::types::NeutronProofWithRoot;
