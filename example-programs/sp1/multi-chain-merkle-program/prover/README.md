@@ -10,7 +10,7 @@ as well as a batch of one storage proof for neutron.
 
 Make sure your `.env` at the project root contains these values and that neutron is running.:
 
-```
+```bash
 ETH_RPC="https://mainnet.infura.io/v3/"
 INFURA="SOME_INFURA_KEY"
 TEST_VECTOR_DENOM_NEUTRON="untrn"

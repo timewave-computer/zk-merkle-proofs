@@ -2,38 +2,13 @@
 > This library is under heavy development and has not been audited
 
 # Opening proofs for the Zk Coprocessor
-This library exposes an interface and implementations to prove the verification of network and account storage proofs in ZKVMs.
-We are especially interested in Neutron and Ethereum for the time being, but the library will be extended to support different networks
-and perhaps layers.
+This workspace exposes different libraries that can be used to write Valence ZK programs.
+At the core of this project are two fundamental libraries that should be implemented for every supported network.:
 
-We implement a `MerkleProver` interface for different `domains`. Domains can be either account abstractions (valence accounts) or any other
-network that has a triestore and data availability layer for merkle proofs.
-
-The inputs to the ZK programs (regardless of the proving backend) are standardized to this format:
-
-```rust
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct MerkleProof {
-    // a list of serialized nodes
-    // the last node should be the queried value on ethereum
-    pub nodes: Vec<Vec<u8>>,
-    // on neutron the value is supplied seperately
-    pub value: Option<Vec<u8>>,
-    // the key that we query
-    pub key: Vec<u8>,
-    // target domain
-    pub domain: Domain,
-    // serialized trie root
-    pub root: Vec<u8>,
-}
-```
-
-see [here](common/types.rs).
+- a library for merkle proofs that implements the `MerkleVerifiable` trait from `common/merkle/types.rs`
+- a library that implements the `GenericMessage` trait from `TODO`
 
 # Developer Notes
-## Optimizations
-- todo: use borsh instead of serde
-
 # Supported proof types
 Obtain storage proofs for 
 

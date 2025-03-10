@@ -1,4 +1,6 @@
-# Ethereum merkle proofs
+# Ethereum libraries
+
+## Merkle Proof Library merkle_lib
 This crate is responsible for implementing the MerkleProver trait for Ethereum.
 Additionally it exposes a `verify_merkle_proof` function.
 
