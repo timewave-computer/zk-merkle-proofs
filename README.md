@@ -17,4 +17,4 @@ Obtain storage proofs for
 [Neutron](neutron/README.md)
 
 # Example ZK Programs that depend on our Libraries
-Multi-chain merkle openings in ZK, [here](example-programs/sp1/multi-chain-merkle-guest/prover/README.md)
+1. Multi-chain merkle openings in ZK, [here](example-programs/sp1/multi-chain-merkle-program/prover/README.md)
