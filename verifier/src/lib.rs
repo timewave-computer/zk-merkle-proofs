@@ -1,5 +1,5 @@
 use common::{types::MerkleProofOutput, MerkleVerifiable};
-use ethereum::EthereumProof;
+use ethereum::types::EthereumProof;
 use neutron::types::NeutronProofWithRoot;
 use serde::{Deserialize, Serialize};
 
