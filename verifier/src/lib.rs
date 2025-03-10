@@ -1,6 +1,6 @@
 use common::{types::MerkleProofOutput, MerkleVerifiable};
-use ethereum::types::EthereumProof;
-use neutron::types::NeutronProofWithRoot;
+use ethereum::merkle_lib::types::EthereumProof;
+use neutron::merkle_lib::types::NeutronProofWithRoot;
 use serde::{Deserialize, Serialize};
 
 pub fn verify_merkle_proof<T: MerkleVerifiable>(

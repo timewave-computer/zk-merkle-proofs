@@ -28,13 +28,13 @@ pub fn prove(input: MerkleProofInput) {
 #[cfg(test)]
 mod tests {
     use crate::sp1::prove;
-    use dotenvy::dotenv;
-    use ethereum::test_vector::get_ethereum_test_vector_storage_proof;
+    use ethereum::merkle_lib::test_vector::get_ethereum_test_vector_storage_proof;
     use neutron::{
-        test_vector::{get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root},
-        types::NeutronProofWithRoot,
+        merkle_lib::test_vector::{
+            get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root,
+        },
+        merkle_lib::types::NeutronProofWithRoot,
     };
-    use std::env;
     use verifier::MerkleProofInput;
 
     #[tokio::test]

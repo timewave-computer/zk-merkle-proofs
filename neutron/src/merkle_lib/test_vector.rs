@@ -1,6 +1,6 @@
 #[cfg(feature = "web")]
 use {
-    crate::types::{NeutronProof, NeutronProver},
+    crate::merkle_lib::types::{NeutronProof, NeutronProver},
     common::MerkleProver,
     dotenvy::dotenv,
     std::env,

@@ -1,4 +1,4 @@
-use crate::helpers::convert_tm_to_ics_merkle_proof;
+use crate::merkle_lib::helpers::convert_tm_to_ics_merkle_proof;
 use common::{types::MerkleProofOutput, MerkleProver, MerkleVerifiable};
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,

@@ -56,7 +56,7 @@ impl MerkleVerifiable for EthereumProof {
         let root_hash = FixedBytes::from_slice(&expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof.clone() {
-            let hash: B256 = crate::digest_keccak(&node_encoded).into();
+            let hash: B256 = crate::merkle_lib::keccak::digest_keccak(&node_encoded).into();
             proof_db
                 .insert(hash.as_slice(), node_encoded.to_vec())
                 .unwrap();

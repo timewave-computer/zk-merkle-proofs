@@ -13,7 +13,10 @@ use {
 };
 
 #[cfg(feature = "web")]
-use crate::{keccak::digest_keccak, types::EthereumProof, types::EvmProver};
+use crate::{
+    merkle_lib::keccak::digest_keccak, merkle_lib::types::EthereumProof,
+    merkle_lib::types::EvmProver,
+};
 
 const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
