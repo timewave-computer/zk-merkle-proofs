@@ -3319,16 +3319,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d97bbf43eb4f088f8ca469930cde17fa036207c9a5e02ccc5107c4e8b17c964"
 
 [[package]]
-name = "merkle-program"
-version = "0.1.0"
-dependencies = [
- "common",
- "serde_json",
- "sp1-zkvm",
- "verifier",
-]
-
-[[package]]
 name = "mime"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3358,6 +3348,16 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "multi-chain-merkle-guest"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "serde_json",
+ "sp1-zkvm",
+ "verifier",
 ]
 
 [[package]]
@@ -4332,7 +4332,7 @@ dependencies = [
  "common",
  "dotenvy",
  "ethereum",
- "merkle-program",
+ "multi-chain-merkle-guest",
  "neutron",
  "serde_json",
  "sp1-helper",

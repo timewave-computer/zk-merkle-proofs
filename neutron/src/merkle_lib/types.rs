@@ -1,5 +1,7 @@
 use crate::merkle_lib::helpers::convert_tm_to_ics_merkle_proof;
-use common::{types::MerkleProofOutput, MerkleProver, MerkleVerifiable};
+use common::{
+    merkle::types::MerkleProofOutput, merkle::types::MerkleProver, merkle::types::MerkleVerifiable,
+};
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
     verify_membership,
@@ -40,9 +42,9 @@ impl MerkleVerifiable for NeutronProof {
             panic!("Wrong proof type!");
         };
         let inner_root =
-            calculate_existence_root::<ics23::HostFunctionsManager>(&existence_proof).unwrap();
+            calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof).unwrap();
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
-            &inner_proof,
+            inner_proof,
             &iavl_spec(),
             &inner_root,
             &hex::decode(&self.key.key).unwrap(),
@@ -51,10 +53,10 @@ impl MerkleVerifiable for NeutronProof {
         assert!(is_valid);
         let outer_proof = proof_decoded.last().unwrap();
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
-            &outer_proof,
+            outer_proof,
             &tendermint_spec(),
             &expected_root.to_vec(),
-            &self.key.prefix.as_bytes(),
+            self.key.prefix.as_bytes(),
             &inner_root,
         );
         assert!(is_valid);
@@ -62,7 +64,7 @@ impl MerkleVerifiable for NeutronProof {
             root: expected_root.to_vec(),
             key: serde_json::to_vec(&self.key).unwrap(),
             value: self.value.clone(),
-            domain: common::Domain::NEUTRON,
+            domain: common::merkle::types::Domain::NEUTRON,
         }
     }
 }
@@ -84,7 +86,7 @@ impl MerkleProver for NeutronProver {
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
             .abci_query(
                 // "store/bank/key", "store/wasm/key", ...
-                Some(format!("{}{}{}", "store/", prefix.to_string(), "/key")),
+                Some(format!("{}{}{}", "store/", prefix, "/key")),
                 hex::decode(key).unwrap(),
                 Some(Height::from(height as u32)),
                 true, // Include proof

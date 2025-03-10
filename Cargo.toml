@@ -3,8 +3,8 @@ members = [
     "common",
     "ethereum",
     "neutron",
-    "prover",
-    "sp1/merkle-program",
+    "example-programs/sp1/multi-chain-merkle-program/prover",
+    "example-programs/sp1/multi-chain-merkle-program/multi-chain-merkle-guest",
     "verifier",
     "neutron",
 ]
@@ -16,7 +16,7 @@ opt-level = 3
 [workspace.dependencies]
 base64 = "0.22.1"
 verifier = { path = "verifier" }
-merkle-program = { path = "sp1/merkle-program" }
+multi-chain-merkle-guest = { path = "example-programs/sp1/multi-chain-merkle-program/multi-chain-merkle-guest" }
 common = { path = "common" }
 sp1-sdk = "4.0.0"
 sp1-zkvm = "4.0.0"

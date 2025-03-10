@@ -7,12 +7,12 @@ edition = "2021"
 tokio.workspace = true
 serde_json.workspace = true
 base64.workspace = true
-merkle-program.workspace = true
+multi-chain-merkle-guest.workspace = true
 common.workspace = true
 sp1-sdk.workspace = true
 verifier.workspace = true
-ethereum = { path = "../ethereum", features = ["web"] }
-neutron = { path = "../neutron", features = ["web"] }
+ethereum = { path = "../../../../ethereum", features = ["web"] }
+neutron = { path = "../../../../neutron", features = ["web"] }
 dotenvy = { workspace = true }
 alloy-primitives = "0.8.12"
 alloy = { version = "0.11.1", features = ["full"] }

@@ -1,7 +1,7 @@
 #[cfg(test)]
 #[cfg(feature = "web")]
 mod tests {
-    use common::MerkleVerifiable;
+    use common::merkle::types::MerkleVerifiable;
     #[tokio::test]
     async fn test_verify_storage_proof_single() {
         use crate::merkle_lib::test_vector::{

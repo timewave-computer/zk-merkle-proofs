@@ -1,5 +1,5 @@
 use std::time::Instant;
-pub const MERKLE_ELF: &[u8] = include_elf!("merkle-program");
+pub const MERKLE_ELF: &[u8] = include_elf!("multi-chain-merkle-guest");
 
 /// entry point for the proving service
 /// this function will be used to prove the merkle-program execution
@@ -38,7 +38,7 @@ mod tests {
     use verifier::MerkleProofInput;
 
     #[tokio::test]
-    async fn test_generate_proof() {
+    async fn test_generate_proof_multi_chain_merkle_program() {
         let eth_proof = get_ethereum_test_vector_storage_proof().await;
         let proof = get_neutron_test_vector_bank_store_supply().await;
         prove(MerkleProofInput {

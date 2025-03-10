@@ -41,7 +41,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
         .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
         .collect();
     let first_proof = raw_storage_proofs.first().unwrap();
-    let eth_proof = EthereumProof {
+    EthereumProof {
         root: proof.storage_hash.to_vec(),
         proof: first_proof.0.clone(),
         key: digest_keccak(
@@ -54,8 +54,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
                 .to_vec(),
         )
         .to_vec(),
-    };
-    eth_proof
+    }
 }
 
 #[cfg(feature = "web")]

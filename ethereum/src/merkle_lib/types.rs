@@ -1,5 +1,5 @@
 use alloy_primitives::{FixedBytes, B256};
-use common::{types::MerkleProofOutput, MerkleVerifiable};
+use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -17,7 +17,7 @@ use {
     alloy::providers::{Provider, ProviderBuilder},
     alloy::rpc::types::EIP1186AccountProofResponse,
     alloy_primitives::Address,
-    common::MerkleProver,
+    common::merkle::types::MerkleProver,
     std::str::FromStr,
     url::Url,
 };
@@ -34,7 +34,7 @@ impl MerkleProver for EvmProver {
     /// and individual storage proofs
     #[allow(unused)]
     async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
-        let address_object = Address::from_hex(&address).unwrap();
+        let address_object = Address::from_hex(address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
             .get_proof(
@@ -53,10 +53,10 @@ impl MerkleProver for EvmProver {
 
 impl MerkleVerifiable for EthereumProof {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
-        let root_hash = FixedBytes::from_slice(&expected_root);
+        let root_hash = FixedBytes::from_slice(expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof.clone() {
-            let hash: B256 = crate::merkle_lib::keccak::digest_keccak(&node_encoded).into();
+            let hash: B256 = crate::merkle_lib::keccak::digest_keccak(node_encoded).into();
             proof_db
                 .insert(hash.as_slice(), node_encoded.to_vec())
                 .unwrap();
@@ -72,7 +72,7 @@ impl MerkleVerifiable for EthereumProof {
             key: self.key.clone(),
             // for Ethereum the value is the last node (a leaf) in the proof
             value: self.proof.last().unwrap().to_vec(),
-            domain: common::Domain::ETHEREUM,
+            domain: common::merkle::types::Domain::ETHEREUM,
         }
     }
 }

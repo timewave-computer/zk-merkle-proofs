@@ -1,7 +1,7 @@
 #[cfg(feature = "web")]
 use {
     crate::merkle_lib::types::{NeutronProof, NeutronProver},
-    common::MerkleProver,
+    common::merkle::types::MerkleProver,
     dotenvy::dotenv,
     std::env,
 };
@@ -38,11 +38,10 @@ pub fn read_test_vector_denom() -> String {
 #[cfg(feature = "web")]
 pub fn read_test_vector_height() -> u64 {
     dotenv().ok();
-    u64::from_str_radix(
-        &env::var("TEST_VECTOR_HEIGHT_NEUTRON").expect("Missing Neutron TEST VECTOR: HEIGHT!"),
-        10,
-    )
-    .expect("Failed to parse test vector as u64: Amount")
+    env::var("TEST_VECTOR_HEIGHT_NEUTRON")
+        .expect("Missing Neutron TEST VECTOR: HEIGHT!")
+        .parse::<u64>()
+        .expect("Failed to parse test vector as u64: Amount")
 }
 
 #[cfg(feature = "web")]

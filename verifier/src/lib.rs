@@ -1,4 +1,4 @@
-use common::{types::MerkleProofOutput, MerkleVerifiable};
+use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use ethereum::merkle_lib::types::EthereumProof;
 use neutron::merkle_lib::types::NeutronProofWithRoot;
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,7 @@ pub fn verify_merkle_proof<T: MerkleVerifiable>(
     proof: T,
     expected_root: &[u8],
 ) -> MerkleProofOutput {
-    proof.verify(&expected_root)
+    proof.verify(expected_root)
 }
 
 /// Circuit input - multiple proofs for multiple domains
