@@ -1,6 +1,6 @@
 [package]
 version = "0.1.0"
-name = "multi-chain-merkle-guest"
+name = "cross-chain-merkle-guest"
 edition = "2021"
 
 [dependencies]

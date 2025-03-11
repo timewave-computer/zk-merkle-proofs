@@ -1,0 +1,13 @@
+[package]
+version = "0.1.0"
+name = "cross-chain-message-builder-guest"
+edition = "2021"
+
+[dependencies]
+sp1-zkvm.workspace = true
+common.workspace = true
+prover-utils.workspace = true
+serde_json.workspace = true
+alloy-primitives = "0.8"
+alloy-sol-types = "0.8"
+types = { path = "../types" }

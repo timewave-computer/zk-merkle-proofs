@@ -1,5 +1,5 @@
 use std::time::Instant;
-pub const MERKLE_ELF: &[u8] = include_elf!("multi-chain-merkle-guest");
+pub const MERKLE_ELF: &[u8] = include_elf!("cross-chain-merkle-guest");
 
 use prover_utils::merkle::types::MerkleProofInput;
 /// entry point for the proving service
@@ -27,7 +27,6 @@ pub fn prove(input: MerkleProofInput) {
 
 #[cfg(test)]
 mod tests {
-    use crate::sp1::prove;
     use ethereum::merkle_lib::test_vector::get_ethereum_test_vector_storage_proof;
     use neutron::{
         merkle_lib::test_vector::{
@@ -37,8 +36,10 @@ mod tests {
     };
     use prover_utils::merkle::types::MerkleProofInput;
 
+    use crate::prove;
+
     #[tokio::test]
-    async fn test_generate_proof_multi_chain_merkle_program() {
+    async fn test_generate_proof_cross_chain_merkle_program() {
         let eth_proof = get_ethereum_test_vector_storage_proof().await;
         let proof = get_neutron_test_vector_bank_store_supply().await;
         prove(MerkleProofInput {

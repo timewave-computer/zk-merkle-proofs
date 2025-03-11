@@ -1,4 +1,4 @@
-> ![WARNING]
+> [!WARNING]
 > This library is under heavy development and has not been audited
 
 # Opening proofs for the Zk Coprocessor
@@ -8,13 +8,11 @@ At the core of this project are two fundamental libraries that should be impleme
 - a library for merkle proofs that implements the `MerkleVerifiable` trait from `common/merkle/types.rs`
 - a library that implements the `GenericMessage` trait from `TODO`
 
-# Developer Notes
-# Supported proof types
-Obtain storage proofs for 
+# Supported Domains
+[Ethereum](domains/ethereum/README.md)
 
-[Ethereum](ethereum/README.md)
-
-[Neutron](neutron/README.md)
+[Neutron](domains/neutron/README.md)
 
 # Example ZK Programs that depend on our Libraries
-1. Multi-chain merkle openings in ZK, [here](example-programs/sp1/multi-chain-merkle-program/prover/README.md)
+1. Cross-chain merkle openings in ZK, [here](example-programs/sp1/cross-chain-merkle-program/prover/README.md)
+2. Executable message builder in ZK, [here](example-programs/sp1/cross-chain-message-builder-program/prover/README.md)

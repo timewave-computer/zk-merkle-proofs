@@ -5,8 +5,8 @@ edition = "2021"
 
 [dependencies]
 serde.workspace = true
-ethereum = { path = "../ethereum" }
-neutron = { path = "../neutron" }
+ethereum = { path = "../domains/ethereum" }
+neutron = { path = "../domains/neutron" }
 common.workspace = true
 serde_json.workspace = true
 [features]

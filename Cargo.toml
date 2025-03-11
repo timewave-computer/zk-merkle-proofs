@@ -1,12 +1,13 @@
 [workspace]
 members = [
     "common",
-    "ethereum",
-    "neutron",
-    "example-programs/sp1/multi-chain-merkle-program/prover",
-    "example-programs/sp1/multi-chain-merkle-program/multi-chain-merkle-guest",
-    "prover-utils",
-    "neutron",
+    "domains/ethereum",
+    "domains/neutron",
+    "example-programs/sp1/cross-chain-merkle-program/prover",
+    "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest",
+    "example-programs/sp1/cross-chain-message-builder-program/prover",
+    "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest",
+    "prover-utils", "example-programs/sp1/cross-chain-message-builder-program/types",
 ]
 resolver = "2"
 
@@ -16,7 +17,8 @@ opt-level = 3
 [workspace.dependencies]
 base64 = "0.22.1"
 prover-utils = { path = "prover-utils" }
-multi-chain-merkle-guest = { path = "example-programs/sp1/multi-chain-merkle-program/multi-chain-merkle-guest" }
+cross-chain-merkle-guest = { path = "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest" }
+cross-chain-message-builder-guest = { path = "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest" }
 common = { path = "common" }
 sp1-sdk = "4.0.0"
 sp1-zkvm = "4.0.0"

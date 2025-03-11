@@ -2,9 +2,6 @@
 sp1_zkvm::entrypoint!(main);
 use common::merkle::types::MerkleProofOutput;
 use prover_utils::merkle::{types::MerkleProofInput, verify_merkle_proof};
-/// the logic that is to be proven
-/// will likely call external functions, primarily verify_merkle_proof
-/// enable sp1 as a feature to use keccak precompile
 pub fn main() {
     let mut outputs: Vec<MerkleProofOutput> = vec![];
     let proof_batch: MerkleProofInput =

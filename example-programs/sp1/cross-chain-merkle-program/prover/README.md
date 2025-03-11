@@ -2,7 +2,7 @@
 To run the example for multi-chain merkle openings in SP1:
 
 ```bash
-cargo test test_generate_proof_multi_chain_merkle_program --release -- --nocapture
+cargo test test_generate_proof_cross_chain_merkle_program --release -- --nocapture
 ```
 
 This will leverage the keccak precompile for the SP1 zkvm and prove a batch filled with one storage proof for Ethereum,

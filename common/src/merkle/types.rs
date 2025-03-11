@@ -12,8 +12,9 @@ pub struct MerkleProofOutput {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct MerkleProofOutputs {
+pub struct ProgramOutputs {
     pub outputs: Vec<MerkleProofOutput>,
+    pub executable_messages: Vec<Vec<u8>>,
 }
 
 pub trait MerkleProver {

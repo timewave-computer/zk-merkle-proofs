@@ -1676,6 +1676,72 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19d374276b40fb8bbdee95aef7c7fa6b5316ec764510eb64b8dd0e2ed0d7e7f5"
 
 [[package]]
+name = "cross-chain-merkle-guest"
+version = "0.1.0"
+dependencies = [
+ "common",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+]
+
+[[package]]
+name = "cross-chain-merkle-program-prover"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "alloy-primitives",
+ "alloy-rlp",
+ "base64 0.22.1",
+ "common",
+ "cross-chain-merkle-guest",
+ "dotenvy",
+ "ethereum",
+ "neutron",
+ "prover-utils",
+ "serde_json",
+ "sp1-helper",
+ "sp1-sdk",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "cross-chain-message-builder-guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "common",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+ "types",
+]
+
+[[package]]
+name = "cross-chain-message-builder-prover"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "alloy-primitives",
+ "alloy-rlp",
+ "base64 0.22.1",
+ "common",
+ "cross-chain-message-builder-guest",
+ "dotenvy",
+ "ethereum",
+ "neutron",
+ "prover-utils",
+ "serde_json",
+ "sp1-helper",
+ "sp1-sdk",
+ "tokio",
+ "types",
+ "url",
+]
+
+[[package]]
 name = "crossbeam-channel"
 version = "0.5.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3351,16 +3417,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "multi-chain-merkle-guest"
-version = "0.1.0"
-dependencies = [
- "common",
- "prover-utils",
- "serde_json",
- "sp1-zkvm",
-]
-
-[[package]]
 name = "native-tls"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4319,27 +4375,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "52c2c1bf36ddb1a1c396b3601a3cec27c2462e45f07c386894ec3ccf5332bd16"
 dependencies = [
  "prost",
-]
-
-[[package]]
-name = "prover"
-version = "0.1.0"
-dependencies = [
- "alloy",
- "alloy-primitives",
- "alloy-rlp",
- "base64 0.22.1",
- "common",
- "dotenvy",
- "ethereum",
- "multi-chain-merkle-guest",
- "neutron",
- "prover-utils",
- "serde_json",
- "sp1-helper",
- "sp1-sdk",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -6694,6 +6729,14 @@ name = "typenum"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
+
+[[package]]
+name = "types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "ucd-trie"
