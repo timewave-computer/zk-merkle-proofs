@@ -1,5 +1,5 @@
 [package]
-name = "types"
+name = "cross-chain-message-builder-types"
 version = "0.1.0"
 edition = "2021"
 

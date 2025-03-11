@@ -5,7 +5,7 @@ use std::str::FromStr;
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use common::merkle::types::ProgramOutputs;
-use cross_chain_message_builder_types::MessageBuilderProgramInput;
+use cross_chain_vault_types::VaultProgramInput;
 
 sol! {
     #[derive(Debug, PartialEq, Eq)]
@@ -27,17 +27,8 @@ pub fn main() {
         outputs: vec![],
         executable_messages: vec![],
     };
-    let transfer_arguments: MessageBuilderProgramInput =
+    let transfer_arguments: VaultProgramInput =
         serde_json::from_slice(&sp1_zkvm::io::read::<Vec<u8>>()).unwrap();
-    // construct messages for the target domain where this proof will be verified
-    // we strive to make this experience more seamless by providing a cross-chain message encoder
-    // as part of the core libraries that are implemented for each domain
-    let erc20_transfer = ERC20::transferFromCall {
-        from: Address::from_str(&transfer_arguments.from).unwrap(),
-        to: Address::from_str(&transfer_arguments.to).unwrap(),
-        amount: U256::from(transfer_arguments.amount),
-    }
-    .abi_encode();
-    outputs.executable_messages.push(erc20_transfer);
+    //
     sp1_zkvm::io::commit_slice(&serde_json::to_vec(&outputs).unwrap());
 }

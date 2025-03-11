@@ -1,6 +1,6 @@
 [package]
 version = "0.1.0"
-name = "cross-chain-message-builder-guest"
+name = "cross-chain-vault-guest"
 edition = "2021"
 
 [dependencies]
@@ -10,4 +10,4 @@ prover-utils.workspace = true
 serde_json.workspace = true
 alloy-primitives = "0.8"
 alloy-sol-types = "0.8"
-cross-chain-message-builder-types = { path = "../types" }
+cross-chain-vault-types = { path = "../types" }

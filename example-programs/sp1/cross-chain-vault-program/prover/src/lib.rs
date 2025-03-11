@@ -1,11 +1,12 @@
 use std::time::Instant;
-pub const MERKLE_ELF: &[u8] = include_elf!("cross-chain-message-builder-guest");
-use cross_chain_message_builder_types::MessageBuilderProgramInput;
+pub const MERKLE_ELF: &[u8] = include_elf!("cross-chain-vault-guest");
+use cross_chain_vault_types::VaultProgramInput;
 /// entry point for the proving service
 /// this function will be used to prove the merkle-program execution
 /// the merkle-program will use verify_merkle_proof to verify one or more opening(s)
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
-pub fn prove(input: MessageBuilderProgramInput) {
+
+pub fn prove(input: VaultProgramInput) {
     let proof_input = serde_json::to_vec(&input).unwrap();
     let start_time = Instant::now();
     let client = ProverClient::new();
@@ -24,14 +25,9 @@ pub fn prove(input: MessageBuilderProgramInput) {
 #[cfg(test)]
 mod tests {
     use crate::prove;
-    use cross_chain_message_builder_types::MessageBuilderProgramInput;
-
+    use cross_chain_vault_types::{Rules, VaultProgramInput};
     #[tokio::test]
-    async fn test_generate_proof_cross_chain_message_builder_program() {
-        prove(MessageBuilderProgramInput {
-            from: "0x0000000000000000000000000000000000000000".to_string(),
-            to: "0x0000000000000000000000000000000000000000".to_string(),
-            amount: 1_000_000_000_000_000_000u64,
-        });
+    async fn test_generate_proof_cross_chain_vault_program() {
+        // todo: call proof
     }
 }

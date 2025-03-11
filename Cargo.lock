@@ -1713,10 +1713,10 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "common",
+ "cross-chain-message-builder-types",
  "prover-utils",
  "serde_json",
  "sp1-zkvm",
- "types",
 ]
 
 [[package]]
@@ -1729,6 +1729,7 @@ dependencies = [
  "base64 0.22.1",
  "common",
  "cross-chain-message-builder-guest",
+ "cross-chain-message-builder-types",
  "dotenvy",
  "ethereum",
  "neutron",
@@ -1737,8 +1738,60 @@ dependencies = [
  "sp1-helper",
  "sp1-sdk",
  "tokio",
- "types",
  "url",
+]
+
+[[package]]
+name = "cross-chain-message-builder-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "cross-chain-vault-guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "common",
+ "cross-chain-vault-types",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+]
+
+[[package]]
+name = "cross-chain-vault-prover"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "alloy-primitives",
+ "alloy-rlp",
+ "base64 0.22.1",
+ "common",
+ "cross-chain-vault-guest",
+ "cross-chain-vault-types",
+ "dotenvy",
+ "ethereum",
+ "neutron",
+ "prover-utils",
+ "serde_json",
+ "sp1-helper",
+ "sp1-sdk",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "cross-chain-vault-types"
+version = "0.1.0"
+dependencies = [
+ "ethereum",
+ "neutron",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -6729,14 +6782,6 @@ name = "typenum"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
-
-[[package]]
-name = "types"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
 
 [[package]]
 name = "ucd-trie"
