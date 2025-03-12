@@ -58,6 +58,22 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
 }
 
 #[cfg(feature = "web")]
+#[tokio::test]
+async fn test_get_receipt_proof() {
+    use common::merkle::types::MerkleVerifiable;
+    let rpc_url = read_rpc_url() + &read_api_key();
+    let prover = EvmProver { rpc_url };
+    let receipt_proof = prover
+        // get a real ERC20 transfer
+        .get_receipt_proof(
+            "0xf03c8324b58076355c2e51bf354f3f8f95daf4a130f04794e245e98a972bf7ce",
+            1,
+        )
+        .await;
+    receipt_proof.verify(&receipt_proof.root);
+}
+
+#[cfg(feature = "web")]
 fn read_api_key() -> String {
     dotenv().ok();
     env::var("INFURA").expect("Missing Infura API key!")

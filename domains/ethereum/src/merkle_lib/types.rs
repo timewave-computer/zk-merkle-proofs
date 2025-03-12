@@ -80,7 +80,6 @@ impl EvmProver {
             .unwrap();
         let memdb = Arc::new(MemoryDB::new(true));
         let mut trie = EthTrie::new(memdb.clone());
-
         for (index, receipt) in receipts.into_iter().enumerate() {
             let inner: ReceiptEnvelope<alloy::rpc::types::Log> = receipt.inner;
             let mut out: Vec<u8> = Vec::new();
@@ -139,6 +138,7 @@ pub fn insert_receipt(
         for t in l.topics() {
             topics.push(H256::from_slice(t.as_ref()));
         }
+        println!("Logs: {:?}", &logs);
         logs.push(Log {
             address: l.address(),
             topics,
@@ -157,6 +157,7 @@ pub fn insert_receipt(
 }
 
 #[cfg(feature = "web")]
+#[derive(Debug, Clone)]
 pub struct Log {
     pub address: Address,
     pub topics: Vec<H256>,

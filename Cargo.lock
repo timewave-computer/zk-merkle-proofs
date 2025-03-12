@@ -1750,51 +1750,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cross-chain-vault-guest"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
- "common",
- "cross-chain-vault-types",
- "prover-utils",
- "serde_json",
- "sp1-zkvm",
-]
-
-[[package]]
-name = "cross-chain-vault-prover"
-version = "0.1.0"
-dependencies = [
- "alloy",
- "alloy-primitives",
- "alloy-rlp",
- "base64 0.22.1",
- "common",
- "cross-chain-vault-guest",
- "cross-chain-vault-types",
- "dotenvy",
- "ethereum",
- "neutron",
- "prover-utils",
- "serde_json",
- "sp1-helper",
- "sp1-sdk",
- "tokio",
- "url",
-]
-
-[[package]]
-name = "cross-chain-vault-types"
-version = "0.1.0"
-dependencies = [
- "ethereum",
- "neutron",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "crossbeam-channel"
 version = "0.5.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6877,6 +6832,113 @@ name = "valuable"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
+
+[[package]]
+name = "vault-zk-rate-guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "common",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+ "vault-zk-rate-types",
+]
+
+[[package]]
+name = "vault-zk-rate-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "vault-zk-transfer-guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "common",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+ "vault-zk-transfer-types",
+]
+
+[[package]]
+name = "vault-zk-transfer-prover"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "alloy-primitives",
+ "alloy-rlp",
+ "base64 0.22.1",
+ "common",
+ "cross-chain-message-builder-guest",
+ "dotenvy",
+ "ethereum",
+ "neutron",
+ "prover-utils",
+ "serde_json",
+ "sp1-helper",
+ "sp1-sdk",
+ "tokio",
+ "url",
+ "vault-zk-transfer-types",
+]
+
+[[package]]
+name = "vault-zk-transfer-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "vault-zk-withdawal-types"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "vault-zk-withdrawal-guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "common",
+ "prover-utils",
+ "serde_json",
+ "sp1-zkvm",
+ "vault-zk-withdawal-types",
+]
+
+[[package]]
+name = "vault-zk-withdrawal-prover"
+version = "0.1.0"
+dependencies = [
+ "alloy",
+ "alloy-primitives",
+ "alloy-rlp",
+ "base64 0.22.1",
+ "common",
+ "cross-chain-message-builder-guest",
+ "dotenvy",
+ "ethereum",
+ "neutron",
+ "prover-utils",
+ "serde_json",
+ "sp1-helper",
+ "sp1-sdk",
+ "tokio",
+ "url",
+ "vault-zk-withdawal-types",
+]
 
 [[package]]
 name = "vcpkg"

@@ -6,7 +6,6 @@ macro_rules! encode {
         {
             let mut vec = vec![];
             $e.encode(&mut vec);
-            println!("{}: {:?}", stringify!($e), vec);
         }
     };
     ($out:ident, $e:expr, $($others:expr),+) => {
