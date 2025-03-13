@@ -6838,6 +6838,7 @@ name = "vault-zk-rate-guest"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "alloy-rlp",
  "alloy-sol-types",
  "common",
  "prover-utils",
@@ -6850,6 +6851,8 @@ dependencies = [
 name = "vault-zk-rate-types"
 version = "0.1.0"
 dependencies = [
+ "ethereum",
+ "neutron",
  "serde",
  "serde_json",
 ]

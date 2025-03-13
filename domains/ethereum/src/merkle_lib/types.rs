@@ -16,10 +16,13 @@ pub struct EthereumProof {
     pub proof: Vec<Vec<u8>>,
     pub key: Vec<u8>,
     pub root: Vec<u8>,
+    // the rlp encoded value
+    pub value: Vec<u8>,
 }
 
 #[cfg(feature = "web")]
 use crate::encode;
+use crate::merkle_lib::keccak::digest_keccak;
 #[cfg(feature = "web")]
 use {
     alloy::hex::FromHex,
@@ -80,7 +83,7 @@ impl EvmProver {
             .unwrap();
         let memdb = Arc::new(MemoryDB::new(true));
         let mut trie = EthTrie::new(memdb.clone());
-        for (index, receipt) in receipts.into_iter().enumerate() {
+        for (index, receipt) in receipts.clone().into_iter().enumerate() {
             let inner: ReceiptEnvelope<alloy::rpc::types::Log> = receipt.inner;
             let mut out: Vec<u8> = Vec::new();
             let index_encoded = alloy_rlp::encode(index);
@@ -118,6 +121,7 @@ impl EvmProver {
             proof,
             root: block.header.receipts_root.to_vec(),
             key: receipt_key,
+            value: serde_json::to_vec(&receipts).unwrap(),
         }
     }
 }
@@ -216,7 +220,7 @@ impl MerkleVerifiable for EthereumProof {
         }
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
-        trie.verify_proof(root_hash, &self.key, self.proof.clone())
+        trie.verify_proof(root_hash, &digest_keccak(&self.key), self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
 

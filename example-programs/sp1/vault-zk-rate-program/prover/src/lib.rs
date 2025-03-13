@@ -8,5 +8,7 @@ mod tests {
     use crate::prove;
 
     #[tokio::test]
-    async fn test_generate_zk_transfer_proof() {}
+    async fn test_generate_zk_transfer_proof() {
+        
+    }
 }

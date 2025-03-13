@@ -11,3 +11,4 @@ serde_json.workspace = true
 alloy-primitives = "0.8"
 alloy-sol-types = "0.8"
 vault-zk-rate-types = { path = "../types" }
+alloy-rlp = { version = "0.3.11" }

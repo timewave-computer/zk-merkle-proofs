@@ -27,10 +27,11 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
     let rpc_url = read_rpc_url() + &read_api_key();
     let prover = EvmProver { rpc_url };
     let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
+    let storage_key = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
     let proof = provider
         .get_proof(
             Address::from_hex(USDT_CONTRACT_ADDRESS).unwrap(),
-            vec![FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap()],
+            vec![storage_key],
         )
         .await
         .expect("Failed to get proof!");
@@ -41,19 +42,30 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
         .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
         .collect();
     let first_proof = raw_storage_proofs.first().unwrap();
+    // for now we only want one storage proof at a time - refactor this later
+    assert_eq!(raw_storage_proofs.len(), 1);
+    assert_eq!(
+        first_proof
+            .1
+            .as_b256()
+            .bytes()
+            .collect::<Result<Vec<u8>, _>>()
+            .unwrap()
+            .to_vec(),
+        storage_key.to_vec()
+    );
     EthereumProof {
         root: proof.storage_hash.to_vec(),
         proof: first_proof.0.clone(),
-        key: digest_keccak(
-            &first_proof
-                .1
-                .as_b256()
-                .bytes()
-                .collect::<Result<Vec<u8>, _>>()
-                .unwrap()
-                .to_vec(),
-        )
-        .to_vec(),
+        key: first_proof
+            .1
+            .as_b256()
+            .bytes()
+            .collect::<Result<Vec<u8>, _>>()
+            .unwrap()
+            .to_vec(),
+        // rlp encoded value
+        value: alloy_rlp::encode(&proof.storage_proof.first().unwrap().value),
     }
 }
 
