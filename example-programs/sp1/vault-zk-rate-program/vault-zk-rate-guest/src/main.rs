@@ -14,18 +14,41 @@ pub fn main() {
     verify_merkle_proof(inputs.ethereum_mint_proof.clone(), &inputs.ethereum_root);
     verify_merkle_proof(inputs.neutron_mint_proof.clone(), &inputs.neutron_root);
 
+    let mut eth_diff: u32 = 0;
+    let mut neutron_diff: u32 = 0;
+
+    // eth precision must be increased by eth_diff
+    if inputs.neutron_precision > inputs.eth_precision {
+        eth_diff = inputs.neutron_precision - inputs.eth_precision
+
+    // neutron precision must be increased by neutron_diff
+    } else if inputs.eth_precision > inputs.neutron_precision {
+        neutron_diff = inputs.eth_precision - inputs.neutron_precision
+    }
+
     let ethereum_balance: U256 =
         alloy_rlp::decode_exact(&inputs.ethereum_balance_proof.value).unwrap();
+
+    let adjusted_ethereum_balance: U256 = adjust_balance(ethereum_balance, eth_diff);
+
     let ethereum_mint_amount: U256 =
         alloy_rlp::decode_exact(&inputs.ethereum_mint_proof.value).unwrap();
+
+    let adjusted_ethereum_mint_amount: U256 = adjust_balance(ethereum_mint_amount, eth_diff);
+
     let neutron_balance: U256 =
         U256::from(decode_neutron_value(inputs.neutron_balance_proof.value));
+
+    let adjusted_neutron_balance: U256 = adjust_balance(neutron_balance, neutron_diff);
+
     let neutron_mint_amount: U256 =
         U256::from(decode_neutron_value(inputs.neutron_mint_proof.value));
 
+    let adjusted_neutron_mint_amount: U256 = adjust_balance(neutron_mint_amount, neutron_diff);
+
     // calculate the current rate
-    let output_rate: U256 =
-        (ethereum_mint_amount + neutron_mint_amount) / (neutron_balance + ethereum_balance);
+    let output_rate: U256 = (adjusted_ethereum_mint_amount + adjusted_neutron_mint_amount)
+        / (adjusted_ethereum_balance + adjusted_neutron_balance);
 
     sp1_zkvm::io::commit_slice(
         &serde_json::to_vec(&RateProgramOutputs {
@@ -35,6 +58,10 @@ pub fn main() {
         })
         .unwrap(),
     );
+}
+
+fn adjust_balance(balance_before: U256, exponent: u32) -> U256 {
+    balance_before * U256::from(10u32.pow(exponent))
 }
 
 // decode bytes to u128

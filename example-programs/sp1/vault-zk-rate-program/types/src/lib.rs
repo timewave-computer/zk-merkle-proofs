@@ -22,6 +22,10 @@ pub struct RateProgramInputs {
     pub ethereum_root: Vec<u8>,
     // the neutron root we want to verify against
     pub neutron_root: Vec<u8>,
+    // precision ethereum side
+    pub eth_precision: u32,
+    // precision neutron side
+    pub neutron_precision: u32,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
