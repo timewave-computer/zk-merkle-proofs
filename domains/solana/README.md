@@ -49,7 +49,7 @@ trie.hash_root()
 
 They will sign the root and send it to the co-processor contract.
 
-That's all, now we have an on-chain representation of the state of the accounts that we are interested in for the Solana application.
+That's all, now we have an on-chain representation of the state of the accounts on Solana that we are interested in for the Valence application.
 
 While there are trust assumptions, they are in control of each app developer deploying the coprocessors.
 
