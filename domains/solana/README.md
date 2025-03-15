@@ -1,6 +1,6 @@
 # Solana libraries
 Solana is tricky, we might have to develop a co-processor specifically for it.
-My current idea is that we could have a co-processor that is deployed for each application, 
+My current idea is that we could have a solana co-processor that is deployed for each application, 
 in combination with an MPC that provides state roots of coprocessor readings.
 
 Since Solana doesn't really have a trie / tree with presistent state. We can monitor state
