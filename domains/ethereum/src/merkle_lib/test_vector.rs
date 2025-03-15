@@ -20,18 +20,20 @@ const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
 
 #[cfg(feature = "web")]
 pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
+    use alloy::rpc::types::EIP1186AccountProofResponse;
+    use common::merkle::types::MerkleProver;
     let rpc_url = read_rpc_url() + &read_api_key();
-    let prover = EvmProver { rpc_url };
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
-    let storage_key = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
-    let proof = provider
-        .get_proof(
-            Address::from_hex(USDT_CONTRACT_ADDRESS).unwrap(),
-            vec![storage_key],
+    let storage_key: FixedBytes<32> = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
+    let merkle_prover = EvmProver { rpc_url };
+    let proof = merkle_prover
+        .get_storage_proof(
+            DEFAULT_STORAGE_KEY_ETHEREUM,
+            USDT_CONTRACT_ADDRESS,
+            22040634,
         )
-        .await
-        .expect("Failed to get proof!");
-    let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof
+        .await;
+    let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
+    let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
         .storage_proof
         .iter()
         .cloned()
@@ -51,7 +53,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
         storage_key.to_vec()
     );
     EthereumProof {
-        root: proof.storage_hash.to_vec(),
+        root: proof_deserialized.storage_hash.to_vec(),
         proof: first_proof.0.clone(),
         key: first_proof
             .1
@@ -60,17 +62,17 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
             .collect::<Result<Vec<u8>, _>>()
             .unwrap()
             .to_vec(),
-        // rlp encoded value
-        value: alloy_rlp::encode(&proof.storage_proof.first().unwrap().value),
+        value: alloy_rlp::encode(&proof_deserialized.storage_proof.first().unwrap().value),
     }
 }
 
 #[cfg(feature = "web")]
 pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
+    use alloy::rpc::types::EIP1186AccountProofResponse;
+    use common::merkle::types::MerkleProver;
+
     let rpc_url = read_rpc_url() + &read_api_key();
-    let prover = EvmProver { rpc_url };
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
-    let storage_key = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
+    let provider = ProviderBuilder::new().on_http(Url::from_str(&rpc_url).unwrap());
     let block = provider
         .get_block_by_number(
             alloy::eips::BlockNumberOrTag::from(22040634),
@@ -79,17 +81,22 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
         .await
         .expect("failed to get block")
         .expect("failed to get block");
+    let merkle_prover = EvmProver { rpc_url };
+    let proof = merkle_prover
+        .get_storage_proof(
+            DEFAULT_STORAGE_KEY_ETHEREUM,
+            USDT_CONTRACT_ADDRESS,
+            22040634,
+        )
+        .await;
+    let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
     let block_state_root = block.header.state_root;
     //let storage_key = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
-    let proof = provider
-        .get_proof(
-            Address::from_hex(USDT_CONTRACT_ADDRESS).unwrap(),
-            vec![storage_key],
-        )
-        .block_id(alloy::eips::BlockId::from(22040634))
-        .await
-        .expect("Failed to get proof!");
-    let account_proof: Vec<Vec<u8>> = proof.account_proof.iter().map(|b| b.to_vec()).collect();
+    let account_proof: Vec<Vec<u8>> = proof_deserialized
+        .account_proof
+        .iter()
+        .map(|b| b.to_vec())
+        .collect();
     EthereumProof {
         root: block_state_root.to_vec(),
         proof: account_proof.clone(),

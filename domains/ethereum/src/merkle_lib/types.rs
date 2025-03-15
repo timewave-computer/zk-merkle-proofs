@@ -44,16 +44,16 @@ impl MerkleProver for EvmProver {
     /// that contains a list of storage proofs for the requested keys
     /// we can verify the combined proof or extract the account proof
     /// and individual storage proofs
-    #[allow(unused)]
-    async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
+    async fn get_storage_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let address_object = Address::from_hex(address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
             .get_proof(
                 address_object,
-                keys.iter()
-                    .map(|k| FixedBytes::from_hex(k).unwrap())
-                    .collect(),
+                /*keys.iter()
+                .map(|k| FixedBytes::from_hex(k).unwrap())
+                .collect(),*/
+                vec![FixedBytes::from_hex(key).unwrap()],
             )
             // use this in production!
             //.block_id(height.try_into().unwrap())
@@ -61,6 +61,16 @@ impl MerkleProver for EvmProver {
             .expect("Failed to get storage proof!");
         serde_json::to_vec(&proof).expect("Failed to serialize proof!")
     }
+}
+
+pub async fn get_account_and_storage_proof(
+    keys: Vec<&str>,
+    address: &str,
+    height: u64,
+) -> (EthereumProof, EthereumProof) {
+    // first proof will be account, second will be storage proof
+    // later we can have a method to batch them
+    todo!("Implement");
 }
 
 #[cfg(feature = "web")]

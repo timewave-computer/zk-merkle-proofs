@@ -20,7 +20,7 @@ pub struct ProgramOutputs {
 pub trait MerkleProver {
     #[allow(async_fn_in_trait)]
     // Obtain a proof for a slot in the key value store
-    async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8>;
+    async fn get_storage_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8>;
 }
 
 pub trait MerkleVerifiable {

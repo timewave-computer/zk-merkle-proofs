@@ -18,6 +18,8 @@ resolver = "2"
 opt-level = 3
 
 [workspace.dependencies]
+ethereum = { path = "domains/ethereum" }
+neutron = { path = "domains/neutron" }
 base64 = "0.22.1"
 prover-utils = { path = "prover-utils" }
 cross-chain-merkle-guest = { path = "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest" }

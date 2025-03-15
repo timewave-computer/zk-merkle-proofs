@@ -4,3 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+serde.workspace = true
+serde_json.workspace = true
+neutron = { path = "../domains/neutron", features = ["web"] }
+ethereum = { path = "../domains/ethereum", features = ["web"] }
+common.workspace = true
+tokio.workspace = true

@@ -15,7 +15,31 @@ use tendermint_rpc::{Client, HttpClient};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronKey {
     pub prefix: String,
+    pub prefix_len: usize,
     pub key: String,
+}
+
+impl NeutronKey {
+    /// Serializes the NeutronKey by encoding prefix_len explicitly.
+    pub fn serialize(&self) -> String {
+        format!("{:03}{}{}", self.prefix_len, self.prefix, self.key)
+    }
+
+    /// Deserializes a string back into a NeutronKey.
+    pub fn deserialize(encoded: &str) -> Self {
+        // Extract the first 3 characters as the prefix length
+        let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
+
+        // Extract the prefix and key based on prefix_len
+        let prefix = &encoded[3..(3 + prefix_len)];
+        let key = &encoded[(3 + prefix_len)..];
+
+        NeutronKey {
+            prefix: prefix.to_string(),
+            prefix_len,
+            key: key.to_string(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -80,17 +104,14 @@ pub struct NeutronProver {
 impl MerkleProver for NeutronProver {
     // chunk[0] = prefix string, chunk[1] = hex encoded key
     #[allow(unused)]
-    async fn get_storage_proof(&self, keys: Vec<&str>, address: &str, height: u64) -> Vec<u8> {
+    async fn get_storage_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
-
-        assert_eq!(keys.len(), 2);
-        let prefix = keys.first().unwrap();
-        let key = keys.last().unwrap();
+        let neutron_key: NeutronKey = NeutronKey::deserialize(&key);
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
             .abci_query(
                 // "store/bank/key", "store/wasm/key", ...
-                Some(format!("{}{}{}", "store/", prefix, "/key")),
-                hex::decode(key).unwrap(),
+                Some(format!("{}{}{}", "store/", neutron_key.prefix, "/key")),
+                hex::decode(neutron_key.key.clone()).unwrap(),
                 Some(Height::from(height as u32)),
                 true, // Include proof
             )
@@ -99,10 +120,7 @@ impl MerkleProver for NeutronProver {
         let proof = response.proof.unwrap();
         serde_json::to_vec(&NeutronProof {
             proof: proof.clone(),
-            key: NeutronKey {
-                prefix: prefix.to_string(),
-                key: key.to_string(),
-            },
+            key: neutron_key,
             value: response.value,
         })
         .unwrap()
