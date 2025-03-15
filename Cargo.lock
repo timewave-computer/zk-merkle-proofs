@@ -6026,6 +6026,10 @@ name = "solana"
 version = "0.1.0"
 
 [[package]]
+name = "solana-coprocessor"
+version = "0.1.0"
+
+[[package]]
 name = "sp1-build"
 version = "4.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
