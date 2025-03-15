@@ -52,3 +52,8 @@ They will sign the root and send it to the co-processor contract.
 That's all, now we have an on-chain representation of the state of the accounts that we are interested in for the Solana application.
 
 While there are trust assumptions, they are in control of each app developer deploying the coprocessors.
+
+We could also have the co-processors submit state to an Ethereum contract and include the root in our MAIN co-processor's Trie/Tree.
+
+## Merkle Openings
+The zk openings will work the exact same for Solana, except we verify against the Trie that is constructed by our special solana co-processor.
