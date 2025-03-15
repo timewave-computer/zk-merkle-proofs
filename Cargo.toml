@@ -9,7 +9,8 @@ members = [
     "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest",
     "example-programs/sp1/vault-zk-rate-program/vault-zk-rate-guest",
     "prover-utils",
-    "domains/solana", "solana-coprocessor",
+    "domains/solana",
+    "coprocessor",
 ]
 resolver = "2"
 

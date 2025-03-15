@@ -1,4 +1,7 @@
 # Solana libraries
+
+Note: Solana is not a priority right now, Neutron/Eth Vault First!
+
 Solana is tricky, we might have to develop a co-processor specifically for it.
 My current idea is that we could have a solana co-processor that is deployed for each application, 
 in combination with an MPC that provides state roots of coprocessor readings.
