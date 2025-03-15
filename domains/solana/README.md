@@ -16,3 +16,4 @@ E * n, where E is the epoch block range and n is the current epoch index.
 2. Construct a merkle trie from said state - we can use the eth_trie library for simplicity
 3. Have a set of operators attest to said state
 4. Post ZK opening proofs on-chain and verify them against the root that is updated by those operators
+5. A smart contract that maintains the root history of our custom trie and updates it when sufficiently many attestations are pushed
