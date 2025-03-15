@@ -2,9 +2,7 @@ use {cosmrs::proto::prost, ics23::CommitmentProof, tendermint::merkle::proof::Pr
 
 pub fn convert_tm_to_ics_merkle_proof(tm_proof: &ProofOps) -> Vec<CommitmentProof> {
     let mut out: Vec<CommitmentProof> = vec![];
-
     assert_eq!(tm_proof.ops.len(), 2);
-
     let proof_op = tm_proof
         .ops
         .first()

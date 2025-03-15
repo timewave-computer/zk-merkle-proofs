@@ -8,8 +8,10 @@ use ics23::{
 };
 use serde::{Deserialize, Serialize};
 use tendermint::{block::Height, merkle::proof::ProofOps};
+
 #[cfg(feature = "web")]
 use tendermint_rpc::{Client, HttpClient};
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronKey {
     pub prefix: String,
@@ -28,6 +30,7 @@ pub struct NeutronProofWithRoot {
     pub proof: NeutronProof,
     pub root: Vec<u8>,
 }
+
 impl MerkleVerifiable for NeutronProofWithRoot {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         self.proof.verify(expected_root)

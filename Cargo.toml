@@ -8,7 +8,7 @@ members = [
     "example-programs/sp1/cross-chain-message-builder-program/prover",
     "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest",
     "example-programs/sp1/vault-zk-rate-program/vault-zk-rate-guest",
-    "prover-utils",
+    "prover-utils", "domains/solana",
 ]
 resolver = "2"
 

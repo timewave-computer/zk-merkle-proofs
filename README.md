@@ -13,6 +13,8 @@ At the core of this project are two fundamental libraries that should be impleme
 
 [Neutron](domains/neutron/README.md)
 
+[Solana - coprocessor](domains/solana/README.md)
+
 # Example ZK Programs that depend on our Libraries
 1. Cross-chain merkle openings in ZK, [here](example-programs/sp1/cross-chain-merkle-program/prover/README.md)
 2. Executable message builder in ZK, [here](example-programs/sp1/cross-chain-message-builder-program/prover/README.md)

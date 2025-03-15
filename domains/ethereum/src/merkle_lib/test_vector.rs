@@ -67,7 +67,6 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
 
 #[cfg(feature = "web")]
 pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
-    use super::keccak::digest_keccak;
     let rpc_url = read_rpc_url() + &read_api_key();
     let prover = EvmProver { rpc_url };
     let provider = ProviderBuilder::new().on_http(Url::from_str(&prover.rpc_url).unwrap());
@@ -75,7 +74,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
     let block = provider
         .get_block_by_number(
             alloy::eips::BlockNumberOrTag::from(22040634),
-            alloy::rpc::types::BlockTransactionsKind::Full,
+            //alloy::rpc::types::BlockTransactionsKind::Full,
         )
         .await
         .expect("failed to get block")
