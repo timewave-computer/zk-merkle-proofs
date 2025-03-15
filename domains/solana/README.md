@@ -17,3 +17,38 @@ E * n, where E is the epoch block range and n is the current epoch index.
 3. Have a set of operators attest to said state
 4. Post ZK opening proofs on-chain and verify them against the root that is updated by those operators
 5. A smart contract that maintains the root history of our custom trie and updates it when sufficiently many attestations are pushed
+
+## Trie representation of on-chain data
+
+The user (valence app operator) will define which accounts on Solana they are interested in.
+
+E.g. Input: Vec<Address||Key>
+
+For sake of simplicity we can start with just token balances.
+
+They also define an update epoch e.g. how many blocks should pass in between state updates.
+
+They instantiate the solana co-processor contract with a set of keys or a multisig wallet:
+
+```json
+CoprocessorConfig{
+    Accounts: Vec<Address||Key>,
+    EpochDuration: 10,
+    Key: Share of multisig, or regular ECDSA|RSA
+}
+```
+
+The coprocessors will start reading state and construct a trie from it:
+
+```rust
+trie: Trie = Trie::new()
+trie.insert(Account1)
+trie.insert(Account2)
+trie.hash_root()
+```
+
+They will sign the root and send it to the co-processor contract.
+
+That's all, now we have an on-chain representation of the state of the accounts that we are interested in for the Solana application.
+
+While there are trust assumptions, they are in control of each app developer deploying the coprocessors.
