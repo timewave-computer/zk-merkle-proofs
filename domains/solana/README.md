@@ -8,6 +8,9 @@ and build our own trie. Multiple nodes could agree on the state of said trie and
 on-chain. If the commitment threshold is met, Solana on-chain state root is updated and merkle openings
 can be accepted.
 
+These nodes would not have to synchronize with one another, they just each individually attest to the state at height 
+E * n, where E is the epoch block range and n is the current epoch index.
+
 ## Requirements solana coprocessor
 1. Query solana account state
 2. Construct a merkle trie from said state - we can use the eth_trie library for simplicity
