@@ -14,6 +14,13 @@ pub struct Coprocessor {
     pub config: CoprocessorConfig,
 }
 
+#[derive(Debug)]
+pub struct CoprocessorTrie {
+    pub ethereum_trie: EthTrie<MemoryDB>,
+    pub neutron_trie: EthTrie<MemoryDB>,
+    pub coprocessor_trie: EthTrie<MemoryDB>,
+}
+
 impl Coprocessor {
     pub async fn get_ethereum_proofs(
         &self,
@@ -68,7 +75,7 @@ impl Coprocessor {
         &self,
         neutron_proofs: Vec<NeutronMerkleProof>,
         ethereum_proofs: Vec<EthereumMerkleProof>,
-    ) -> EthTrie<MemoryDB> {
+    ) -> CoprocessorTrie {
         let neutron_db = Arc::new(MemoryDB::new(true));
         let mut neutron_trie = EthTrie::new(neutron_db.clone());
         for proof in neutron_proofs {
@@ -79,6 +86,7 @@ impl Coprocessor {
                 )
                 .expect("Failed to insert into Neutron Trie");
         }
+        let neutron_root = neutron_trie.root_hash().unwrap().to_vec();
         let eth_db = Arc::new(MemoryDB::new(true));
         let mut ethereum_trie = EthTrie::new(eth_db.clone());
         for proof in ethereum_proofs {
@@ -87,40 +95,39 @@ impl Coprocessor {
                 .insert(&proof.key, &proof.value)
                 .expect("Failed to insert into Ethereum Trie");
         }
+        let eth_root = ethereum_trie.root_hash().unwrap().to_vec();
+        println!("Eth root: {:?}", &eth_root);
         let coprocessor_db = Arc::new(MemoryDB::new(true));
         let mut coprocessor_trie = EthTrie::new(coprocessor_db.clone());
         coprocessor_trie
-            .insert(
-                b"ethereum",
-                &ethereum_trie
-                    .root_hash()
-                    .expect("Failed to compute ethereum trie root")
-                    .to_vec(),
-            )
+            .insert(b"ethereum", &eth_root.to_vec())
             .expect("Failed to insert ethereum root into coprocessor trie");
         coprocessor_trie
-            .insert(
-                b"neutron",
-                &neutron_trie
-                    .root_hash()
-                    .expect("Failed to compute neutron trie root")
-                    .to_vec(),
-            )
+            .insert(b"neutron", &neutron_root)
             .expect("Failed to insert neutron root into coprocessor trie");
         // the coprocessor trie can now be used to obtain merkle proofs for any ethereum/neutron values
-        coprocessor_trie
+        CoprocessorTrie {
+            ethereum_trie,
+            neutron_trie,
+            coprocessor_trie,
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use super::{Coprocessor, CoprocessorConfig};
-    use alloy::hex;
+    use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
-    use eth_trie::Trie;
-    use ethereum::merkle_lib::test_vector::{
-        read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-        DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
+    use eth_trie::{EthTrie, MemoryDB, Trie};
+    use ethereum::merkle_lib::{
+        test_vector::{
+            read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
+            DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
+        },
+        types::EthereumMerkleProof,
     };
     use neutron::merkle_lib::{
         test_vector::{
@@ -172,6 +179,38 @@ mod test {
                 .map(|batch| batch.1.clone())
                 .collect(),
         );
-        let _ = coprocessor_trie.root_hash();
+        let coprocessor_trie_root = coprocessor_trie.coprocessor_trie.root_hash().unwrap();
+        let ethereum_trie_root = coprocessor_trie.ethereum_trie.root_hash().unwrap().to_vec();
+        // verify a storage proof against the coprocessor trie
+        let ethereum_storage_proof = coprocessor_trie
+            .ethereum_trie
+            .get_proof(&hex::decode(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap())
+            .unwrap();
+        coprocessor_trie
+            .ethereum_trie
+            .verify_proof(
+                FixedBytes::from_slice(&ethereum_trie_root),
+                &hex::decode(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap(),
+                ethereum_storage_proof,
+            )
+            .expect("Value not in Eth Trie");
+        let coprocessor_storage_proof = coprocessor_trie
+            .coprocessor_trie
+            .get_proof(b"ethereum")
+            .unwrap();
+        coprocessor_trie
+            .coprocessor_trie
+            .verify_proof(
+                coprocessor_trie_root,
+                b"ethereum",
+                coprocessor_storage_proof.clone(),
+            )
+            .expect("Value not in Coprocessor Trie");
+
+        assert!(coprocessor_storage_proof
+            .last()
+            .unwrap()
+            .ends_with(&ethereum_trie_root));
+        assert_eq!(ethereum_trie_root.len(), 32);
     }
 }
