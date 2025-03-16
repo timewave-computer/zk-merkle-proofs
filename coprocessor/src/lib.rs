@@ -5,7 +5,7 @@ use common::merkle::types::MerkleProver;
 use config::CoprocessorConfig;
 use eth_trie::{EthTrie, MemoryDB, Trie};
 use ethereum::merkle_lib::types::{EthereumMerkleProof, MerkleProverEvm};
-use neutron::merkle_lib::types::{MerkleProverNeutron, NeutronKey, NeutronMerkleProof};
+use neutron::merkle_lib::types::{MerkleProverNeutron, NeutronMerkleProof};
 use serde::{Deserialize, Serialize};
 mod config;
 
@@ -162,6 +162,7 @@ mod test {
             proof.1.verify(&proof.1.root);
         }
         for proof in neutron_proofs.clone() {
+            #[allow(deprecated)]
             proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
         }
         let mut coprocessor_trie = coprocessor.build_coprocessor_trie(

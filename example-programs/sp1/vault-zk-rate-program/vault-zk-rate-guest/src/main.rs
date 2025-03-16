@@ -67,5 +67,5 @@ fn adjust_balance(balance_before: U256, exponent: u32) -> U256 {
 // decode bytes to u128
 fn decode_neutron_value(bytes: Vec<u8>) -> u128 {
     let string = String::from_utf8(bytes).unwrap();
-    u128::from_str_radix(&string, 10).unwrap()
+    string.parse::<u128>().unwrap()
 }

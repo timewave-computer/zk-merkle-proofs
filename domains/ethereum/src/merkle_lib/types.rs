@@ -50,7 +50,7 @@ impl MerkleProver for MerkleProverEvm {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
             .get_proof(address_object, vec![FixedBytes::from_hex(key).unwrap()])
-            .block_id(height.try_into().unwrap())
+            .block_id(height.into())
             .await
             .expect("Failed to get storage proof!");
         serde_json::to_vec(&proof).expect("Failed to serialize proof!")
@@ -78,7 +78,7 @@ impl MerkleProverEvm {
         let account_proof = EthereumMerkleProof {
             root: block_state_root.to_vec(),
             proof: account_proof.clone(),
-            key: hex::decode(&address).unwrap(),
+            key: hex::decode(address).unwrap(),
             value: storage_hash,
         };
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
@@ -98,7 +98,7 @@ impl MerkleProverEvm {
                 .collect::<Result<Vec<u8>, _>>()
                 .unwrap()
                 .to_vec(),
-            value: alloy_rlp::encode(&proof_deserialized.storage_proof.first().unwrap().value),
+            value: alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
         };
         (account_proof, storage_proof)
     }
@@ -151,6 +151,7 @@ impl MerkleProverEvm {
                 ReceiptEnvelope::Legacy(r) => {
                     insert_receipt(r, &mut trie, index_encoded, None);
                 }
+                #[allow(unreachable_patterns)]
                 _ => {
                     eprintln!("Unknown Receipt Type!")
                 }

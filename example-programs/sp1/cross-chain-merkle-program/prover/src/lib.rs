@@ -8,6 +8,7 @@ use prover_utils::merkle::types::MerkleProofInput;
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 pub fn prove(input: MerkleProofInput) {
     let start_time = Instant::now();
+    #[allow(deprecated)]
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
     // note that when verifying the merkle proof a trusted root should be used
@@ -46,6 +47,7 @@ mod tests {
             ethereum_proofs: vec![eth_proof],
             neutron_proofs: vec![NeutronMerkleProofWithRoot {
                 proof: proof,
+                #[allow(deprecated)]
                 root: base64::decode(read_test_vector_merkle_root()).unwrap(),
             }],
         });

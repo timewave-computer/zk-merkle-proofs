@@ -1,15 +1,13 @@
-use alloy_primitives::{Address, FixedBytes};
-use std::{env, io::Read, str::FromStr};
+use alloy_primitives::FixedBytes;
+use std::{env, io::Read};
 
 #[cfg(feature = "web")]
 use {
     alloy::{
-        hex::{self, FromHex, ToHex},
-        providers::{Provider, ProviderBuilder},
+        hex::{self, FromHex},
         serde::JsonStorageKey,
     },
     dotenvy::dotenv,
-    url::Url,
 };
 
 #[cfg(feature = "web")]
@@ -61,7 +59,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
             .collect::<Result<Vec<u8>, _>>()
             .unwrap()
             .to_vec(),
-        value: alloy_rlp::encode(&proof_deserialized.storage_proof.first().unwrap().value),
+        value: alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
     }
 }
 
@@ -89,7 +87,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     EthereumMerkleProof {
         root: state_root.to_vec(),
         proof: account_proof.clone(),
-        key: hex::decode(&USDT_CONTRACT_ADDRESS).unwrap(),
+        key: hex::decode(USDT_CONTRACT_ADDRESS).unwrap(),
         value: account_proof.last().unwrap().to_vec(),
     }
 }

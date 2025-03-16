@@ -105,7 +105,7 @@ impl MerkleProver for MerkleProverNeutron {
     #[allow(unused)]
     async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
-        let neutron_key: NeutronKey = NeutronKey::deserialize(&key);
+        let neutron_key: NeutronKey = NeutronKey::deserialize(key);
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
             .abci_query(
                 // "store/bank/key", "store/wasm/key", ...

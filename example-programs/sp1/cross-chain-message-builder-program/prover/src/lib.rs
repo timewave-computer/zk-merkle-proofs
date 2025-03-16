@@ -8,6 +8,7 @@ use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
 pub fn prove(input: MessageBuilderProgramInput) {
     let proof_input = serde_json::to_vec(&input).unwrap();
     let start_time = Instant::now();
+    #[allow(deprecated)]
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
     stdin.write(&proof_input);

@@ -8,6 +8,7 @@ mod tests {
             get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root,
         };
         let proof = get_neutron_test_vector_bank_store_supply().await;
+        #[allow(deprecated)]
         proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
     }
 }
