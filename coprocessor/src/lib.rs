@@ -117,6 +117,7 @@ mod test {
     use super::{Coprocessor, CoprocessorConfig};
     use alloy::hex;
     use common::merkle::types::MerkleVerifiable;
+    use eth_trie::Trie;
     use ethereum::merkle_lib::test_vector::{
         read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
         DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
@@ -155,13 +156,21 @@ mod test {
         let neutron_proofs = coprocessor
             .get_neutron_proofs(read_test_vector_height())
             .await;
-        for proof in ethereum_proofs {
+        for proof in ethereum_proofs.clone() {
             proof.0.verify(&state_root);
             // must equal the storage hash of the account
             proof.1.verify(&proof.1.root);
         }
-        for proof in neutron_proofs {
+        for proof in neutron_proofs.clone() {
             proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
         }
+        let mut coprocessor_trie = coprocessor.build_coprocessor_trie(
+            neutron_proofs,
+            ethereum_proofs
+                .iter()
+                .map(|batch| batch.1.clone())
+                .collect(),
+        );
+        let _ = coprocessor_trie.root_hash();
     }
 }
