@@ -23,7 +23,6 @@ alloy-rlp = { version = "0.3.11", features = [
     "arrayvec",
 ], optional = true }
 tiny-keccak = "2.0.2"
-hex = "0.4.3"
 # use precompile when running in prod
 tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patches/tiny-keccak", tag = "patch-2.0.2-sp1-4.0.0", features = [
     "keccak",

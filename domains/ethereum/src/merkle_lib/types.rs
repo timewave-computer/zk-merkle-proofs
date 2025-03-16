@@ -2,6 +2,7 @@
 use alloy::{
     consensus::{Receipt, ReceiptEnvelope, ReceiptWithBloom, TxReceipt},
     rpc::types::{Log as AlloyLog, TransactionReceipt},
+    serde::JsonStorageKey,
 };
 use alloy_primitives::{FixedBytes, B256};
 #[cfg(feature = "web")]
@@ -9,7 +10,7 @@ use alloy_rlp::{BufMut, Encodable, RlpEncodableWrapper};
 use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+use std::{io::Read, sync::Arc};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumProof {
@@ -22,10 +23,12 @@ pub struct EthereumProof {
 
 #[cfg(feature = "web")]
 use crate::encode;
-use crate::merkle_lib::keccak::digest_keccak;
+use crate::merkle_lib::{
+    keccak::digest_keccak, test_vector::get_ethereum_test_vector_account_proof,
+};
 #[cfg(feature = "web")]
 use {
-    alloy::hex::FromHex,
+    alloy::hex::{self, FromHex},
     alloy::providers::{Provider, ProviderBuilder},
     alloy::rpc::types::EIP1186AccountProofResponse,
     alloy_primitives::Address,
@@ -48,33 +51,59 @@ impl MerkleProver for EvmProver {
         let address_object = Address::from_hex(address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
-            .get_proof(
-                address_object,
-                /*keys.iter()
-                .map(|k| FixedBytes::from_hex(k).unwrap())
-                .collect(),*/
-                vec![FixedBytes::from_hex(key).unwrap()],
-            )
-            // use this in production!
-            //.block_id(height.try_into().unwrap())
+            .get_proof(address_object, vec![FixedBytes::from_hex(key).unwrap()])
+            .block_id(height.try_into().unwrap())
             .await
             .expect("Failed to get storage proof!");
         serde_json::to_vec(&proof).expect("Failed to serialize proof!")
     }
 }
 
-pub async fn get_account_and_storage_proof(
-    keys: Vec<&str>,
-    address: &str,
-    height: u64,
-) -> (EthereumProof, EthereumProof) {
-    // first proof will be account, second will be storage proof
-    // later we can have a method to batch them
-    todo!("Implement");
-}
-
 #[cfg(feature = "web")]
 impl EvmProver {
+    pub async fn get_account_and_storage_proof(
+        &self,
+        key: &str,
+        address: &str,
+        height: u64,
+        block_state_root: &[u8],
+    ) -> (EthereumProof, EthereumProof) {
+        let proof = self.get_storage_proof(key, address, height).await;
+        let proof_deserialized: EIP1186AccountProofResponse =
+            serde_json::from_slice(&proof).unwrap();
+        let account_proof: Vec<Vec<u8>> = proof_deserialized
+            .account_proof
+            .iter()
+            .map(|b| b.to_vec())
+            .collect();
+        let account_proof = EthereumProof {
+            root: block_state_root.to_vec(),
+            proof: account_proof.clone(),
+            key: hex::decode(&address).unwrap(),
+            value: account_proof.last().unwrap().to_vec(),
+        };
+        let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
+            .storage_proof
+            .iter()
+            .cloned()
+            .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
+            .collect();
+        let first_storage_proof = raw_storage_proofs.first().unwrap();
+        let storage_proof = EthereumProof {
+            root: proof_deserialized.storage_hash.to_vec(),
+            proof: first_storage_proof.0.clone(),
+            key: first_storage_proof
+                .1
+                .as_b256()
+                .bytes()
+                .collect::<Result<Vec<u8>, _>>()
+                .unwrap()
+                .to_vec(),
+            value: alloy_rlp::encode(&proof_deserialized.storage_proof.first().unwrap().value),
+        };
+        (account_proof, storage_proof)
+    }
+
     pub async fn get_receipt_proof(&self, block_hash: &str, target_index: u32) -> EthereumProof {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let block_hash_b256 = B256::from_str(block_hash).unwrap();
@@ -220,7 +249,7 @@ impl H256 {
 
 impl MerkleVerifiable for EthereumProof {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
-        let root_hash = FixedBytes::from_slice(expected_root);
+        let root_hash: FixedBytes<32> = FixedBytes::from_slice(expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof.clone() {
             let hash: B256 = crate::merkle_lib::keccak::digest_keccak(node_encoded).into();
@@ -230,7 +259,6 @@ impl MerkleVerifiable for EthereumProof {
         }
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
-
         trie.verify_proof(root_hash, &digest_keccak(&self.key), self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");

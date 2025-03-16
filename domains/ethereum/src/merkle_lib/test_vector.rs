@@ -14,9 +14,10 @@ use {
 
 #[cfg(feature = "web")]
 use crate::{merkle_lib::types::EthereumProof, merkle_lib::types::EvmProver};
-const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
+pub const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+pub const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
+pub const DEFAULT_ETH_BLOCK_HEIGHT: u64 = 22040634;
 
 #[cfg(feature = "web")]
 pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
@@ -29,7 +30,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
         .get_storage_proof(
             DEFAULT_STORAGE_KEY_ETHEREUM,
             USDT_CONTRACT_ADDRESS,
-            22040634,
+            DEFAULT_ETH_BLOCK_HEIGHT,
         )
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
@@ -40,8 +41,6 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
         .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
         .collect();
     let first_proof = raw_storage_proofs.first().unwrap();
-    // for now we only want one storage proof at a time - refactor this later
-    assert_eq!(raw_storage_proofs.len(), 1);
     assert_eq!(
         first_proof
             .1
@@ -70,35 +69,25 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
 pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
     use alloy::rpc::types::EIP1186AccountProofResponse;
     use common::merkle::types::MerkleProver;
-
     let rpc_url = read_rpc_url() + &read_api_key();
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&rpc_url).unwrap());
-    let block = provider
-        .get_block_by_number(
-            alloy::eips::BlockNumberOrTag::from(22040634),
-            //alloy::rpc::types::BlockTransactionsKind::Full,
-        )
-        .await
-        .expect("failed to get block")
-        .expect("failed to get block");
+    let state_root =
+        hex::decode("0xf4da06dccd5bc3891b4d43b75e4a83ccea460f0bd5cde1901f368472e5ad7e4a").unwrap();
     let merkle_prover = EvmProver { rpc_url };
     let proof = merkle_prover
         .get_storage_proof(
             DEFAULT_STORAGE_KEY_ETHEREUM,
             USDT_CONTRACT_ADDRESS,
-            22040634,
+            DEFAULT_ETH_BLOCK_HEIGHT,
         )
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
-    let block_state_root = block.header.state_root;
-    //let storage_key = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
     let account_proof: Vec<Vec<u8>> = proof_deserialized
         .account_proof
         .iter()
         .map(|b| b.to_vec())
         .collect();
     EthereumProof {
-        root: block_state_root.to_vec(),
+        root: state_root.to_vec(),
         proof: account_proof.clone(),
         key: hex::decode(&USDT_CONTRACT_ADDRESS).unwrap(),
         value: account_proof.last().unwrap().to_vec(),
@@ -122,13 +111,13 @@ async fn test_get_receipt_proof() {
 }
 
 #[cfg(feature = "web")]
-fn read_api_key() -> String {
+pub fn read_api_key() -> String {
     dotenv().ok();
     env::var("INFURA").expect("Missing Infura API key!")
 }
 
 #[cfg(feature = "web")]
-fn read_rpc_url() -> String {
+pub fn read_rpc_url() -> String {
     dotenv().ok();
     env::var("ETH_RPC").expect("Missing Ethereum RPC url!")
 }

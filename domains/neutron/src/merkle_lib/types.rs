@@ -29,7 +29,6 @@ impl NeutronKey {
     pub fn deserialize(encoded: &str) -> Self {
         // Extract the first 3 characters as the prefix length
         let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
-
         // Extract the prefix and key based on prefix_len
         let prefix = &encoded[3..(3 + prefix_len)];
         let key = &encoded[(3 + prefix_len)..];

@@ -21,6 +21,7 @@ opt-level = 3
 ethereum = { path = "domains/ethereum" }
 neutron = { path = "domains/neutron" }
 base64 = "0.22.1"
+hex = "0.4"
 prover-utils = { path = "prover-utils" }
 cross-chain-merkle-guest = { path = "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest" }
 cross-chain-message-builder-guest = { path = "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest" }
