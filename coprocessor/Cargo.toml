@@ -12,3 +12,4 @@ common.workspace = true
 tokio.workspace = true
 hex.workspace = true
 alloy = { version = "0.12.5", features = ["full"] }
+base64.workspace = true

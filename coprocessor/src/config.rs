@@ -1,7 +1,7 @@
-use alloy::hex;
-use common::merkle::types::{MerkleProver, MerkleVerifiable};
-use ethereum::merkle_lib::types::{EthereumProof, EvmProver};
-use neutron::merkle_lib::types::{NeutronKey, NeutronProof, NeutronProver};
+use alloy::rpc::types::EIP1186AccountProofResponse;
+use common::merkle::types::MerkleProver;
+use ethereum::merkle_lib::types::{EthereumProof, MerkleProverEvm};
+use neutron::merkle_lib::types::{MerkleProverNeutron, NeutronKey, NeutronProof};
 use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct CoprocessorConfig {
@@ -27,12 +27,24 @@ impl Coprocessor {
     ) -> Vec<(EthereumProof, EthereumProof)> {
         // pair of account proof and storage proof for that account
         let mut eth_proofs: Vec<(EthereumProof, EthereumProof)> = vec![];
-        let merkle_prover = EvmProver {
+        let merkle_prover = MerkleProverEvm {
             rpc_url: self.config.ethereum_rpc.clone(),
         };
         for key in &self.config.ethereum_keys {
+            let raw_proof = merkle_prover
+                .get_merkle_proof_from_rpc(&key.0, &key.1, height)
+                .await;
+            let proof_decoded: EIP1186AccountProofResponse =
+                serde_json::from_slice(&raw_proof).unwrap();
+            let account_storage_hash = proof_decoded.storage_hash;
             let batch = merkle_prover
-                .get_account_and_storage_proof(&key.0, &key.1, height, block_state_root)
+                .get_account_and_storage_proof(
+                    &key.0,
+                    &key.1,
+                    height,
+                    block_state_root,
+                    account_storage_hash.to_vec(),
+                )
                 .await;
             eth_proofs.push(batch);
         }
@@ -42,12 +54,12 @@ impl Coprocessor {
     pub async fn get_neutron_proofs(&self, height: u64) -> Vec<NeutronProof> {
         // neutron proof with combined account & storage proof
         let mut neutron_proofs: Vec<NeutronProof> = vec![];
-        let merkle_prover = NeutronProver {
+        let merkle_prover = MerkleProverNeutron {
             rpc_url: self.config.neutron_rpc.clone(),
         };
         for key in &self.config.neutron_keys {
             let proof = merkle_prover
-                .get_storage_proof(&key.serialize(), "", height)
+                .get_merkle_proof_from_rpc(&key.serialize(), "", height)
                 .await;
             let neutron_proof: NeutronProof = serde_json::from_slice(&proof).unwrap();
             neutron_proofs.push(neutron_proof);
@@ -68,7 +80,7 @@ mod test {
     use neutron::merkle_lib::{
         test_vector::{
             construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_denom,
-            read_test_vector_height,
+            read_test_vector_height, read_test_vector_merkle_root,
         },
         types::NeutronKey,
     };
@@ -103,6 +115,9 @@ mod test {
             proof.0.verify(&state_root);
             // must equal the storage hash of the account
             proof.1.verify(&proof.1.root);
+        }
+        for proof in neutron_proofs {
+            proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
         }
     }
 }
