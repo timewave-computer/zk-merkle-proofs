@@ -13,21 +13,21 @@ use {
 };
 
 #[cfg(feature = "web")]
-use crate::{merkle_lib::types::EthereumProof, merkle_lib::types::EvmProver};
+use crate::{merkle_lib::types::EthereumMerkleProof, merkle_lib::types::MerkleProverEvm};
 pub const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 pub const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const DEFAULT_ETH_BLOCK_HEIGHT: u64 = 22040634;
 
 #[cfg(feature = "web")]
-pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
+pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
     use alloy::rpc::types::EIP1186AccountProofResponse;
     use common::merkle::types::MerkleProver;
     let rpc_url = read_rpc_url() + &read_api_key();
     let storage_key: FixedBytes<32> = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
-    let merkle_prover = EvmProver { rpc_url };
+    let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_storage_proof(
+        .get_merkle_proof_from_rpc(
             DEFAULT_STORAGE_KEY_ETHEREUM,
             USDT_CONTRACT_ADDRESS,
             DEFAULT_ETH_BLOCK_HEIGHT,
@@ -51,7 +51,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
             .to_vec(),
         storage_key.to_vec()
     );
-    EthereumProof {
+    EthereumMerkleProof {
         root: proof_deserialized.storage_hash.to_vec(),
         proof: first_proof.0.clone(),
         key: first_proof
@@ -66,15 +66,15 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumProof {
 }
 
 #[cfg(feature = "web")]
-pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
+pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     use alloy::rpc::types::EIP1186AccountProofResponse;
     use common::merkle::types::MerkleProver;
     let rpc_url = read_rpc_url() + &read_api_key();
     let state_root =
         hex::decode("0xf4da06dccd5bc3891b4d43b75e4a83ccea460f0bd5cde1901f368472e5ad7e4a").unwrap();
-    let merkle_prover = EvmProver { rpc_url };
+    let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_storage_proof(
+        .get_merkle_proof_from_rpc(
             DEFAULT_STORAGE_KEY_ETHEREUM,
             USDT_CONTRACT_ADDRESS,
             DEFAULT_ETH_BLOCK_HEIGHT,
@@ -86,7 +86,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
         .iter()
         .map(|b| b.to_vec())
         .collect();
-    EthereumProof {
+    EthereumMerkleProof {
         root: state_root.to_vec(),
         proof: account_proof.clone(),
         key: hex::decode(&USDT_CONTRACT_ADDRESS).unwrap(),
@@ -99,7 +99,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumProof {
 async fn test_get_receipt_proof() {
     use common::merkle::types::MerkleVerifiable;
     let rpc_url = read_rpc_url() + &read_api_key();
-    let prover = EvmProver { rpc_url };
+    let prover = MerkleProverEvm { rpc_url };
     let receipt_proof = prover
         // get a real ERC20 transfer
         .get_receipt_proof(

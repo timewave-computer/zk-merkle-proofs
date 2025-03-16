@@ -2087,7 +2087,9 @@ name = "coprocessor"
 version = "0.1.0"
 dependencies = [
  "alloy 0.12.5",
+ "base64 0.22.1",
  "common",
+ "eth_trie",
  "ethereum",
  "hex",
  "neutron",

@@ -10,7 +10,6 @@ pub fn prove(input: MerkleProofInput) {
     let start_time = Instant::now();
     let client = ProverClient::new();
     let mut stdin = SP1Stdin::new();
-
     // note that when verifying the merkle proof a trusted root should be used
     // instead of the root hash from input
     let proof_input = serde_json::to_vec(&input).unwrap();
@@ -27,16 +26,15 @@ pub fn prove(input: MerkleProofInput) {
 
 #[cfg(test)]
 mod tests {
+    use crate::prove;
     use ethereum::merkle_lib::test_vector::get_ethereum_test_vector_storage_proof;
     use neutron::{
         merkle_lib::test_vector::{
             get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root,
         },
-        merkle_lib::types::NeutronProofWithRoot,
+        merkle_lib::types::NeutronMerkleProofWithRoot,
     };
     use prover_utils::merkle::types::MerkleProofInput;
-
-    use crate::prove;
 
     #[tokio::test]
     async fn test_generate_proof_cross_chain_merkle_program() {
@@ -46,7 +44,7 @@ mod tests {
             // pass a list of storage proofs to be verified in zk
             // for now we pass only one ETHEREUM merkle proof for the SUPPLY slot of the USDT contract
             ethereum_proofs: vec![eth_proof],
-            neutron_proofs: vec![NeutronProofWithRoot {
+            neutron_proofs: vec![NeutronMerkleProofWithRoot {
                 proof: proof,
                 root: base64::decode(read_test_vector_merkle_root()).unwrap(),
             }],

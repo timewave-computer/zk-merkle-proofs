@@ -42,25 +42,25 @@ impl NeutronKey {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NeutronProof {
+pub struct NeutronMerkleProof {
     pub proof: ProofOps,
     pub key: NeutronKey,
     pub value: Vec<u8>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NeutronProofWithRoot {
-    pub proof: NeutronProof,
+pub struct NeutronMerkleProofWithRoot {
+    pub proof: NeutronMerkleProof,
     pub root: Vec<u8>,
 }
 
-impl MerkleVerifiable for NeutronProofWithRoot {
+impl MerkleVerifiable for NeutronMerkleProofWithRoot {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         self.proof.verify(expected_root)
     }
 }
 
-impl MerkleVerifiable for NeutronProof {
+impl MerkleVerifiable for NeutronMerkleProof {
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
         let inner_proof = proof_decoded.first().unwrap();
@@ -95,15 +95,15 @@ impl MerkleVerifiable for NeutronProof {
     }
 }
 // we might want to rename this IF this can be generalized to something like "cosmos" or "ics23-common"
-pub struct NeutronProver {
+pub struct MerkleProverNeutron {
     pub rpc_url: String,
 }
 
 #[cfg(feature = "web")]
-impl MerkleProver for NeutronProver {
+impl MerkleProver for MerkleProverNeutron {
     // chunk[0] = prefix string, chunk[1] = hex encoded key
     #[allow(unused)]
-    async fn get_storage_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
+    async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
         let neutron_key: NeutronKey = NeutronKey::deserialize(&key);
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
@@ -117,7 +117,7 @@ impl MerkleProver for NeutronProver {
             .await
             .unwrap();
         let proof = response.proof.unwrap();
-        serde_json::to_vec(&NeutronProof {
+        serde_json::to_vec(&NeutronMerkleProof {
             proof: proof.clone(),
             key: neutron_key,
             value: response.value,

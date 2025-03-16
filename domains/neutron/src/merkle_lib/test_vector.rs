@@ -1,6 +1,6 @@
 #[cfg(feature = "web")]
 use {
-    crate::merkle_lib::types::{NeutronProof, NeutronProver},
+    crate::merkle_lib::types::{MerkleProverNeutron, NeutronMerkleProof},
     common::merkle::types::MerkleProver,
     dotenvy::dotenv,
     std::env,
@@ -9,18 +9,18 @@ use {
 #[cfg(feature = "web")]
 // first verifies account state, then a single storage proof
 // currently the variables need to be manually set before running the test
-pub async fn get_neutron_test_vector_bank_store_supply() -> NeutronProof {
+pub async fn get_neutron_test_vector_bank_store_supply() -> NeutronMerkleProof {
     use super::types::NeutronKey;
     let rpc_url = read_rpc_url();
     let supply_key = construct_supply_key(&read_test_vector_denom(), vec![0x00]);
-    let prover = NeutronProver { rpc_url };
+    let prover = MerkleProverNeutron { rpc_url };
     let neutron_key = NeutronKey {
         prefix: "bank".to_string(),
         prefix_len: 4,
         key: hex::encode(supply_key),
     };
     let proofs = prover
-        .get_storage_proof(&neutron_key.serialize(), "", read_test_vector_height())
+        .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
         .await;
     serde_json::from_slice(&proofs).unwrap()
 }
