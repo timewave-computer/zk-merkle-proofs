@@ -48,6 +48,7 @@ pub struct NeutronMerkleProof {
     pub value: Vec<u8>,
 }
 
+// this struct only exists as an input
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronMerkleProofWithRoot {
     pub proof: NeutronMerkleProof,

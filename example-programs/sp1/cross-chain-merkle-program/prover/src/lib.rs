@@ -29,21 +29,21 @@ pub fn prove(input: MerkleProofInput) {
 #[cfg(test)]
 mod tests {
     use crate::prove;
-    use ethereum::merkle_lib::tests::test_vector::get_ethereum_test_vector_storage_proof;
-    use neutron::{
-        merkle_lib::tests::test_vector::{
-            get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root,
-        },
-        merkle_lib::types::NeutronMerkleProofWithRoot,
+    use ethereum::merkle_lib::tests::test_vector::TEST_VECTOR_ETH_STORAGE_PROOF;
+    use neutron::merkle_lib::{
+        tests::test_vector::{read_test_vector_merkle_root, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
+        types::NeutronMerkleProofWithRoot,
     };
     use prover_utils::merkle::types::MerkleProofInput;
 
     #[tokio::test]
     async fn test_generate_proof_cross_chain_merkle_program() {
-        let mut eth_proof = get_ethereum_test_vector_storage_proof().await;
+        let mut eth_proof: ethereum::merkle_lib::types::EthereumMerkleProof =
+            serde_json::from_slice(&TEST_VECTOR_ETH_STORAGE_PROOF).unwrap();
         // we need to hash the key unless this is a receipt proof
         eth_proof.hash_key();
-        let neutron_proof = get_neutron_test_vector_bank_store_supply().await;
+        let neutron_proof: neutron::merkle_lib::types::NeutronMerkleProof =
+            serde_json::from_slice(&TEST_VECTOR_NEUTRON_STORAGE_PROOF).unwrap();
         prove(MerkleProofInput {
             // pass a list of storage proofs to be verified in zk
             // for now we pass only one ETHEREUM merkle proof for the SUPPLY slot of the USDT contract

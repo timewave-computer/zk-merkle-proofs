@@ -14,6 +14,21 @@ pub struct Coprocessor {
     pub config: CoprocessorConfig,
 }
 
+// storage proof requirements
+// inputs required to the circuit
+// we need the expected eth trie root
+// the expected neutron trie root
+// a list of neutron proofs
+// a list of ethereum proofs
+
+// account proof requirements (next step)
+// we need to store account hashes in the respective tries
+// and verify proofs against them => only advantage here is that
+// users can simplify the verification logic by verifying accounts
+// once per block and then accepting multiple opening proofs for that account
+// this is somewhat of a userspace problem, but we can provide the trie methods for it
+// e.g. get_account_proof, insert_account
+
 #[derive(Debug)]
 pub struct CoprocessorTrie {
     pub ethereum_trie: EthTrie<MemoryDB>,
@@ -115,17 +130,15 @@ impl Coprocessor {
 }
 
 #[cfg(test)]
+#[cfg(feature = "tests-online")]
 mod test {
     use super::{Coprocessor, CoprocessorConfig};
     use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
     use eth_trie::Trie;
-    use ethereum::merkle_lib::{
-        keccak::digest_keccak,
-        tests::test_vector::{
-            read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-            DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
-        },
+    use ethereum::merkle_lib::tests::test_vector::{
+        read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
+        DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
     };
     use neutron::merkle_lib::{
         tests::test_vector::{

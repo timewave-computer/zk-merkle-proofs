@@ -94,7 +94,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "no-sp1")]
+    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
     #[tokio::test]
     async fn test_get_receipt_proof() {
         use crate::merkle_lib::{
@@ -107,13 +107,13 @@ mod tests {
         let receipt_proof = prover
             // erc20 transfers etc. will be located in the logs
             .get_receipt_proof(
-                "0xf03c8324b58076355c2e51bf354f3f8f95daf4a130f04794e245e98a972bf7ce",
+                "0x3e07ae6bee69fe1a7a73fd739248662d36791f7b3a95a7c91178e9e4a232b6da",
                 1,
             )
             .await;
         receipt_proof.verify(&receipt_proof.root);
     }
-    #[cfg(feature = "no-sp1")]
+    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
     #[tokio::test]
     async fn print_ethereum_storage_proof() {
         use super::get_ethereum_test_vector_storage_proof;
@@ -123,7 +123,7 @@ mod tests {
             &serde_json::to_vec(&proof).unwrap()
         )
     }
-    #[cfg(feature = "no-sp1")]
+    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
     #[tokio::test]
     async fn print_ethereum_account_proof() {
         use super::get_ethereum_test_vector_account_proof;
@@ -133,6 +133,31 @@ mod tests {
             "Proof Serialized: {:?}",
             &serde_json::to_vec(&proof).unwrap()
         )
+    }
+    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+    #[tokio::test]
+    async fn print_ethereum_receipts_proof() {
+        use std::{fs::File, io::Write};
+
+        use crate::merkle_lib::{
+            tests::test_vector::{read_api_key, read_rpc_url},
+            types::MerkleProverEvm,
+        };
+        let rpc_url = read_rpc_url() + &read_api_key();
+        let prover = MerkleProverEvm { rpc_url };
+        let receipt_proof = prover
+            // erc20 transfers etc. will be located in the logs
+            .get_receipt_proof(
+                "0x3e07ae6bee69fe1a7a73fd739248662d36791f7b3a95a7c91178e9e4a232b6da",
+                1,
+            )
+            .await;
+        let mut file = File::create(
+            "/Users/chef/Desktop/zk-development-stack/domains/ethereum/test_data/erc20_receipt.bin",
+        )
+        .unwrap();
+        file.write_all(&serde_json::to_vec(&receipt_proof).unwrap())
+            .expect("Failed to write proof to file");
     }
 }
 

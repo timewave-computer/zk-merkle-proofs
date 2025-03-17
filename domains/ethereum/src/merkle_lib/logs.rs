@@ -2,9 +2,8 @@
 use {
     crate::encode,
     alloy::{
-        consensus::{Receipt, ReceiptEnvelope, ReceiptWithBloom, TxReceipt},
-        rpc::types::{Log as AlloyLog, TransactionReceipt},
-        serde::JsonStorageKey,
+        consensus::{Receipt, ReceiptWithBloom, TxReceipt},
+        rpc::types::Log as AlloyLog,
     },
     alloy_primitives::Address,
     alloy_rlp::RlpEncodableWrapper,
@@ -19,13 +18,26 @@ pub fn insert_receipt(
     index_encoded: Vec<u8>,
     prefix: Option<u8>,
 ) {
+    //use alloy::hex;
+    //use alloy_primitives::U256;
     let status = r.status();
     let cumulative_gas_used = r.cumulative_gas_used();
     let bloom = r.logs_bloom;
     let mut logs: Vec<Log> = Vec::new();
+    /*let transfer_event_signature =
+    hex::decode("ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef").unwrap();*/
     for l in r.logs() {
         let mut topics: Vec<H256> = Vec::new();
         for t in l.topics() {
+            /*if t.to_vec() == transfer_event_signature {
+                println!("Found an ERC20 Transfer!");
+                let from = Address::from_slice(&l.topics()[1].0[12..]);
+                let to = Address::from_slice(&l.topics()[2].0[12..]);
+                let amount = U256::from_be_bytes::<32>(
+                    l.data().data.to_vec().as_slice().try_into().unwrap(),
+                );
+                println!("From: {:?}, To: {:?}, Amount: {:?}", from, to, amount);
+            }*/
             topics.push(H256::from_slice(t.as_ref()));
         }
         logs.push(Log {

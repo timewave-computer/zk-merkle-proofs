@@ -31,3 +31,4 @@ tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patch
 [features]
 no-sp1 = ["tokio", "reqwest", "url", "dotenvy", "alloy", "alloy-rlp"]
 sp1 = ["tiny-keccak-sp1"]
+tests-online = []

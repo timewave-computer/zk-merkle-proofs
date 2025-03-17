@@ -35,3 +35,5 @@ cargo test --features sp1 zk-tests
 ```
 
 Note that this will take a while, make sure to connect your device to a power source and grab a coffee in the meantime ;).
+
+Tests that require an internet connection are disabled by default. You can run them by adding the feature `tests-online`.
