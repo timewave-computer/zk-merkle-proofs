@@ -1,4 +1,4 @@
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 #[macro_export]
 macro_rules! encode {
     ($out:ident, $e:expr) => {

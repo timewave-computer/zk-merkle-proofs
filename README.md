@@ -18,3 +18,20 @@ At the core of this project are two fundamental libraries that should be impleme
 # Example ZK Programs that depend on our Libraries
 1. Cross-chain merkle openings in ZK, [here](example-programs/sp1/cross-chain-merkle-program/prover/README.md)
 2. Executable message builder in ZK, [here](example-programs/sp1/cross-chain-message-builder-program/prover/README.md)
+
+
+# Run tests globally
+
+To run tests that don't depend on SP1 (verify merkle proofs against some payload):
+
+```
+cargo test --features no-sp1
+```
+
+To run the zk prover tests (generating real proofs) for all example programs:
+
+```
+cargo test --features sp1
+```
+
+Note that this will take a while, make sure to connect your device to a power source and grab a coffee in the meantime ;).

@@ -1,11 +1,11 @@
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 use alloy::{
     consensus::{Receipt, ReceiptEnvelope, ReceiptWithBloom, TxReceipt},
     rpc::types::{Log as AlloyLog, TransactionReceipt},
     serde::JsonStorageKey,
 };
 use alloy_primitives::{FixedBytes, B256};
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 use alloy_rlp::{BufMut, Encodable, RlpEncodableWrapper};
 use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
@@ -21,10 +21,10 @@ pub struct EthereumMerkleProof {
     pub value: Vec<u8>,
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 use crate::encode;
 use crate::merkle_lib::keccak::digest_keccak;
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 use {
     alloy::hex::{self, FromHex},
     alloy::providers::{Provider, ProviderBuilder},
@@ -35,11 +35,11 @@ use {
     url::Url,
 };
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 pub struct MerkleProverEvm {
     pub rpc_url: String,
 }
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl MerkleProver for MerkleProverEvm {
     /// returns an account proof object for the requested address
     /// that contains a list of storage proofs for the requested keys
@@ -57,7 +57,7 @@ impl MerkleProver for MerkleProverEvm {
     }
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl MerkleProverEvm {
     pub async fn get_account_and_storage_proof(
         &self,
@@ -151,7 +151,6 @@ impl MerkleProverEvm {
                 ReceiptEnvelope::Legacy(r) => {
                     insert_receipt(r, &mut trie, index_encoded, None);
                 }
-                #[allow(unreachable_patterns)]
                 _ => {
                     eprintln!("Unknown Receipt Type!")
                 }
@@ -169,7 +168,7 @@ impl MerkleProverEvm {
     }
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 pub fn insert_receipt(
     r: ReceiptWithBloom<Receipt<AlloyLog>>,
     trie: &mut EthTrie<MemoryDB>,
@@ -185,7 +184,6 @@ pub fn insert_receipt(
         for t in l.topics() {
             topics.push(H256::from_slice(t.as_ref()));
         }
-        println!("Logs: {:?}", &logs);
         logs.push(Log {
             address: l.address(),
             topics,
@@ -203,7 +201,7 @@ pub fn insert_receipt(
     trie.insert(&index_encoded, &out).expect("Failed to insert");
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 #[derive(Debug, Clone)]
 pub struct Log {
     pub address: Address,
@@ -211,7 +209,7 @@ pub struct Log {
     pub data: Vec<u8>,
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl Log {
     fn rlp_header(&self) -> alloy_rlp::Header {
         let payload_length =
@@ -223,7 +221,7 @@ impl Log {
     }
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl Encodable for Log {
     fn encode(&self, out: &mut dyn alloy_rlp::BufMut) {
         let header = self.rlp_header();
@@ -235,11 +233,11 @@ impl Encodable for Log {
     }
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 #[derive(Debug, RlpEncodableWrapper, PartialEq, Clone)]
 pub struct H256(pub [u8; 32]);
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl H256 {
     pub fn zero() -> Self {
         Self([0u8; 32])
@@ -289,7 +287,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
 // since currenlty preformance is not our top-priority, let's
 // delay this decision and stick with eth_trie for now.
 // It's always good to have an alternative in case something breaks.
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::keccak::digest_keccak;

@@ -20,7 +20,7 @@ Here my `.vscode/settings.json`:
 ```json
 {
     "rust-analyzer.cargo.features": [
-        "web"
+        "no-sp1"
     ]
 }
 ```

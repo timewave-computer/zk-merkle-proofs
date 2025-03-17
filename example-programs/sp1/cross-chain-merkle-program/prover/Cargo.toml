@@ -11,8 +11,8 @@ cross-chain-merkle-guest.workspace = true
 common.workspace = true
 sp1-sdk.workspace = true
 prover-utils.workspace = true
-ethereum = { path = "../../../../domains/ethereum", features = ["web"] }
-neutron = { path = "../../../../domains/neutron", features = ["web"] }
+ethereum = { path = "../../../../domains/ethereum", features = ["no-sp1"] }
+neutron = { path = "../../../../domains/neutron", features = ["no-sp1"] }
 dotenvy = { workspace = true }
 alloy-primitives = "0.8.12"
 alloy = { version = "0.11.1", features = ["full"] }
@@ -21,3 +21,6 @@ url.workspace = true
 
 [build-dependencies]
 sp1-helper = "4.0.0"
+
+[features]
+zk-tests = []

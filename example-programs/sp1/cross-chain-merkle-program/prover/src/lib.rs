@@ -25,12 +25,13 @@ pub fn prove(input: MerkleProofInput) {
     println!("Elapsed time: {:?}", duration);
 }
 
+#[cfg(feature = "zk-tests")]
 #[cfg(test)]
 mod tests {
     use crate::prove;
-    use ethereum::merkle_lib::test_vector::get_ethereum_test_vector_storage_proof;
+    use ethereum::merkle_lib::tests::test_vector::get_ethereum_test_vector_storage_proof;
     use neutron::{
-        merkle_lib::test_vector::{
+        merkle_lib::tests::test_vector::{
             get_neutron_test_vector_bank_store_supply, read_test_vector_merkle_root,
         },
         merkle_lib::types::NeutronMerkleProofWithRoot,

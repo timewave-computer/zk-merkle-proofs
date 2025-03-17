@@ -22,6 +22,7 @@ pub fn prove(input: MessageBuilderProgramInput) {
     println!("Elapsed time: {:?}", duration);
 }
 
+#[cfg(feature = "zk-tests")]
 #[cfg(test)]
 mod tests {
     use crate::prove;

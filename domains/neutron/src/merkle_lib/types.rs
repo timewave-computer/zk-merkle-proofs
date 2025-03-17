@@ -9,7 +9,7 @@ use ics23::{
 use serde::{Deserialize, Serialize};
 use tendermint::{block::Height, merkle::proof::ProofOps};
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 use tendermint_rpc::{Client, HttpClient};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -99,7 +99,7 @@ pub struct MerkleProverNeutron {
     pub rpc_url: String,
 }
 
-#[cfg(feature = "web")]
+#[cfg(feature = "no-sp1")]
 impl MerkleProver for MerkleProverNeutron {
     // chunk[0] = prefix string, chunk[1] = hex encoded key
     #[allow(unused)]

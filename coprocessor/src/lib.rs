@@ -116,21 +116,16 @@ impl Coprocessor {
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
     use super::{Coprocessor, CoprocessorConfig};
     use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
-    use eth_trie::{EthTrie, MemoryDB, Trie};
-    use ethereum::merkle_lib::{
-        test_vector::{
-            read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-            DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
-        },
-        types::EthereumMerkleProof,
+    use eth_trie::Trie;
+    use ethereum::merkle_lib::tests::test_vector::{
+        read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
+        DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
     };
     use neutron::merkle_lib::{
-        test_vector::{
+        tests::test_vector::{
             construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_denom,
             read_test_vector_height, read_test_vector_merkle_root,
         },
@@ -206,11 +201,16 @@ mod test {
                 coprocessor_storage_proof.clone(),
             )
             .expect("Value not in Coprocessor Trie");
-
         assert!(coprocessor_storage_proof
             .last()
             .unwrap()
             .ends_with(&ethereum_trie_root));
+        // todo: figure out the prefix construction / encoding
+        // match the exact leaf, not just the raw suffix
+        println!(
+            "Full Leaf Node: {:?}",
+            coprocessor_storage_proof.last().unwrap()
+        );
         assert_eq!(ethereum_trie_root.len(), 32);
     }
 }
