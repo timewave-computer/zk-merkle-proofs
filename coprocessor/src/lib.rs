@@ -22,13 +22,12 @@ pub struct Coprocessor {
 // a list of ethereum proofs
 
 // account proof requirements (next step)
-// we need to store account hashes in the respective tries
-// and verify proofs against them => only advantage here is that
-// users can simplify the verification logic by verifying accounts
-// once per block and then accepting multiple opening proofs for that account
-// this is somewhat of a userspace problem, but we can provide the trie methods for it
-// e.g. get_account_proof, insert_account
+// account proofs have become a user space problem
+// users can submit an account proof and store the account
+// storage hash in the coprocessor trie, to then submit multiple
+// storage proofs against that account hash
 
+// we can either prefix keys with a blockID, or construct a trie for each block
 #[derive(Debug)]
 pub struct CoprocessorTrie {
     pub ethereum_trie: EthTrie<MemoryDB>,

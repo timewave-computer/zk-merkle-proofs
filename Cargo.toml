@@ -27,8 +27,8 @@ cross-chain-merkle-guest = { path = "example-programs/sp1/cross-chain-merkle-pro
 cross-chain-message-builder-guest = { path = "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest" }
 vault-zk-rate-guest = { path = "example-programs/sp1/vault-zk-rate-program/vault-zk-rate-guest" }
 common = { path = "common" }
-sp1-sdk = "4.0.0"
-sp1-zkvm = "4.0.0"
+sp1-sdk = { version = "4.1.2", features = ["native-gnark"] }
+sp1-zkvm = "4.1.2"
 tokio = { version = "1.4.11", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

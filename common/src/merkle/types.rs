@@ -11,12 +11,6 @@ pub struct MerkleProofOutput {
     pub domain: Domain,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct ProgramOutputs {
-    pub outputs: Vec<MerkleProofOutput>,
-    pub executable_messages: Vec<Vec<u8>>,
-}
-
 pub trait MerkleProver {
     #[allow(async_fn_in_trait)]
     // Obtain a proof for a slot in the key value store

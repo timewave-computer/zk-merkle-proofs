@@ -15,6 +15,7 @@ pub fn prove(input: MessageBuilderProgramInput) {
     let (pk, vk) = client.setup(MERKLE_ELF);
     let proof = client
         .prove(&pk, &stdin)
+        .groth16()
         .run()
         .expect("Failed to generate proof!");
     client.verify(&proof, &vk).expect("Failed to verify proof!");
@@ -27,9 +28,8 @@ pub fn prove(input: MessageBuilderProgramInput) {
 mod tests {
     use crate::prove;
     use cross_chain_message_builder_types::MessageBuilderProgramInput;
-
-    #[tokio::test]
-    async fn test_generate_proof_cross_chain_message_builder_program() {
+    #[test]
+    fn test_generate_proof_cross_chain_message_builder_program() {
         prove(MessageBuilderProgramInput {
             from: "0x0000000000000000000000000000000000000000".to_string(),
             to: "0x0000000000000000000000000000000000000000".to_string(),

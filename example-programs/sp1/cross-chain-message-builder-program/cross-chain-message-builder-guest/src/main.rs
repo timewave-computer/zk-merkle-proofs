@@ -4,7 +4,6 @@ use std::str::FromStr;
 
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::{sol, SolCall};
-use common::merkle::types::ProgramOutputs;
 use cross_chain_message_builder_types::MessageBuilderProgramInput;
 
 sol! {
@@ -23,10 +22,6 @@ sol! {
 }
 
 pub fn main() {
-    let mut outputs: ProgramOutputs = ProgramOutputs {
-        outputs: vec![],
-        executable_messages: vec![],
-    };
     let transfer_arguments: MessageBuilderProgramInput =
         serde_json::from_slice(&sp1_zkvm::io::read::<Vec<u8>>()).unwrap();
     // construct messages for the target domain where this proof will be verified
@@ -38,6 +33,5 @@ pub fn main() {
         amount: U256::from(transfer_arguments.amount),
     }
     .abi_encode();
-    outputs.executable_messages.push(erc20_transfer);
-    sp1_zkvm::io::commit_slice(&serde_json::to_vec(&outputs).unwrap());
+    sp1_zkvm::io::commit_slice(&erc20_transfer);
 }

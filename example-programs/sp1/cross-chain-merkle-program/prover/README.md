@@ -1,4 +1,8 @@
 # Multi-chain merkle openings in ZK
+
+This program does not yet leverage the coprocessor. It verifies merkle proofs for domains against domain roots.
+Later we want to instead verify proofs against the coprocessor root.
+
 To run the example for multi-chain merkle openings in SP1:
 
 ```bash
