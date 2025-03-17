@@ -107,7 +107,7 @@ mod tests {
         let receipt_proof = prover
             // erc20 transfers etc. will be located in the logs
             .get_receipt_proof(
-                "0xd2bde80565304cce312b50e8e4caf12f8fd5c3a8401ebe1c13fb02395ae98a75",
+                "0xf03c8324b58076355c2e51bf354f3f8f95daf4a130f04794e245e98a972bf7ce",
                 1,
             )
             .await;

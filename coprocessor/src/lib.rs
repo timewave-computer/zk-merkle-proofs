@@ -120,9 +120,12 @@ mod test {
     use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
     use eth_trie::Trie;
-    use ethereum::merkle_lib::tests::test_vector::{
-        read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-        DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
+    use ethereum::merkle_lib::{
+        keccak::digest_keccak,
+        tests::test_vector::{
+            read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
+            DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
+        },
     };
     use neutron::merkle_lib::{
         tests::test_vector::{
@@ -158,9 +161,11 @@ mod test {
         let neutron_proofs = coprocessor
             .get_neutron_proofs(read_test_vector_height())
             .await;
-        for proof in ethereum_proofs.clone() {
+        for mut proof in ethereum_proofs.clone() {
+            proof.0.hash_key();
             proof.0.verify(&state_root);
             // must equal the storage hash of the account
+            proof.1.hash_key();
             proof.1.verify(&proof.1.root);
         }
         for proof in neutron_proofs.clone() {

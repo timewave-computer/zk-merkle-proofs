@@ -40,14 +40,16 @@ mod tests {
 
     #[tokio::test]
     async fn test_generate_proof_cross_chain_merkle_program() {
-        let eth_proof = get_ethereum_test_vector_storage_proof().await;
-        let proof = get_neutron_test_vector_bank_store_supply().await;
+        let mut eth_proof = get_ethereum_test_vector_storage_proof().await;
+        // we need to hash the key unless this is a receipt proof
+        eth_proof.hash_key();
+        let neutron_proof = get_neutron_test_vector_bank_store_supply().await;
         prove(MerkleProofInput {
             // pass a list of storage proofs to be verified in zk
             // for now we pass only one ETHEREUM merkle proof for the SUPPLY slot of the USDT contract
             ethereum_proofs: vec![eth_proof],
             neutron_proofs: vec![NeutronMerkleProofWithRoot {
-                proof: proof,
+                proof: neutron_proof,
                 #[allow(deprecated)]
                 root: base64::decode(read_test_vector_merkle_root()).unwrap(),
             }],

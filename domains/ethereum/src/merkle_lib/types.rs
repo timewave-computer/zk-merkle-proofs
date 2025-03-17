@@ -20,10 +20,16 @@ pub struct EthereumMerkleProof {
     // the rlp encoded value
     pub value: Vec<u8>,
 }
+impl EthereumMerkleProof {
+    pub fn hash_key(&mut self) {
+        self.key = digest_keccak(&self.key).to_vec()
+    }
+}
 
+use super::keccak::digest_keccak;
 #[cfg(feature = "no-sp1")]
 use crate::encode;
-use crate::merkle_lib::keccak::digest_keccak;
+
 #[cfg(feature = "no-sp1")]
 use {
     alloy::hex::{self, FromHex},
@@ -113,6 +119,7 @@ impl MerkleProverEvm {
         let block = provider
             .get_block_by_hash(
                 B256::from_str(block_hash).unwrap(),
+                // for alloy < 0.12
                 //alloy::rpc::types::BlockTransactionsKind::Full,
             )
             .await
@@ -261,7 +268,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
         }
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
-        trie.verify_proof(root_hash, &digest_keccak(&self.key), self.proof.clone())
+        trie.verify_proof(root_hash, &self.key, self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
         MerkleProofOutput {

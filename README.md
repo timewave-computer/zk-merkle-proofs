@@ -28,10 +28,10 @@ To run tests that don't depend on SP1 (verify merkle proofs against some payload
 cargo test --features no-sp1
 ```
 
-To run the zk prover tests (generating real proofs) for all example programs:
+To run all tests, including the zk prover tests (generating real proofs) for all example programs:
 
 ```
-cargo test --features sp1
+cargo test --features sp1 zk-tests
 ```
 
 Note that this will take a while, make sure to connect your device to a power source and grab a coffee in the meantime ;).

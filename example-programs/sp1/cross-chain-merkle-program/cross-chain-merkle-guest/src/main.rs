@@ -7,7 +7,7 @@ pub fn main() {
     let proof_batch: MerkleProofInput =
         serde_json::from_slice(&sp1_zkvm::io::read::<Vec<u8>>()).unwrap();
     // verify and commit a batch of Ethereum merkle proofs
-    for proof in proof_batch.ethereum_proofs {
+    for mut proof in proof_batch.ethereum_proofs {
         outputs.push(verify_merkle_proof(proof.clone(), &proof.root.clone()));
     }
     // verify and commit a batch of neutron storage proofs
