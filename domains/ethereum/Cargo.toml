@@ -18,6 +18,7 @@ hash-db = "0.15"
 plain_hasher = "0.2"
 triehash = "0.8.4"
 alloy = { version = "0.12.5", features = ["full"], optional = true }
+alloy-sol-types = { version = "0.8.23", optional = true }
 alloy-rlp = { version = "0.3.11", features = [
     "derive",
     "arrayvec",
@@ -29,6 +30,14 @@ tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patch
 ], optional = true }
 
 [features]
-no-sp1 = ["tokio", "reqwest", "url", "dotenvy", "alloy", "alloy-rlp"]
+no-sp1 = [
+    "tokio",
+    "reqwest",
+    "url",
+    "dotenvy",
+    "alloy",
+    "alloy-rlp",
+    "alloy-sol-types",
+]
 sp1 = ["tiny-keccak-sp1"]
 tests-online = []

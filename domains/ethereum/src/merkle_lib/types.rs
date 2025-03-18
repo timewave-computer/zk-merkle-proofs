@@ -265,3 +265,27 @@ mod tests {
         triehash::trie_root::<Keccak256Hasher, _, _, _>(iter)
     }
 }
+
+/* Construct Storage Keys Ethereum
+
+Todo: Install a contract on Ethereum and store a value under a key
+then also store a value in a dictionary under another key.
+Try to construct the key and get the proofs,
+then repeat the same for Neutron
+
+fn compute_mapping_key(address: &str, slot: u64) -> String {
+    let address: Address = address.parse().expect("Invalid address");
+    let slot = U256::from(slot);
+    let key = keccak256((address, slot).rlp());
+    format!("0x{}", hex::encode(key))
+}
+
+fn main() {
+    let contract_address = "0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1"; // Example address
+    let slot = 0; // Mapping storage slot (depends on contract layout)
+    let storage_key = compute_mapping_key(contract_address, slot);
+    println!("Ethereum Storage Key for balances[{}]: {}", contract_address, storage_key);
+}
+
+for just a value it's the encoded slot
+*/

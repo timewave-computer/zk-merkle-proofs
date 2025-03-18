@@ -12,10 +12,57 @@ use {
 
 #[cfg(feature = "no-sp1")]
 use crate::{merkle_lib::types::EthereumMerkleProof, merkle_lib::types::MerkleProverEvm};
-pub const USDT_CONTRACT_ADDRESS: &str = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+pub const MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM: &str =
+    "0xdAC17F958D2ee523a2206206994597C13D831ec7";
 pub const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const DEFAULT_ETH_BLOCK_HEIGHT: u64 = 22040634;
+
+#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+pub async fn get_ethereum_storage_proof(
+    key: &str,
+    address: &str,
+    height: u64,
+) -> EthereumMerkleProof {
+    use alloy::rpc::types::EIP1186AccountProofResponse;
+    use common::merkle::types::MerkleProver;
+    let rpc_url = read_sepolia_url();
+    let storage_key: FixedBytes<32> = FixedBytes::from_hex(key).unwrap();
+    let merkle_prover = MerkleProverEvm { rpc_url };
+    let proof = merkle_prover
+        .get_merkle_proof_from_rpc(key, address, height)
+        .await;
+    let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
+    let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
+        .storage_proof
+        .iter()
+        .cloned()
+        .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
+        .collect();
+    let first_proof = raw_storage_proofs.first().unwrap();
+    assert_eq!(
+        first_proof
+            .1
+            .as_b256()
+            .bytes()
+            .collect::<Result<Vec<u8>, _>>()
+            .unwrap()
+            .to_vec(),
+        storage_key.to_vec()
+    );
+    EthereumMerkleProof {
+        root: proof_deserialized.storage_hash.to_vec(),
+        proof: first_proof.0.clone(),
+        key: first_proof
+            .1
+            .as_b256()
+            .bytes()
+            .collect::<Result<Vec<u8>, _>>()
+            .unwrap()
+            .to_vec(),
+        value: alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
+    }
+}
 
 #[cfg(feature = "no-sp1")]
 pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
@@ -27,7 +74,7 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
     let proof = merkle_prover
         .get_merkle_proof_from_rpc(
             DEFAULT_STORAGE_KEY_ETHEREUM,
-            USDT_CONTRACT_ADDRESS,
+            MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
             DEFAULT_ETH_BLOCK_HEIGHT,
         )
         .await;
@@ -74,7 +121,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     let proof = merkle_prover
         .get_merkle_proof_from_rpc(
             DEFAULT_STORAGE_KEY_ETHEREUM,
-            USDT_CONTRACT_ADDRESS,
+            MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
             DEFAULT_ETH_BLOCK_HEIGHT,
         )
         .await;
@@ -87,7 +134,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     EthereumMerkleProof {
         root: state_root.to_vec(),
         proof: account_proof.clone(),
-        key: hex::decode(USDT_CONTRACT_ADDRESS).unwrap(),
+        key: hex::decode(MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM).unwrap(),
         value: account_proof.last().unwrap().to_vec(),
     }
 }
@@ -149,6 +196,12 @@ pub fn read_api_key() -> String {
 pub fn read_rpc_url() -> String {
     dotenv().ok();
     env::var("ETH_RPC").expect("Missing Ethereum RPC url!")
+}
+
+#[cfg(feature = "no-sp1")]
+pub fn read_sepolia_url() -> String {
+    dotenv().ok();
+    env::var("SEPOLIA_URL").expect("Missing Sepolia url!")
 }
 
 pub const TEST_VECTOR_ETH_STORAGE_PROOF: &[u8] = &[
