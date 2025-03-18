@@ -32,8 +32,7 @@ pub fn read_rpc_url() -> String {
 
 #[cfg(feature = "no-sp1")]
 pub fn read_test_vector_denom() -> String {
-    dotenv().ok();
-    env::var("TEST_VECTOR_DENOM_NEUTRON").expect("Missing Neutron TEST VECTOR: DENOM!")
+    return "untrn".to_string();
 }
 
 #[cfg(feature = "no-sp1")]
