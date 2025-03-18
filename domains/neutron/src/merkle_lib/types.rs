@@ -10,7 +10,7 @@ use tendermint::{block::Height, merkle::proof::ProofOps};
 #[cfg(feature = "no-sp1")]
 use tendermint_rpc::{Client, HttpClient};
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct NeutronKey {
     pub prefix: String,
     pub prefix_len: usize,
@@ -123,4 +123,17 @@ impl MerkleProver for MerkleProverNeutron {
         })
         .unwrap()
     }
+}
+
+#[test]
+fn test_neutron_key_serialization() {
+    let key = NeutronKey {
+        // max supported key length is 999, which is unrealistic for neutron.
+        prefix: "some_long_key_to_rule_out_issues".to_string(),
+        prefix_len: "some_long_key_to_rule_out_issues".to_string().len(),
+        key: "0x000".to_string(),
+    };
+    let key_serialized = key.serialize();
+    let key_deserialized = NeutronKey::deserialize(&key_serialized);
+    assert_eq!(key_deserialized, key);
 }

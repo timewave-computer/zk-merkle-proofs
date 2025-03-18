@@ -3,6 +3,7 @@ use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
 use std::{io::Read, sync::Arc};
+
 #[cfg(feature = "no-sp1")]
 use {
     crate::merkle_lib::logs::insert_receipt,
@@ -25,6 +26,7 @@ pub struct EthereumMerkleProof {
     // the rlp encoded value
     pub value: Vec<u8>,
 }
+
 impl EthereumMerkleProof {
     pub fn hash_key(&mut self) {
         self.key = digest_keccak(&self.key).to_vec()

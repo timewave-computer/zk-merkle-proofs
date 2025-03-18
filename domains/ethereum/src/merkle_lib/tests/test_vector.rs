@@ -115,34 +115,12 @@ mod tests {
     }
     #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
     #[tokio::test]
-    async fn print_ethereum_storage_proof() {
-        use super::get_ethereum_test_vector_storage_proof;
-        let proof = get_ethereum_test_vector_storage_proof().await;
-        println!(
-            "Proof Serialized: {:?}",
-            &serde_json::to_vec(&proof).unwrap()
-        )
-    }
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
-    #[tokio::test]
-    async fn print_ethereum_account_proof() {
-        use super::get_ethereum_test_vector_account_proof;
-
-        let proof = get_ethereum_test_vector_account_proof().await;
-        println!(
-            "Proof Serialized: {:?}",
-            &serde_json::to_vec(&proof).unwrap()
-        )
-    }
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
-    #[tokio::test]
     async fn print_ethereum_receipts_proof() {
-        use std::{fs::File, io::Write};
-
         use crate::merkle_lib::{
             tests::test_vector::{read_api_key, read_rpc_url},
             types::MerkleProverEvm,
         };
+        use std::{fs::File, io::Write};
         let rpc_url = read_rpc_url() + &read_api_key();
         let prover = MerkleProverEvm { rpc_url };
         let receipt_proof = prover

@@ -130,9 +130,8 @@ impl Coprocessor {
 #[cfg(test)]
 #[cfg(feature = "tests-online")]
 mod test {
-    use crate::dangerous_call_decode_leaf_node;
-
     use super::{Coprocessor, CoprocessorConfig};
+    use crate::dangerous_call_decode_leaf_node;
     use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
     use eth_trie::Trie;
@@ -143,7 +142,8 @@ mod test {
     use neutron::merkle_lib::{
         tests::test_vector::{
             construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_denom,
-            read_test_vector_height, read_test_vector_merkle_root,
+            read_test_vector_height, read_test_vector_merkle_root, TEST_VECTOR_NEUTRON_HEIGHT,
+            TEST_VECTOR_NEUTRON_ROOT,
         },
         types::NeutronKey,
     };

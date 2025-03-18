@@ -118,3 +118,6 @@ pub const TEST_VECTOR_NEUTRON_STORAGE_PROOF: &[u8] = &[
     53, 53, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44,
     52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 44, 52, 56, 93, 125,
 ];
+
+pub const TEST_VECTOR_NEUTRON_ROOT: &str = "xuPL4Vt/UqXOvYfaVNsE5rqtOqB3j1UIi2GLB7SvPNY=";
+pub const TEST_VECTOR_NEUTRON_HEIGHT: &str = "19";

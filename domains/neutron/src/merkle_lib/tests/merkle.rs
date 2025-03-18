@@ -2,7 +2,8 @@
 #[cfg(feature = "no-sp1")]
 mod tests {
     use crate::merkle_lib::{
-        tests::test_vector::TEST_VECTOR_NEUTRON_STORAGE_PROOF, types::NeutronMerkleProof,
+        tests::test_vector::{TEST_VECTOR_NEUTRON_ROOT, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
+        types::NeutronMerkleProof,
     };
     use common::merkle::types::MerkleVerifiable;
     #[tokio::test]
@@ -15,6 +16,6 @@ mod tests {
             &String::from_utf8_lossy(&proof.value)
         );
         #[allow(deprecated)]
-        proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
+        proof.verify(&base64::decode(TEST_VECTOR_NEUTRON_ROOT).unwrap());
     }
 }
