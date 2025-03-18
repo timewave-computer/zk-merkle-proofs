@@ -100,7 +100,6 @@ pub struct MerkleProverNeutron {
 
 #[cfg(feature = "no-sp1")]
 impl MerkleProver for MerkleProverNeutron {
-    // chunk[0] = prefix string, chunk[1] = hex encoded key
     #[allow(unused)]
     async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
@@ -116,6 +115,7 @@ impl MerkleProver for MerkleProverNeutron {
             .await
             .unwrap();
         let proof = response.proof.unwrap();
+        println!("Response: {:?}", &response.value);
         serde_json::to_vec(&NeutronMerkleProof {
             proof: proof.clone(),
             key: neutron_key,

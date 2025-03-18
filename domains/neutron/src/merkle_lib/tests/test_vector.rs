@@ -6,7 +6,38 @@ use {
     std::env,
 };
 
-#[cfg(feature = "no-sp1")]
+#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+#[tokio::test]
+async fn test_get_neutron_contract_value_from_dict() {
+    use cosmrs::AccountId;
+    use cosmwasm_std::Addr;
+    use std::str::FromStr;
+    let contract_address =
+        AccountId::from_str("neutron1nyuryl5u5z04dx4zsqgvsuw7fe8gl2f77yufynauuhklnnmnjncqcls0tj")
+            .unwrap();
+    let height: u64 = 918;
+    let initial_address = "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2";
+    let mut key_bytes = vec![0x03];
+    key_bytes.append(&mut contract_address.to_bytes());
+    let length_bytes = (b"store".len() as u32).to_be_bytes();
+    let relevant_bytes = [length_bytes[2], length_bytes[3]];
+    key_bytes.extend_from_slice(&relevant_bytes);
+    key_bytes.extend_from_slice(b"store");
+    key_bytes.append(&mut Addr::unchecked(initial_address).as_bytes().to_vec());
+    let rpc_url = read_rpc_url();
+    let prover = MerkleProverNeutron { rpc_url };
+    let neutron_key = NeutronKey {
+        prefix: "wasm".to_string(),
+        prefix_len: 4,
+        key: hex::encode(key_bytes),
+    };
+    let proofs = prover
+        .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", height)
+        .await;
+    //let x: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
+}
+
+#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
 // first verifies account state, then a single storage proof
 // currently the variables need to be manually set before running the test
 pub async fn get_neutron_test_vector_bank_store_supply() -> NeutronMerkleProof {
@@ -55,18 +86,6 @@ pub fn construct_supply_key(denom: &str, prefix: Vec<u8>) -> Vec<u8> {
     let mut key = prefix; // Prefix for supply query in the Cosmos SDK
     key.extend_from_slice(denom.as_bytes()); // Append the denom in UTF-8 encoding
     key
-}
-
-#[cfg(feature = "no-sp1")]
-#[cfg(test)]
-mod tests {
-    use crate::merkle_lib::tests::test_vector::get_neutron_test_vector_bank_store_supply;
-    #[tokio::test]
-    async fn print_neutron_storage_proof() {
-        let proof = get_neutron_test_vector_bank_store_supply().await;
-        let proof_serialized = serde_json::to_vec(&proof).unwrap();
-        println!("Neutron Proof: {:?}", &proof_serialized);
-    }
 }
 
 pub const TEST_VECTOR_NEUTRON_STORAGE_PROOF: &[u8] = &[

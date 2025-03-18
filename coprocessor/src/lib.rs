@@ -137,13 +137,12 @@ mod test {
     use eth_trie::Trie;
     use ethereum::merkle_lib::tests::test_vector::{
         read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-        DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
+        DEFAULT_STORAGE_KEY_ETHEREUM, MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
     };
     use neutron::merkle_lib::{
         tests::test_vector::{
             construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_denom,
-            read_test_vector_height, read_test_vector_merkle_root, TEST_VECTOR_NEUTRON_HEIGHT,
-            TEST_VECTOR_NEUTRON_ROOT,
+            read_test_vector_height, read_test_vector_merkle_root,
         },
         types::NeutronKey,
     };
@@ -159,7 +158,7 @@ mod test {
             neutron_keys: vec![neutron_key],
             ethereum_keys: vec![(
                 DEFAULT_STORAGE_KEY_ETHEREUM.to_string(),
-                USDT_CONTRACT_ADDRESS.to_string(),
+                MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM.to_string(),
             )],
             neutron_rpc: read_neutron_rpc_url(),
             ethereum_rpc: read_ethereum_rpc_url() + &read_api_key(),

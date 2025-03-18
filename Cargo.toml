@@ -3,11 +3,11 @@ members = [
     "common",
     "domains/ethereum",
     "domains/neutron",
-    "example-programs/sp1/cross-chain-merkle-program/prover",
-    "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest",
-    "example-programs/sp1/cross-chain-message-builder-program/prover",
-    "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest",
-    "example-programs/sp1/vault-zk-rate-program/vault-zk-rate-guest",
+    "examples/sp1/cross-chain-merkle-program/prover",
+    "examples/sp1/cross-chain-merkle-program/cross-chain-merkle-guest",
+    "examples/sp1/cross-chain-message-builder-program/prover",
+    "examples/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest",
+    "examples/sp1/vault-zk-rate-program/vault-zk-rate-guest",
     "prover-utils",
     "domains/solana",
     "coprocessor",
@@ -23,9 +23,9 @@ neutron = { path = "domains/neutron" }
 base64 = "0.22.1"
 hex = "0.4"
 prover-utils = { path = "prover-utils" }
-cross-chain-merkle-guest = { path = "example-programs/sp1/cross-chain-merkle-program/cross-chain-merkle-guest" }
-cross-chain-message-builder-guest = { path = "example-programs/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest" }
-vault-zk-rate-guest = { path = "example-programs/sp1/vault-zk-rate-program/vault-zk-rate-guest" }
+cross-chain-merkle-guest = { path = "examples/sp1/cross-chain-merkle-program/cross-chain-merkle-guest" }
+cross-chain-message-builder-guest = { path = "examples/sp1/cross-chain-message-builder-program/cross-chain-message-builder-guest" }
+vault-zk-rate-guest = { path = "examples/sp1/vault-zk-rate-program/vault-zk-rate-guest" }
 common = { path = "common" }
 sp1-sdk = { version = "4.1.2", features = ["native-gnark"] }
 sp1-zkvm = "4.1.2"

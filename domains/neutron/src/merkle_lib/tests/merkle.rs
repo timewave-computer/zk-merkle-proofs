@@ -8,7 +8,6 @@ mod tests {
     use common::merkle::types::MerkleVerifiable;
     #[tokio::test]
     async fn test_verify_storage_proof_single() {
-        use crate::merkle_lib::tests::test_vector::read_test_vector_merkle_root;
         let proof: NeutronMerkleProof =
             serde_json::from_slice(&TEST_VECTOR_NEUTRON_STORAGE_PROOF).unwrap();
         println!(

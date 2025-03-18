@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cosmwasm-std = { version = "2.2.2", optional = true }
 tendermint = { version = "=0.38.1", optional = false }
 tendermint-proto = { version = "=0.38.1", optional = true }
 tendermint-rpc = { version = "=0.38.1", features = [
@@ -20,6 +21,12 @@ common.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 dotenvy = { workspace = true, optional = true }
-
 [features]
-no-sp1 = ["tokio", "dotenvy", "tendermint-proto", "tendermint-rpc"]
+no-sp1 = [
+    "tokio",
+    "dotenvy",
+    "tendermint-proto",
+    "tendermint-rpc",
+    "cosmwasm-std",
+]
+tests-online = []
