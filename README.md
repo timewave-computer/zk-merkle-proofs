@@ -17,9 +17,9 @@ Ultimately we want to be able to prove any state on any network.
 [Neutron](domains/neutron/README.md)
 
 # Example ZK Programs that depend on our Libraries
-1. Cross-chain merkle openings in ZK, [here](example-programs/sp1/cross-chain-merkle-program/prover/README.md)
+1. Cross-chain merkle openings in ZK, [here](examples/example-programs/sp1/cross-chain-merkle-program/prover/README.md)
 
-2. Executable message builder in ZK, [here](example-programs/sp1/cross-chain-message-builder-program/prover/README.md)
+2. Executable message builder in ZK, [here](examples/example-programs/sp1/cross-chain-message-builder-program/prover/README.md)
 
 
 # Test Existing Libraries and Provers
