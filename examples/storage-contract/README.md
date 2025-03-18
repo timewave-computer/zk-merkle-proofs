@@ -15,6 +15,13 @@ https://book.getfoundry.sh/
 
 ## Usage
 
+### Install forge standard lib
+
+```shell
+$ cd examples/storage-contract
+$ forge install foundry-rs/forge-std --no-commit
+```
+
 ### Build
 
 ```shell

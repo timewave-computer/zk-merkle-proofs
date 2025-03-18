@@ -4,3 +4,4 @@
 examples/storage-contract/cache
 examples/storage-contract/out
 examples/storage-contract/broadcast
+examples/storage-contract/lib/*
