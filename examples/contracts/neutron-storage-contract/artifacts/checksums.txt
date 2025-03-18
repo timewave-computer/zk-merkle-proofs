@@ -1,0 +1,1 @@
+5c57b695cdd8592b3387df941644c869051f701dd19a306e580ccb4b2d48c9ca  minimal_contract.wasm
