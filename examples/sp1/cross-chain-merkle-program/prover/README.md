@@ -1,24 +1,12 @@
 # Multi-chain merkle openings in ZK
-
-This program does not yet leverage the coprocessor. It verifies merkle proofs for domains against domain roots.
-Later we want to instead verify proofs against the coprocessor root.
+This is a simple example of how one can verify merkle proofs (state) from different chains (Neutron, Ethereum) inside an off-chain ZK Valence program and generate a cryptographic proof that said state is valid.
 
 To run the example for multi-chain merkle openings in SP1:
 
 ```bash
-cargo test test_generate_proof_cross_chain_merkle_program --release -- --nocapture
+cargo test test_generate_proof_cross_chain_merkle_program --release --features zk-tests --features sp1 -- --nocapture
 ```
 
-This will leverage the keccak precompile for the SP1 zkvm and prove a batch filled with one storage proof for Ethereum,
-as well as a batch of one storage proof for neutron.
+This will generate an Ethereum encoded proof that can be sent to an Ethereum smart contract linked to a Valence program, to verify and udpate cross-chain state, based on off-chain computation results.
 
-Make sure your `.env` at the project root contains these values and that neutron is running.:
-
-```bash
-ETH_RPC="https://mainnet.infura.io/v3/"
-INFURA="SOME_INFURA_KEY"
-TEST_VECTOR_DENOM_NEUTRON="untrn"
-TEST_VECTOR_HEIGHT_NEUTRON="0"
-TEST_VECTOR_MERKLE_ROOT_NEUTRON="SOME_HEX_ENCODED_APP_HASH"
-NEUTRON_RPC="http://localhost:26657"
-```
+[click to return home](../../../../README.md)

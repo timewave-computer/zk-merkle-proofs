@@ -1,9 +1,10 @@
 # Multi-chain merkle openings in ZK
-To run the example for multi-chain merkle openings in SP1:
+This is a simple example for building an executable Ethereum message inside a ZK Valence program. While not particularily useful as-is, this concept can be combined with other examples, like the `cross-chain-merkle-program`, to construct a set of on-chain calls in our off-chain execution environment.
 
 ```bash
 cargo test test_generate_proof_cross_chain_message_builder_program --release -- --nocapture
 ```
 
-This will leverage the keccak precompile for the SP1 zkvm and prove a batch filled with one storage proof for Ethereum,
-as well as a batch of one storage proof for neutron.
+This will generate an Ethereum encoded proof that can be sent to an Ethereum smart contract linked to a Valence program, to verify and udpate cross-chain state, based on off-chain computation results.
+
+[click to return home](../../../../README.md)

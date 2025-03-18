@@ -1,26 +1,6 @@
 # Ethereum libraries
 
-## Merkle Proof Library merkle_lib
-This crate is responsible for implementing the MerkleProver trait for Ethereum.
-Additionally it exposes a `verify_merkle_proof` function.
+## Merkle Proofs
+The Ethereum `merkle_lib` library exposes functions to obtain different kinds of storage and account proofs from an Ethereum node, as well as verify them against a `trusted root`.
 
-# Run Tests
-To run tests for this crate:
-
-```bash
-cargo test --features web
-```
-
-The `web` feature is used to exclude tokio and other unwanted deps when proving with SP1.
-We use the `web` feature to query the L1 and get our proofs and then disable it when generating an opening ZKP.
-
-
-Here my `.vscode/settings.json`:
-
-```json
-{
-    "rust-analyzer.cargo.features": [
-        "no-sp1"
-    ]
-}
-```
+[click to return home](../../README.md)
