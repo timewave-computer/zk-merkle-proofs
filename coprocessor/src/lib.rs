@@ -130,12 +130,12 @@ impl Coprocessor {
 #[cfg(test)]
 #[cfg(feature = "tests-online")]
 mod test {
-    use crate::decode_leaf_node;
+    use crate::dangerous_call_decode_leaf_node;
 
     use super::{Coprocessor, CoprocessorConfig};
-    use alloy::{hex, primitives::FixedBytes, rlp::Rlp};
+    use alloy::{hex, primitives::FixedBytes};
     use common::merkle::types::MerkleVerifiable;
-    use eth_trie::{nibbles::Nibbles, Trie};
+    use eth_trie::Trie;
     use ethereum::merkle_lib::tests::test_vector::{
         read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
         DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
@@ -222,7 +222,7 @@ mod test {
         println!("Leaf: {:?}", &coprocessor_storage_proof.last().unwrap());
         println!(
             "Raw Stored Value: {:?}",
-            decode_leaf_node(&coprocessor_storage_proof.last().unwrap()).1
+            dangerous_call_decode_leaf_node(&coprocessor_storage_proof.last().unwrap()).1
         );
 
         assert!(coprocessor_storage_proof
@@ -236,13 +236,10 @@ mod test {
     }
 }
 
-fn decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
+pub fn dangerous_call_decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
     let mut index = 0;
-
-    // Step 1: Read RLP list prefix
     let list_prefix = leaf_node[index];
     index += 1;
-
     let list_length = if list_prefix <= 0xf7 {
         (list_prefix - 0xc0) as usize
     } else {
@@ -254,32 +251,21 @@ fn decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
         }
         length
     };
-
     let list_end = index + list_length;
-
-    // Step 2: Read compact-encoded key
     let key_prefix = leaf_node[index];
     index += 1;
-
-    let is_leaf = (key_prefix & 0x20) != 0; // Check if it's a leaf node
-    let odd_length = (key_prefix & 0x10) != 0; // Check if the key length is odd
-
+    let odd_length = (key_prefix & 0x10) != 0;
     let mut nibbles = Vec::new();
 
     if odd_length {
-        // First nibble is stored in lower 4 bits of key_prefix
         nibbles.push(key_prefix & 0x0F);
     }
-
-    // Process the rest of the nibbles
     while index < list_end && leaf_node[index] != 0xa0 {
         let byte = leaf_node[index];
         nibbles.push(byte >> 4);
         nibbles.push(byte & 0x0F);
         index += 1;
     }
-
-    // Convert nibbles back into full bytes
     let mut key = Vec::new();
     for chunk in nibbles.chunks(2) {
         if chunk.len() == 2 {
@@ -288,11 +274,8 @@ fn decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
             key.push(chunk[0] << 4);
         }
     }
-
-    // Step 3: Read the value
     let value_prefix = leaf_node[index];
     index += 1;
-
     let value_length = if value_prefix <= 0xb7 {
         (value_prefix - 0x80) as usize
     } else {
@@ -304,8 +287,8 @@ fn decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
         }
         length
     };
-
     let value = leaf_node[index..index + value_length].to_vec();
-
+    // note that the key here is the hex encoded nibble key
+    // i think we should use the full key for now
     (key, value)
 }
