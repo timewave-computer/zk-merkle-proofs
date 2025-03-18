@@ -1,9 +1,9 @@
 **/target
 **/.vscode
 .env
-examples/ethereum-storage-contract/cache
-examples/ethereum-storage-contract/out
-examples/ethereum-storage-contract/broadcast
-examples/ethereum-storage-contract/lib/forge-std
-examples/ethereum-storage-contract/lib
-examples/neutron-storage-contract/target
+examples/contracts/ethereum-storage-contract/cache
+examples/contracts/ethereum-storage-contract/out
+examples/contracts/ethereum-storage-contract/broadcast
+examples/contracts/ethereum-storage-contract/lib/forge-std
+examples/contracts/ethereum-storage-contract/lib
+examples/contracts/neutron-storage-contract/target
