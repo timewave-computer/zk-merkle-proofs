@@ -1,7 +1,5 @@
 use crate::merkle_lib::helpers::convert_tm_to_ics_merkle_proof;
-use common::{
-    merkle::types::MerkleProofOutput, merkle::types::MerkleProver, merkle::types::MerkleVerifiable,
-};
+use common::merkle::types::{MerkleProofOutput, MerkleProver, MerkleVerifiable};
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
     verify_membership,
