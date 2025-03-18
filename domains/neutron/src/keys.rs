@@ -34,7 +34,11 @@ impl NeutronKey {
     #[cfg(feature = "no-sp1")]
     pub fn new_wasm_account_mapping(store: &[u8], key: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
-        key_bytes.append(&mut AccountId::from_str(contract_address).unwrap().to_bytes());
+        key_bytes.append(
+            &mut AccountId::from_str(contract_address)
+                .expect("Invalid contract address")
+                .to_bytes(),
+        );
         let length_bytes = (store.len() as u32).to_be_bytes();
         let relevant_bytes = [length_bytes[2], length_bytes[3]];
         key_bytes.extend_from_slice(&relevant_bytes);
@@ -51,12 +55,29 @@ impl NeutronKey {
     pub fn new_bank_total_supply(denom: &str) -> Self {
         // supply prefix is 0x00
         // see https://protective-bearberry-a26.notion.site/Query-the-state-of-a-Cosmos-chain-and-verify-the-proof-1a55cfa0622c8055816ae6e6aec7f319?pvs=4
-        let mut key = vec![0x00];
-        key.extend_from_slice(denom.as_bytes());
+        let mut key_bytes = vec![0x00];
+        key_bytes.extend_from_slice(denom.as_bytes());
         Self {
             prefix: "bank".to_string(),
             prefix_len: 4,
-            key: hex::encode(key),
+            key: hex::encode(key_bytes),
+        }
+    }
+
+    #[cfg(feature = "no-sp1")]
+    pub fn new_bank_account_balance(denom: &str, address: &str) -> Self {
+        // balance prefix is 0x02
+        // see https://protective-bearberry-a26.notion.site/Query-the-state-of-a-Cosmos-chain-and-verify-the-proof-1a55cfa0622c8055816ae6e6aec7f319?pvs=4
+        let mut key_bytes = vec![0x02];
+        let account_id = AccountId::from_str(address).expect("Invalid account address");
+        let address_bytes = account_id.to_bytes();
+        key_bytes.push(address_bytes.len() as u8);
+        key_bytes.extend_from_slice(&address_bytes);
+        key_bytes.extend_from_slice(denom.as_bytes());
+        Self {
+            prefix: "bank".to_string(),
+            prefix_len: 4,
+            key: hex::encode(key_bytes),
         }
     }
 }

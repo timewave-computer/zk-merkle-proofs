@@ -18,9 +18,9 @@ mod tests {
         proof.verify(&base64::decode(TEST_VECTOR_NEUTRON_ROOT).unwrap());
     }
 
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+    #[cfg(feature = "tests-online")]
     #[tokio::test]
-    async fn test_get_neutron_contract_value_from_dict() {
+    async fn test_get_neutron_wasm_store_dictionary_merkle_proof() {
         use common::merkle::types::MerkleProver;
 
         use crate::{
@@ -40,11 +40,11 @@ mod tests {
             .await;
     }
 
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+    #[cfg(feature = "tests-online")]
     // first verifies account state, then a single storage proof
     // currently the variables need to be manually set before running the test
     #[tokio::test]
-    pub async fn get_neutron_test_vector_bank_store_supply() {
+    pub async fn test_get_neutron_bank_store_supply_merkle_proof() {
         use common::merkle::types::MerkleProver;
 
         use crate::{
@@ -58,6 +58,30 @@ mod tests {
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
         let neutron_key = NeutronKey::new_bank_total_supply("untrn");
+        let _proofs = prover
+            .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
+            .await;
+    }
+
+    #[cfg(feature = "tests-online")]
+    #[tokio::test]
+    pub async fn test_get_neutron_bank_store_balance_merkle_proof() {
+        use common::merkle::types::MerkleProver;
+
+        use crate::{
+            keys::NeutronKey,
+            merkle_lib::{
+                tests::test_vector::{read_rpc_url, read_test_vector_height},
+                types::MerkleProverNeutron,
+            },
+        };
+
+        let rpc_url = read_rpc_url();
+        let prover = MerkleProverNeutron { rpc_url };
+        let neutron_key = NeutronKey::new_bank_account_balance(
+            "untrn",
+            "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2",
+        );
         let _proofs = prover
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;

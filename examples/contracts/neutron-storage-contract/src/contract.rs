@@ -55,8 +55,6 @@ pub fn execute_insert_balance(
         .add_attribute("sender", info.sender))
 }
 
-/// ----------------------------- QUERIES ------------------------------------
-
 #[cw_serde]
 pub struct CurrentValueResponse {
     pub current_value: Uint128,
