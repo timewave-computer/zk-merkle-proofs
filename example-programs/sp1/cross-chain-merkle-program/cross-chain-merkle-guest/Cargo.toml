@@ -8,3 +8,7 @@ sp1-zkvm.workspace = true
 common.workspace = true
 prover-utils.workspace = true
 serde_json.workspace = true
+cross-chain-merkle-program-types = { path = "../types" }
+alloy-primitives = "0.8.23"
+alloy-sol-types = "0.8.23"
+cosmwasm-schema = "2.2.2"

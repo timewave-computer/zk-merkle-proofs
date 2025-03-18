@@ -110,7 +110,6 @@ impl Coprocessor {
                 .expect("Failed to insert into Ethereum Trie");
         }
         let eth_root = ethereum_trie.root_hash().unwrap().to_vec();
-        println!("Eth root: {:?}", &eth_root);
         let coprocessor_db = Arc::new(MemoryDB::new(true));
         let mut coprocessor_trie = EthTrie::new(coprocessor_db.clone());
         coprocessor_trie
@@ -131,10 +130,12 @@ impl Coprocessor {
 #[cfg(test)]
 #[cfg(feature = "tests-online")]
 mod test {
+    use crate::decode_leaf_node;
+
     use super::{Coprocessor, CoprocessorConfig};
-    use alloy::{hex, primitives::FixedBytes};
+    use alloy::{hex, primitives::FixedBytes, rlp::Rlp};
     use common::merkle::types::MerkleVerifiable;
-    use eth_trie::Trie;
+    use eth_trie::{nibbles::Nibbles, Trie};
     use ethereum::merkle_lib::tests::test_vector::{
         read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
         DEFAULT_STORAGE_KEY_ETHEREUM, USDT_CONTRACT_ADDRESS,
@@ -218,16 +219,93 @@ mod test {
                 coprocessor_storage_proof.clone(),
             )
             .expect("Value not in Coprocessor Trie");
+        println!("Leaf: {:?}", &coprocessor_storage_proof.last().unwrap());
+        println!(
+            "Raw Stored Value: {:?}",
+            decode_leaf_node(&coprocessor_storage_proof.last().unwrap()).1
+        );
+
         assert!(coprocessor_storage_proof
             .last()
             .unwrap()
             .ends_with(&ethereum_trie_root));
         // todo: figure out the prefix construction / encoding
         // match the exact leaf, not just the raw suffix
-        println!(
-            "Full Leaf Node: {:?}",
-            coprocessor_storage_proof.last().unwrap()
-        );
+        println!("Root: {:?}", &ethereum_trie_root);
         assert_eq!(ethereum_trie_root.len(), 32);
     }
+}
+
+fn decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
+    let mut index = 0;
+
+    // Step 1: Read RLP list prefix
+    let list_prefix = leaf_node[index];
+    index += 1;
+
+    let list_length = if list_prefix <= 0xf7 {
+        (list_prefix - 0xc0) as usize
+    } else {
+        let len_of_length = (list_prefix - 0xf7) as usize;
+        let mut length = 0usize;
+        for _ in 0..len_of_length {
+            length = (length << 8) | (leaf_node[index] as usize);
+            index += 1;
+        }
+        length
+    };
+
+    let list_end = index + list_length;
+
+    // Step 2: Read compact-encoded key
+    let key_prefix = leaf_node[index];
+    index += 1;
+
+    let is_leaf = (key_prefix & 0x20) != 0; // Check if it's a leaf node
+    let odd_length = (key_prefix & 0x10) != 0; // Check if the key length is odd
+
+    let mut nibbles = Vec::new();
+
+    if odd_length {
+        // First nibble is stored in lower 4 bits of key_prefix
+        nibbles.push(key_prefix & 0x0F);
+    }
+
+    // Process the rest of the nibbles
+    while index < list_end && leaf_node[index] != 0xa0 {
+        let byte = leaf_node[index];
+        nibbles.push(byte >> 4);
+        nibbles.push(byte & 0x0F);
+        index += 1;
+    }
+
+    // Convert nibbles back into full bytes
+    let mut key = Vec::new();
+    for chunk in nibbles.chunks(2) {
+        if chunk.len() == 2 {
+            key.push((chunk[0] << 4) | chunk[1]);
+        } else {
+            key.push(chunk[0] << 4);
+        }
+    }
+
+    // Step 3: Read the value
+    let value_prefix = leaf_node[index];
+    index += 1;
+
+    let value_length = if value_prefix <= 0xb7 {
+        (value_prefix - 0x80) as usize
+    } else {
+        let len_of_length = (value_prefix - 0xb7) as usize;
+        let mut length = 0usize;
+        for _ in 0..len_of_length {
+            length = (length << 8) | (leaf_node[index] as usize);
+            index += 1;
+        }
+        length
+    };
+
+    let value = leaf_node[index..index + value_length].to_vec();
+
+    (key, value)
 }

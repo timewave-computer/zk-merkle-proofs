@@ -18,6 +18,7 @@ alloy-primitives = "0.8.12"
 alloy = { version = "0.11.1", features = ["full"] }
 alloy-rlp = { version = "0.3.11" }
 url.workspace = true
+cross-chain-merkle-program-types = { path = "../types" }
 
 [build-dependencies]
 sp1-helper = "4.1.2"

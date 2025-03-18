@@ -14,5 +14,6 @@ hex.workspace = true
 alloy = { version = "0.12.5", features = ["full"] }
 base64.workspace = true
 eth_trie = "0.5.0"
+
 [features]
 tests-online = []
