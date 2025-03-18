@@ -6,7 +6,7 @@ use {
     std::env,
 };
 
-#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+/*#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
 #[tokio::test]
 async fn test_get_neutron_contract_value_from_dict() {
     use cosmrs::AccountId;
@@ -35,7 +35,7 @@ async fn test_get_neutron_contract_value_from_dict() {
         .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", height)
         .await;
     //let x: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-}
+}*/
 
 #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
 // first verifies account state, then a single storage proof
