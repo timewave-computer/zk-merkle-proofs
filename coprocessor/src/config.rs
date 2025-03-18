@@ -1,4 +1,4 @@
-use neutron::merkle_lib::types::NeutronKey;
+use neutron::keys::NeutronKey;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Default, Clone)]

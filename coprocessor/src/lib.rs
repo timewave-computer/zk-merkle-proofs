@@ -139,16 +139,16 @@ mod test {
         read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
         DEFAULT_STORAGE_KEY_ETHEREUM, MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
     };
-    use neutron::merkle_lib::{
-        tests::test_vector::{
-            construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_denom,
-            read_test_vector_height, read_test_vector_merkle_root,
+    use neutron::{
+        keys::NeutronKey,
+        merkle_lib::tests::test_vector::{
+            construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_height,
+            read_test_vector_merkle_root,
         },
-        types::NeutronKey,
     };
     #[tokio::test]
     async fn test_coprocessor() {
-        let supply_key = construct_supply_key(&read_test_vector_denom(), vec![0x00]);
+        let supply_key = construct_supply_key(&"untrn", vec![0x00]);
         let neutron_key = NeutronKey {
             prefix: "bank".to_string(),
             prefix_len: 4,

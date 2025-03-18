@@ -1,4 +1,4 @@
-use crate::merkle_lib::helpers::convert_tm_to_ics_merkle_proof;
+use crate::{keys::NeutronKey, merkle_lib::helpers::convert_tm_to_ics_merkle_proof};
 use common::merkle::types::{MerkleProofOutput, MerkleProver, MerkleVerifiable};
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
@@ -9,35 +9,6 @@ use tendermint::{block::Height, merkle::proof::ProofOps};
 
 #[cfg(feature = "no-sp1")]
 use tendermint_rpc::{Client, HttpClient};
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct NeutronKey {
-    pub prefix: String,
-    pub prefix_len: usize,
-    pub key: String,
-}
-
-impl NeutronKey {
-    /// Serializes the NeutronKey by encoding prefix_len explicitly.
-    pub fn serialize(&self) -> String {
-        format!("{:03}{}{}", self.prefix_len, self.prefix, self.key)
-    }
-
-    /// Deserializes a string back into a NeutronKey.
-    pub fn deserialize(encoded: &str) -> Self {
-        // Extract the first 3 characters as the prefix length
-        let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
-        // Extract the prefix and key based on prefix_len
-        let prefix = &encoded[3..(3 + prefix_len)];
-        let key = &encoded[(3 + prefix_len)..];
-
-        NeutronKey {
-            prefix: prefix.to_string(),
-            prefix_len,
-            key: key.to_string(),
-        }
-    }
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronMerkleProof {
@@ -115,7 +86,7 @@ impl MerkleProver for MerkleProverNeutron {
             .await
             .unwrap();
         let proof = response.proof.unwrap();
-        println!("Response: {:?}", &response.value);
+        assert!(response.value.len() > 0);
         serde_json::to_vec(&NeutronMerkleProof {
             proof: proof.clone(),
             key: neutron_key,

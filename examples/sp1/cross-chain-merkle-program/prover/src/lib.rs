@@ -38,7 +38,7 @@ mod tests {
     use crate::prove;
     use ethereum::merkle_lib::tests::test_vector::TEST_VECTOR_ETH_STORAGE_PROOF;
     use neutron::merkle_lib::{
-        tests::test_vector::{read_test_vector_merkle_root, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
+        tests::test_vector::{TEST_VECTOR_NEUTRON_ROOT, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
         types::NeutronMerkleProofWithRoot,
     };
     use prover_utils::merkle::types::MerkleProofInput;
@@ -57,7 +57,7 @@ mod tests {
             neutron_proofs: vec![NeutronMerkleProofWithRoot {
                 proof: neutron_proof,
                 #[allow(deprecated)]
-                root: base64::decode(read_test_vector_merkle_root()).unwrap(),
+                root: base64::decode(TEST_VECTOR_NEUTRON_ROOT).unwrap(),
             }],
         });
     }
