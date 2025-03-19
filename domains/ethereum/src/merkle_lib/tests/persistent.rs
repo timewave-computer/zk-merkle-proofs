@@ -150,6 +150,19 @@ mod tests {
 }
 
 #[cfg(feature = "no-sp1")]
+pub fn read_ethereum_vault_contract_address() -> String {
+    dotenv().ok();
+    env::var("ETHEREUM_SEPOLIA_VAULT_EXAMPLE_CONTRACT_ADDRESS")
+        .expect("Missing Sepolia Vault Contract Address!")
+}
+
+#[cfg(feature = "no-sp1")]
+pub fn read_sepolia_default_account_address() -> String {
+    dotenv().ok();
+    env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
+}
+
+#[cfg(feature = "no-sp1")]
 pub fn read_sepolia_url() -> String {
     dotenv().ok();
     env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
