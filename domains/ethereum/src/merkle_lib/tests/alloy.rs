@@ -11,7 +11,7 @@
 // since currenlty preformance is not our top-priority, let's
 // delay this decision and stick with eth_trie for now.
 // It's always good to have an alternative in case something breaks.
-#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+#[cfg(all(feature = "no-sp1", feature = "no-sp1"))]
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::keccak::digest_keccak;

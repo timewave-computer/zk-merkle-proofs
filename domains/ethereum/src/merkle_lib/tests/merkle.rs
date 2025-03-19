@@ -20,7 +20,7 @@ mod tests {
         eth_proof.verify(&eth_proof.root.to_vec());
     }
 
-    #[cfg(feature = "tests-online")]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_counter_contract_on_sepolia() {
         use crate::merkle_lib::tests::test_vector::get_ethereum_storage_proof;
@@ -38,7 +38,7 @@ mod tests {
         eth_proof.verify(&eth_proof.root.to_vec());
     }
 
-    #[cfg(feature = "tests-online")]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_stored_value_from_dictionary_on_sepolia() {
         use crate::merkle_lib::{

@@ -29,4 +29,3 @@ no-sp1 = [
     "tendermint-rpc",
     "cosmwasm-std",
 ]
-tests-online = []

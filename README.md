@@ -5,7 +5,6 @@ In the broader context of Valence, we call this unified state the `zk-coprocesso
 
 Our modular design of (ZK) Valence libraries allows us to easily integrate with new zk lightclients and enable developers to choose their own security / verification stack, aside from the default stack that we provide.
 
-
 # Adding new Chains to ZK Valence
 At the core of this project are chain-specific merkle proof libraries that implements the `MerkleVerifiable` generic from  [common](common/src/merkle/types.rs).
 This trait must be implemented for every supported chain. Any chain can easily be added to Valence by simply implementing this trait and choosing either a combination of light clients or utilizing Valence's `zk-coprocessor`.
@@ -23,23 +22,19 @@ Ultimately we want to be able to prove any state on any network.
 
 2. Executable message builder in ZK, [here](examples/sp1/cross-chain-message-builder-program/prover/README.md)
 
-
 # Test Existing Libraries and Provers
-To run tests that don't depend on SP1 (verify merkle proofs against some payload):
+
+To run the SP1 prover tests (generating real proofs) for all example programs:
+
 ```shell
-$ cargo test --features no-sp1
-```
-To run all tests, including the zk prover tests (generating real proofs) for all example programs:
-```shell
-$ cargo test --features sp1 zk-tests
+$ cargo test --features sp1 --features zk-tests
 ```
 
-Tests that require an internet connection are disabled by default. You can run them by adding the feature `tests-online`.
-> [!WARNING]
-> tests-online is currently not stable as some of those tests 
-> require manually updating roots and connecting to a local neutron network
-> the other tests should never fail on the master branch
+To test against contracts that have been deployed on `Neutron` (pion-1) and `Ethereum` (Sepolia) testnet:
 
+```shell
+$ cargo test
+```
 
 # Visual Studio
 `.vscode/settings.json`:
@@ -47,8 +42,7 @@ Tests that require an internet connection are disabled by default. You can run t
 ```json
 {
     "rust-analyzer.cargo.features": [
-        #"no-sp1", || "sp1",
-        #"tests-online",
+        #"no-sp1" || "sp1", ("zk-tests")
     ]
 }
 ```

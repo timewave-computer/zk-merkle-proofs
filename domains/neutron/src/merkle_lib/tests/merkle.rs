@@ -5,7 +5,14 @@ mod tests {
         tests::test_vector::{TEST_VECTOR_NEUTRON_ROOT, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
         types::NeutronMerkleProof,
     };
-    use common::merkle::types::MerkleVerifiable;
+    use crate::{
+        keys::NeutronKey,
+        merkle_lib::{
+            tests::test_vector::{read_rpc_url, read_test_vector_height},
+            types::MerkleProverNeutron,
+        },
+    };
+    use common::merkle::types::{MerkleProver, MerkleVerifiable};
     #[tokio::test]
     async fn test_verify_storage_proof_single() {
         let proof: NeutronMerkleProof =
@@ -18,35 +25,9 @@ mod tests {
         proof.verify(&base64::decode(TEST_VECTOR_NEUTRON_ROOT).unwrap());
     }
 
-    #[cfg(feature = "tests-online")]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_get_neutron_wasm_store_dictionary_merkle_proof() {
-        use common::merkle::types::MerkleProver;
-
-        use crate::{
-            keys::NeutronKey,
-            merkle_lib::{tests::test_vector::read_rpc_url, types::MerkleProverNeutron},
-        };
-
-        let contract_address = "neutron1nyuryl5u5z04dx4zsqgvsuw7fe8gl2f77yufynauuhklnnmnjncqcls0tj";
-        let height: u64 = 918;
-        let initial_address = "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2";
-        let neutron_key: NeutronKey =
-            NeutronKey::new_wasm_account_mapping(b"store", initial_address, contract_address);
-        let rpc_url = read_rpc_url();
-        let prover = MerkleProverNeutron { rpc_url };
-        let _proofs = prover
-            .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", height)
-            .await;
-    }
-
-    #[cfg(feature = "tests-online")]
-    // first verifies account state, then a single storage proof
-    // currently the variables need to be manually set before running the test
-    #[tokio::test]
-    pub async fn test_get_neutron_bank_store_supply_merkle_proof() {
-        use common::merkle::types::MerkleProver;
-
         use crate::{
             keys::NeutronKey,
             merkle_lib::{
@@ -54,7 +35,29 @@ mod tests {
                 types::MerkleProverNeutron,
             },
         };
+        let contract_address = "neutron1xlklun3vpf7ts08mm79tyyllyezles7mpp3np5a4ueadgfz9ndns350qw2";
+        let initial_address = "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2";
+        let neutron_key: NeutronKey =
+            NeutronKey::new_wasm_account_mapping(b"store", initial_address, contract_address);
+        let rpc_url = read_rpc_url();
+        let prover = MerkleProverNeutron { rpc_url };
+        let _proofs = prover
+            .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
+            .await;
+    }
 
+    #[cfg(feature = "no-sp1")]
+    // first verifies account state, then a single storage proof
+    // currently the variables need to be manually set before running the test
+    #[tokio::test]
+    pub async fn test_get_neutron_bank_store_supply_merkle_proof() {
+        use crate::{
+            keys::NeutronKey,
+            merkle_lib::{
+                tests::test_vector::{read_rpc_url, read_test_vector_height},
+                types::MerkleProverNeutron,
+            },
+        };
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
         let neutron_key = NeutronKey::new_bank_total_supply("untrn");
@@ -63,19 +66,9 @@ mod tests {
             .await;
     }
 
-    #[cfg(feature = "tests-online")]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     pub async fn test_get_neutron_bank_store_balance_merkle_proof() {
-        use common::merkle::types::MerkleProver;
-
-        use crate::{
-            keys::NeutronKey,
-            merkle_lib::{
-                tests::test_vector::{read_rpc_url, read_test_vector_height},
-                types::MerkleProverNeutron,
-            },
-        };
-
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
         let neutron_key = NeutronKey::new_bank_account_balance(

@@ -5,6 +5,7 @@ use cross_chain_message_builder_types::MessageBuilderProgramInput;
 /// this function will be used to prove the merkle-program execution
 /// the merkle-program will use verify_merkle_proof to verify one or more opening(s)
 use sp1_sdk::{include_elf, ProverClient, SP1Stdin};
+
 pub fn prove(input: MessageBuilderProgramInput) {
     let proof_input = serde_json::to_vec(&input).unwrap();
     let start_time = Instant::now();

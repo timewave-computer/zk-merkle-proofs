@@ -40,4 +40,3 @@ no-sp1 = [
     "alloy-sol-types",
 ]
 sp1 = ["tiny-keccak-sp1"]
-tests-online = []

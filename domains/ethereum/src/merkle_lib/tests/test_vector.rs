@@ -18,7 +18,7 @@ pub const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
 pub const DEFAULT_ETH_BLOCK_HEIGHT: u64 = 22040634;
 
-#[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+#[cfg(feature = "no-sp1")]
 pub async fn get_ethereum_storage_proof(
     key: &str,
     address: &str,
@@ -141,7 +141,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
 
 #[cfg(test)]
 mod tests {
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_get_receipt_proof() {
         use crate::merkle_lib::{
@@ -160,7 +160,7 @@ mod tests {
             .await;
         receipt_proof.verify(&receipt_proof.root);
     }
-    #[cfg(all(feature = "no-sp1", feature = "tests-online"))]
+    #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn print_ethereum_receipts_proof() {
         use crate::merkle_lib::{

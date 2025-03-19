@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
-neutron = { path = "../domains/neutron", features = ["no-sp1"] }
-ethereum = { path = "../domains/ethereum", features = ["no-sp1"] }
+neutron = { path = "../domains/neutron" }
+ethereum = { path = "../domains/ethereum" }
 common.workspace = true
 tokio.workspace = true
 hex.workspace = true
@@ -16,4 +16,4 @@ base64.workspace = true
 eth_trie = "0.5.0"
 
 [features]
-tests-online = []
+no-sp1 = ["neutron/no-sp1", "ethereum/no-sp1"]

@@ -14,20 +14,6 @@ pub struct Coprocessor {
     pub config: CoprocessorConfig,
 }
 
-// storage proof requirements
-// inputs required to the circuit
-// we need the expected eth trie root
-// the expected neutron trie root
-// a list of neutron proofs
-// a list of ethereum proofs
-
-// account proof requirements (next step)
-// account proofs have become a user space problem
-// users can submit an account proof and store the account
-// storage hash in the coprocessor trie, to then submit multiple
-// storage proofs against that account hash
-
-// we can either prefix keys with a blockID, or construct a trie for each block
 #[derive(Debug)]
 pub struct CoprocessorTrie {
     pub ethereum_trie: EthTrie<MemoryDB>,
@@ -78,6 +64,7 @@ impl Coprocessor {
                 .get_merkle_proof_from_rpc(&key.serialize(), "", height)
                 .await;
             let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proof).unwrap();
+            assert!(neutron_proof.value.len() > 0);
             neutron_proofs.push(neutron_proof);
         }
         neutron_proofs
@@ -128,7 +115,7 @@ impl Coprocessor {
 }
 
 #[cfg(test)]
-#[cfg(feature = "tests-online")]
+#[cfg(feature = "no-sp1")]
 mod test {
     use super::{Coprocessor, CoprocessorConfig};
     use crate::dangerous_call_decode_leaf_node;
