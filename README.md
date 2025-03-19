@@ -37,6 +37,7 @@ Where the mapping at slot `0` represents deposit balances and the value at slot 
 Since this is a vault, we have a default account in each mapping that we are interested in.
 
 | Chain | Default Account |
+|---|---|
 | Sepolia | 0x51df57D545074bA4b2B04b5f973Efc008A2fde6E |
 | Pion-1 | neutron148w9spa5f9hcwgdy8cnejfel8ly6c2kdazuu94ja5dmy6zyet2ks6c49fd |
 
