@@ -118,44 +118,48 @@ impl Coprocessor {
 #[cfg(feature = "no-sp1")]
 mod test {
     use super::{Coprocessor, CoprocessorConfig};
-    use crate::dangerous_call_decode_leaf_node;
-    use alloy::{hex, primitives::FixedBytes};
+    use crate::decode_ethereum_leaf;
+    use alloy::{
+        hex,
+        primitives::FixedBytes,
+        providers::{Provider, ProviderBuilder},
+        transports::http::reqwest::Url,
+    };
     use common::merkle::types::MerkleVerifiable;
     use eth_trie::Trie;
-    use ethereum::merkle_lib::tests::test_vector::{
-        read_api_key, read_rpc_url as read_ethereum_rpc_url, DEFAULT_ETH_BLOCK_HEIGHT,
-        DEFAULT_STORAGE_KEY_ETHEREUM, MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
+    use ethereum::merkle_lib::tests::persistent::{
+        read_sepolia_height, read_sepolia_url, SEPOLIA_USDT, SEPOLIA_USDT_SUPPLY,
     };
     use neutron::{
         keys::NeutronKey,
-        merkle_lib::tests::test_vector::{
-            construct_supply_key, read_rpc_url as read_neutron_rpc_url, read_test_vector_height,
+        merkle_lib::tests::persistent::{
+            read_rpc_url as read_neutron_rpc_url, read_test_vector_height,
             read_test_vector_merkle_root,
         },
     };
+    use std::str::FromStr;
     #[tokio::test]
     async fn test_coprocessor() {
-        let supply_key = construct_supply_key(&"untrn", vec![0x00]);
-        let neutron_key = NeutronKey {
-            prefix: "bank".to_string(),
-            prefix_len: 4,
-            key: hex::encode(supply_key),
-        };
+        let neutron_key = NeutronKey::new_bank_total_supply("untrn");
         let config = CoprocessorConfig {
             neutron_keys: vec![neutron_key],
-            ethereum_keys: vec![(
-                DEFAULT_STORAGE_KEY_ETHEREUM.to_string(),
-                MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM.to_string(),
-            )],
+            ethereum_keys: vec![(SEPOLIA_USDT_SUPPLY.to_string(), SEPOLIA_USDT.to_string())],
             neutron_rpc: read_neutron_rpc_url(),
-            ethereum_rpc: read_ethereum_rpc_url() + &read_api_key(),
+            ethereum_rpc: read_sepolia_url(),
         };
-        let state_root =
-            hex::decode("0xf4da06dccd5bc3891b4d43b75e4a83ccea460f0bd5cde1901f368472e5ad7e4a")
-                .unwrap();
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
+        let block = provider
+            .get_block_by_number(
+                alloy::eips::BlockNumberOrTag::Number(read_sepolia_height()), // for alloy < 0.12
+                                                                              //alloy::rpc::types::BlockTransactionsKind::Full,
+            )
+            .await
+            .expect("Failed to get Block!")
+            .expect("Block not found!");
+        let state_root = block.header.state_root.to_vec();
         let coprocessor = Coprocessor { config };
         let ethereum_proofs = coprocessor
-            .get_ethereum_proofs(DEFAULT_ETH_BLOCK_HEIGHT, &state_root)
+            .get_ethereum_proofs(read_sepolia_height(), &state_root)
             .await;
         let neutron_proofs = coprocessor
             .get_neutron_proofs(read_test_vector_height())
@@ -183,13 +187,13 @@ mod test {
         // verify a storage proof against the coprocessor trie
         let ethereum_storage_proof = coprocessor_trie
             .ethereum_trie
-            .get_proof(&hex::decode(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap())
+            .get_proof(&hex::decode(SEPOLIA_USDT_SUPPLY).unwrap())
             .unwrap();
         coprocessor_trie
             .ethereum_trie
             .verify_proof(
                 FixedBytes::from_slice(&ethereum_trie_root),
-                &hex::decode(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap(),
+                &hex::decode(SEPOLIA_USDT_SUPPLY).unwrap(),
                 ethereum_storage_proof,
             )
             .expect("Value not in Eth Trie");
@@ -208,7 +212,7 @@ mod test {
         println!("Leaf: {:?}", &coprocessor_storage_proof.last().unwrap());
         println!(
             "Raw Stored Value: {:?}",
-            dangerous_call_decode_leaf_node(&coprocessor_storage_proof.last().unwrap()).1
+            decode_ethereum_leaf(&coprocessor_storage_proof.last().unwrap()).1
         );
 
         assert!(coprocessor_storage_proof
@@ -222,7 +226,7 @@ mod test {
     }
 }
 
-pub fn dangerous_call_decode_leaf_node(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
+pub fn decode_ethereum_leaf(leaf_node: &[u8]) -> (Vec<u8>, Vec<u8>) {
     let mut index = 0;
     let list_prefix = leaf_node[index];
     index += 1;

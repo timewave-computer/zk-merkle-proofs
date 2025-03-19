@@ -13,8 +13,8 @@ else
         cosmwasm/optimizer:0.16.1
 fi
 
-docker run --rm -it \
-    -v "$(pwd)/solidity":/solidity \
-    -w /solidity \
-    --entrypoint sh \
-    ghcr.io/foundry-rs/foundry:stable -c "forge soldeer install && forge build"
+#docker run --rm -it \
+#    -v "$(pwd)/solidity":/solidity \
+#    -w /solidity \
+#    --entrypoint sh \
+#    ghcr.io/foundry-rs/foundry:stable -c "forge soldeer install && forge build"

@@ -14,6 +14,8 @@ members = [
 ]
 resolver = "2"
 
+exclude = ["examples/contracts/neutron-vault-contract"]
+
 [profile.dev]
 opt-level = 3
 

@@ -13,7 +13,7 @@ pub fn read_rpc_url() -> String {
 #[cfg(feature = "no-sp1")]
 pub fn read_test_vector_height() -> u64 {
     dotenv().ok();
-    env::var("TEST_VECTOR_HEIGHT_NEUTRON")
+    env::var("HEIGHT_NEUTRON")
         .expect("Missing Neutron TEST VECTOR: HEIGHT!")
         .parse::<u64>()
         .expect("Failed to parse test vector as u64: Amount")
@@ -22,14 +22,20 @@ pub fn read_test_vector_height() -> u64 {
 #[cfg(feature = "no-sp1")]
 pub fn read_test_vector_merkle_root() -> String {
     dotenv().ok();
-    env::var("TEST_VECTOR_MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
+    env::var("MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
 }
 
 #[cfg(feature = "no-sp1")]
-pub fn construct_supply_key(denom: &str, prefix: Vec<u8>) -> Vec<u8> {
-    let mut key = prefix; // Prefix for supply query in the Cosmos SDK
-    key.extend_from_slice(denom.as_bytes()); // Append the denom in UTF-8 encoding
-    key
+pub fn read_pion_1_vault_contract_address() -> String {
+    dotenv().ok();
+    env::var("NEUTRON_PION_1_VAULT_EXAMPLE_CONTRACT_ADDRESS")
+        .expect("Missing Pion 1 Vault Contract Address!")
+}
+
+#[cfg(feature = "no-sp1")]
+pub fn read_pion_1_default_account_address() -> String {
+    dotenv().ok();
+    env::var("NEUTRON_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Neutron Default Account Address!")
 }
 
 pub const TEST_VECTOR_NEUTRON_STORAGE_PROOF: &[u8] = &[
@@ -82,4 +88,3 @@ pub const TEST_VECTOR_NEUTRON_STORAGE_PROOF: &[u8] = &[
 ];
 
 pub const TEST_VECTOR_NEUTRON_ROOT: &str = "xuPL4Vt/UqXOvYfaVNsE5rqtOqB3j1UIi2GLB7SvPNY=";
-pub const TEST_VECTOR_NEUTRON_HEIGHT: &str = "19";

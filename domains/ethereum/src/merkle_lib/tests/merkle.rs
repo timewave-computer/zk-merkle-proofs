@@ -2,7 +2,7 @@
 #[cfg(feature = "no-sp1")]
 mod tests {
     use crate::merkle_lib::{
-        tests::test_vector::{
+        tests::persistent::{
             get_ethereum_test_vector_storage_proof, TEST_VECTOR_ETH_ACCOUNT_PROOF,
         },
         types::EthereumMerkleProof,
@@ -23,11 +23,13 @@ mod tests {
     #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_counter_contract_on_sepolia() {
-        use crate::merkle_lib::tests::test_vector::get_ethereum_storage_proof;
+        use crate::merkle_lib::tests::persistent::{
+            get_ethereum_storage_proof, read_sepolia_height,
+        };
         let mut eth_proof: EthereumMerkleProof = get_ethereum_storage_proof(
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x567A801BdE180DFDd25Ab71e75630B9e26b757e1",
-            7929295,
+            read_sepolia_height(),
         )
         .await;
         let leaf = eth_proof.proof.last().unwrap().to_owned();
@@ -42,7 +44,8 @@ mod tests {
     #[tokio::test]
     async fn test_stored_value_from_dictionary_on_sepolia() {
         use crate::merkle_lib::{
-            keccak::digest_keccak, tests::test_vector::get_ethereum_storage_proof,
+            keccak::digest_keccak,
+            tests::persistent::{get_ethereum_storage_proof, read_sepolia_height},
         };
         use alloy::hex::FromHex;
         use alloy_primitives::U256;
@@ -57,7 +60,7 @@ mod tests {
         let mut eth_proof: EthereumMerkleProof = get_ethereum_storage_proof(
             &alloy::hex::encode(keccak_key),
             "0x8119a4eCD758D2B9B5f06D813BdE7e7aba323A4E",
-            7929465,
+            read_sepolia_height(),
         )
         .await;
         let leaf = eth_proof.proof.last().unwrap().to_owned();

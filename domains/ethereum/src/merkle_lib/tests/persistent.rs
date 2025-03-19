@@ -12,11 +12,9 @@ use {
 
 #[cfg(feature = "no-sp1")]
 use crate::{merkle_lib::types::EthereumMerkleProof, merkle_lib::types::MerkleProverEvm};
-pub const MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM: &str =
-    "0xdAC17F958D2ee523a2206206994597C13D831ec7";
-pub const DEFAULT_STORAGE_KEY_ETHEREUM: &str =
+pub const SEPOLIA_USDT: &str = "0xf08A50178dfcDe18524640EA6618a1f965821715";
+pub const SEPOLIA_USDT_SUPPLY: &str =
     "0x0000000000000000000000000000000000000000000000000000000000000000";
-pub const DEFAULT_ETH_BLOCK_HEIGHT: u64 = 22040634;
 
 #[cfg(feature = "no-sp1")]
 pub async fn get_ethereum_storage_proof(
@@ -68,15 +66,11 @@ pub async fn get_ethereum_storage_proof(
 pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
     use alloy::rpc::types::EIP1186AccountProofResponse;
     use common::merkle::types::MerkleProver;
-    let rpc_url = read_rpc_url() + &read_api_key();
-    let storage_key: FixedBytes<32> = FixedBytes::from_hex(DEFAULT_STORAGE_KEY_ETHEREUM).unwrap();
+    let rpc_url = read_sepolia_url();
+    let storage_key: FixedBytes<32> = FixedBytes::from_hex(SEPOLIA_USDT_SUPPLY).unwrap();
     let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_merkle_proof_from_rpc(
-            DEFAULT_STORAGE_KEY_ETHEREUM,
-            MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
-            DEFAULT_ETH_BLOCK_HEIGHT,
-        )
+        .get_merkle_proof_from_rpc(SEPOLIA_USDT_SUPPLY, SEPOLIA_USDT, read_sepolia_height())
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
     let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
@@ -114,16 +108,12 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
 pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     use alloy::rpc::types::EIP1186AccountProofResponse;
     use common::merkle::types::MerkleProver;
-    let rpc_url = read_rpc_url() + &read_api_key();
+    let rpc_url = read_sepolia_url();
     let state_root =
         hex::decode("0xf4da06dccd5bc3891b4d43b75e4a83ccea460f0bd5cde1901f368472e5ad7e4a").unwrap();
     let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_merkle_proof_from_rpc(
-            DEFAULT_STORAGE_KEY_ETHEREUM,
-            MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM,
-            DEFAULT_ETH_BLOCK_HEIGHT,
-        )
+        .get_merkle_proof_from_rpc(SEPOLIA_USDT_SUPPLY, SEPOLIA_USDT, read_sepolia_height())
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
     let account_proof: Vec<Vec<u8>> = proof_deserialized
@@ -134,7 +124,7 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
     EthereumMerkleProof {
         root: state_root.to_vec(),
         proof: account_proof.clone(),
-        key: hex::decode(MAINNET_USDT_CONTRACT_ADDRESS_ETHEREUM).unwrap(),
+        key: hex::decode(SEPOLIA_USDT_SUPPLY).unwrap(),
         value: account_proof.last().unwrap().to_vec(),
     }
 }
@@ -144,64 +134,35 @@ mod tests {
     #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_get_receipt_proof() {
-        use crate::merkle_lib::{
-            tests::test_vector::{read_api_key, read_rpc_url},
-            types::MerkleProverEvm,
-        };
+        use crate::merkle_lib::{tests::persistent::read_sepolia_url, types::MerkleProverEvm};
         use common::merkle::types::MerkleVerifiable;
-        let rpc_url = read_rpc_url() + &read_api_key();
+        let rpc_url = read_sepolia_url();
         let prover = MerkleProverEvm { rpc_url };
         let receipt_proof = prover
             // erc20 transfers etc. will be located in the logs
             .get_receipt_proof(
-                "0x3e07ae6bee69fe1a7a73fd739248662d36791f7b3a95a7c91178e9e4a232b6da",
+                "0x529f947c793dee682b977b5904f1f48571b3176d015baa5055ace2f3661234d5",
                 1,
             )
             .await;
         receipt_proof.verify(&receipt_proof.root);
     }
-    #[cfg(feature = "no-sp1")]
-    #[tokio::test]
-    async fn print_ethereum_receipts_proof() {
-        use crate::merkle_lib::{
-            tests::test_vector::{read_api_key, read_rpc_url},
-            types::MerkleProverEvm,
-        };
-        use std::{fs::File, io::Write};
-        let rpc_url = read_rpc_url() + &read_api_key();
-        let prover = MerkleProverEvm { rpc_url };
-        let receipt_proof = prover
-            // erc20 transfers etc. will be located in the logs
-            .get_receipt_proof(
-                "0x3e07ae6bee69fe1a7a73fd739248662d36791f7b3a95a7c91178e9e4a232b6da",
-                1,
-            )
-            .await;
-        let mut file = File::create(
-            "/Users/chef/Desktop/zk-development-stack/domains/ethereum/test_data/erc20_receipt.bin",
-        )
-        .unwrap();
-        file.write_all(&serde_json::to_vec(&receipt_proof).unwrap())
-            .expect("Failed to write proof to file");
-    }
-}
-
-#[cfg(feature = "no-sp1")]
-pub fn read_api_key() -> String {
-    dotenv().ok();
-    env::var("INFURA").expect("Missing Infura API key!")
-}
-
-#[cfg(feature = "no-sp1")]
-pub fn read_rpc_url() -> String {
-    dotenv().ok();
-    env::var("ETH_RPC").expect("Missing Ethereum RPC url!")
 }
 
 #[cfg(feature = "no-sp1")]
 pub fn read_sepolia_url() -> String {
     dotenv().ok();
-    env::var("SEPOLIA_URL").expect("Missing Sepolia url!")
+    env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
+}
+
+#[cfg(feature = "no-sp1")]
+pub fn read_sepolia_height() -> u64 {
+    dotenv().ok();
+    u64::from_str_radix(
+        &env::var("HEIGHT_ETHEREUM").expect("Missing Sepolia url!"),
+        10,
+    )
+    .unwrap()
 }
 
 pub const TEST_VECTOR_ETH_STORAGE_PROOF: &[u8] = &[
