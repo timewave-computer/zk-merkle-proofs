@@ -103,7 +103,8 @@ mod tests {
     pub async fn test_get_neutron_pion_vault_shares_merkle_proof() {
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
-        let neutron_key = NeutronKey::new_wasm_stored_value(b"shares");
+        let neutron_key =
+            NeutronKey::new_wasm_stored_value("shares", &read_pion_1_vault_contract_address());
         let _proofs = prover
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;

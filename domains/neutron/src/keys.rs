@@ -52,12 +52,14 @@ impl NeutronKey {
     }
 
     #[cfg(feature = "no-sp1")]
-    pub fn new_wasm_stored_value(store: &[u8]) -> Self {
+    pub fn new_wasm_stored_value(store: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
-        //let length_bytes = (store.len() as u32).to_be_bytes();
-        //let relevant_bytes = [length_bytes[2], length_bytes[3]];
-        //key_bytes.extend_from_slice(&relevant_bytes);
-        key_bytes.extend_from_slice(store);
+        key_bytes.append(
+            &mut AccountId::from_str(contract_address)
+                .expect("Invalid contract address")
+                .to_bytes(),
+        );
+        key_bytes.extend_from_slice(store.as_bytes());
         Self {
             prefix: "wasm".to_string(),
             prefix_len: 4,
