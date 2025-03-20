@@ -134,7 +134,7 @@ mod tests {
     #[cfg(feature = "no-sp1")]
     #[tokio::test]
     async fn test_get_receipt_proof() {
-        use crate::merkle_lib::{tests::persistent::read_sepolia_url, types::MerkleProverEvm};
+        use crate::merkle_lib::{tests::defaults::read_sepolia_url, types::MerkleProverEvm};
         use common::merkle::types::MerkleVerifiable;
         let rpc_url = read_sepolia_url();
         let prover = MerkleProverEvm { rpc_url };

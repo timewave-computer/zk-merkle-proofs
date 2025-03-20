@@ -1,2 +1,3 @@
+pub mod defaults;
 pub mod merkle;
-pub mod persistent;
+pub mod vault;

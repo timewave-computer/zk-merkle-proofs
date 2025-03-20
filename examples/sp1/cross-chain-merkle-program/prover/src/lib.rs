@@ -36,9 +36,9 @@ pub fn prove(input: MerkleProofInput) {
 #[cfg(test)]
 mod tests {
     use crate::prove;
-    use ethereum::merkle_lib::tests::persistent::TEST_VECTOR_ETH_STORAGE_PROOF;
+    use ethereum::merkle_lib::tests::defaults::TEST_VECTOR_ETH_STORAGE_PROOF;
     use neutron::merkle_lib::{
-        tests::persistent::{TEST_VECTOR_NEUTRON_ROOT, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
+        tests::defaults::{TEST_VECTOR_NEUTRON_ROOT, TEST_VECTOR_NEUTRON_STORAGE_PROOF},
         types::NeutronMerkleProofWithRoot,
     };
     use prover_utils::merkle::types::MerkleProofInput;

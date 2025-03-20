@@ -65,14 +65,3 @@ To test against contracts that have been deployed on `Neutron` (pion-1) and `Eth
 ```shell
 $ cargo test
 ```
-
-# Visual Studio
-`.vscode/settings.json`:
-
-```json
-{
-    "rust-analyzer.cargo.features": [
-        #"no-sp1" || "sp1", ("zk-tests")
-    ]
-}
-```
