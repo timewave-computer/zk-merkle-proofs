@@ -57,29 +57,37 @@ mod tests {
         use crate::{
             keys::NeutronKey,
             merkle_lib::{
-                tests::defaults::{read_rpc_url, read_test_vector_height},
+                tests::defaults::{
+                    read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
+                },
                 types::MerkleProverNeutron,
             },
         };
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
         let neutron_key = NeutronKey::new_bank_total_supply("untrn");
-        let _proofs = prover
+        let proofs = prover
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
+        let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
+        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
     }
 
     #[cfg(feature = "no-sp1")]
     #[tokio::test]
     pub async fn test_get_neutron_bank_store_balance_merkle_proof() {
+        use crate::merkle_lib::tests::defaults::read_test_vector_merkle_root;
+
         let rpc_url = read_rpc_url();
         let prover = MerkleProverNeutron { rpc_url };
         let neutron_key = NeutronKey::new_bank_account_balance(
             "untrn",
             "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2",
         );
-        let _proofs = prover
+        let proofs = prover
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
+        let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
+        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
     }
 }
