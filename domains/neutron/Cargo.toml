@@ -1,0 +1,31 @@
+[package]
+name = "neutron"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cosmwasm-std = { version = "2.2.2", optional = true }
+tendermint = { version = "=0.38.1", optional = false }
+tendermint-proto = { version = "=0.38.1", optional = true }
+tendermint-rpc = { version = "=0.38.1", features = [
+    "http-client",
+], optional = true }
+tokio = { version = "1.43", optional = true }
+hex = "0.4"
+base64.workspace = true
+cosmrs = "0.18"
+ics23 = { version = "0.12.0", default-features = false, features = [
+    "host-functions",
+] }
+common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+dotenvy = { workspace = true, optional = true }
+[features]
+no-sp1 = [
+    "tokio",
+    "dotenvy",
+    "tendermint-proto",
+    "tendermint-rpc",
+    "cosmwasm-std",
+]
