@@ -152,8 +152,8 @@ mod test {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let block = provider
             .get_block_by_number(
-                alloy::eips::BlockNumberOrTag::Number(read_sepolia_height()), // for alloy < 0.12
-                                                                              //alloy::rpc::types::BlockTransactionsKind::Full,
+                alloy::eips::BlockNumberOrTag::Number(read_sepolia_height().await), // for alloy < 0.12
+                                                                                    //alloy::rpc::types::BlockTransactionsKind::Full,
             )
             .await
             .expect("Failed to get Block!")
@@ -161,7 +161,7 @@ mod test {
         let state_root = block.header.state_root.to_vec();
         let coprocessor = Coprocessor { config };
         let ethereum_proofs = coprocessor
-            .get_ethereum_proofs(read_sepolia_height(), &state_root)
+            .get_ethereum_proofs(read_sepolia_height().await, &state_root)
             .await;
         let neutron_proofs = coprocessor
             .get_neutron_proofs(read_test_vector_height())

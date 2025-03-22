@@ -3,11 +3,15 @@ use std::{env, io::Read};
 
 #[cfg(feature = "no-sp1")]
 use {
+    alloy::providers::Provider,
+    alloy::providers::ProviderBuilder,
     alloy::{
         hex::{self, FromHex},
         serde::JsonStorageKey,
     },
     dotenvy::dotenv,
+    std::str::FromStr,
+    url::Url,
 };
 
 #[cfg(feature = "no-sp1")]
@@ -70,7 +74,11 @@ pub async fn get_ethereum_test_vector_storage_proof() -> EthereumMerkleProof {
     let storage_key: FixedBytes<32> = FixedBytes::from_hex(SEPOLIA_USDT_SUPPLY).unwrap();
     let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_merkle_proof_from_rpc(SEPOLIA_USDT_SUPPLY, SEPOLIA_USDT, read_sepolia_height())
+        .get_merkle_proof_from_rpc(
+            SEPOLIA_USDT_SUPPLY,
+            SEPOLIA_USDT,
+            read_sepolia_height().await,
+        )
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
     let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
@@ -113,7 +121,11 @@ pub async fn get_ethereum_test_vector_account_proof() -> EthereumMerkleProof {
         hex::decode("0xf4da06dccd5bc3891b4d43b75e4a83ccea460f0bd5cde1901f368472e5ad7e4a").unwrap();
     let merkle_prover = MerkleProverEvm { rpc_url };
     let proof = merkle_prover
-        .get_merkle_proof_from_rpc(SEPOLIA_USDT_SUPPLY, SEPOLIA_USDT, read_sepolia_height())
+        .get_merkle_proof_from_rpc(
+            SEPOLIA_USDT_SUPPLY,
+            SEPOLIA_USDT,
+            read_sepolia_height().await,
+        )
         .await;
     let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof).unwrap();
     let account_proof: Vec<Vec<u8>> = proof_deserialized
@@ -169,13 +181,17 @@ pub fn read_sepolia_url() -> String {
 }
 
 #[cfg(feature = "no-sp1")]
-pub fn read_sepolia_height() -> u64 {
-    dotenv().ok();
-    u64::from_str_radix(
-        &env::var("HEIGHT_ETHEREUM").expect("Missing Sepolia url!"),
-        10,
-    )
-    .unwrap()
+pub async fn read_sepolia_height() -> u64 {
+    let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
+    let block = provider
+        .get_block_by_number(
+            alloy::eips::BlockNumberOrTag::Latest, // for alloy < 0.12
+                                                   //alloy::rpc::types::BlockTransactionsKind::Full,
+        )
+        .await
+        .expect("Failed to get Block!")
+        .expect("Block not found!");
+    block.header.number
 }
 
 pub const TEST_VECTOR_ETH_STORAGE_PROOF: &[u8] = &[

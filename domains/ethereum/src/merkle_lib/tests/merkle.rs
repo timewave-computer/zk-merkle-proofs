@@ -25,7 +25,7 @@ mod tests {
         let mut eth_proof: EthereumMerkleProof = get_ethereum_storage_proof(
             "0x0000000000000000000000000000000000000000000000000000000000000000",
             "0x567A801BdE180DFDd25Ab71e75630B9e26b757e1",
-            read_sepolia_height(),
+            read_sepolia_height().await,
         )
         .await;
         let leaf = eth_proof.proof.last().unwrap().to_owned();
@@ -58,7 +58,7 @@ mod tests {
         let mut eth_proof: EthereumMerkleProof = get_ethereum_storage_proof(
             &alloy::hex::encode(keccak_key),
             "0x8119a4eCD758D2B9B5f06D813BdE7e7aba323A4E",
-            read_sepolia_height(),
+            read_sepolia_height().await,
         )
         .await;
         let leaf = eth_proof.proof.last().unwrap().to_owned();
