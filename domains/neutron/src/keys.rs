@@ -1,11 +1,24 @@
+//! Key management for Neutron blockchain state queries.
+//!
+//! This module provides functionality for creating and managing keys used to query
+//! different types of state on the Neutron blockchain, including bank balances,
+//! WASM contract state, and other storage types.
+
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "no-sp1")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
 
+/// Represents a key used to query state on the Neutron blockchain.
+///
+/// The key consists of a prefix (e.g., "bank", "wasm") and a key string that identifies
+/// the specific state to query. The prefix_len field is used for serialization purposes.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct NeutronKey {
+    /// The prefix indicating the type of state (e.g., "bank", "wasm")
     pub prefix: String,
+    /// The length of the prefix string
     pub prefix_len: usize,
+    /// The specific key identifying the state to query
     pub key: String,
 }
 

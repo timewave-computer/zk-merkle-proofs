@@ -14,17 +14,29 @@ use {
     tendermint_rpc::{Client, HttpClient},
 };
 
+/// Represents a Merkle proof for state on the Neutron blockchain.
+///
+/// This type combines the proof data from Tendermint with the key and value
+/// being proven, allowing for verification of state existence.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronMerkleProof {
+    /// The Tendermint proof operations
     pub proof: ProofOps,
+    /// The key being proven
     pub key: NeutronKey,
+    /// The value being proven
     pub value: Vec<u8>,
 }
 
-// this struct only exists as an input
+/// A wrapper type that combines a Merkle proof with its expected root hash.
+///
+/// This type is used as input for verification operations, providing both
+/// the proof and the expected root hash that the proof should verify against.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct NeutronMerkleProofWithRoot {
+    /// The Merkle proof to verify
     pub proof: NeutronMerkleProof,
+    /// The expected root hash
     pub root: Vec<u8>,
 }
 
@@ -68,8 +80,13 @@ impl MerkleVerifiable for NeutronMerkleProof {
         }
     }
 }
-// we might want to rename this IF this can be generalized to something like "cosmos" or "ics23-common"
+
+/// A prover implementation for retrieving Merkle proofs from a Neutron RPC endpoint.
+///
+/// This type provides functionality to interact with a Neutron node's RPC interface
+/// to retrieve Merkle proofs for specific state queries.
 pub struct MerkleProverNeutron {
+    /// The URL of the Neutron RPC endpoint
     pub rpc_url: String,
 }
 

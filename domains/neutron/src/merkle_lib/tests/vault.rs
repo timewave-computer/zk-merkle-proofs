@@ -11,6 +11,7 @@ mod tests {
             types::{MerkleProverNeutron, NeutronMerkleProof},
         },
     };
+    use base64::Engine;
     use common::merkle::types::{MerkleProver, MerkleVerifiable};
     #[tokio::test]
     pub async fn test_get_neutron_pion_vault_contract_balance_merkle_proof() {
@@ -25,7 +26,11 @@ mod tests {
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
+        neutron_proof.verify(
+            &base64::engine::general_purpose::STANDARD
+                .decode(read_test_vector_merkle_root())
+                .unwrap(),
+        );
     }
 
     #[tokio::test]
@@ -38,6 +43,10 @@ mod tests {
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
+        neutron_proof.verify(
+            &base64::engine::general_purpose::STANDARD
+                .decode(read_test_vector_merkle_root())
+                .unwrap(),
+        );
     }
 }

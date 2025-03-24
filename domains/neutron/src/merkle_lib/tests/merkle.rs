@@ -3,8 +3,8 @@
 mod tests {
     use crate::merkle_lib::{
         tests::defaults::{
-            read_pion_1_default_account_address, TEST_VECTOR_NEUTRON_ROOT,
-            TEST_VECTOR_NEUTRON_STORAGE_PROOF,
+            get_test_vector_neutron_storage_proof, read_pion_1_default_account_address,
+            TEST_VECTOR_NEUTRON_ROOT,
         },
         types::NeutronMerkleProof,
     };
@@ -15,17 +15,21 @@ mod tests {
             types::MerkleProverNeutron,
         },
     };
+    use base64::Engine;
     use common::merkle::types::{MerkleProver, MerkleVerifiable};
     #[tokio::test]
     async fn test_verify_storage_proof_single() {
         let proof: NeutronMerkleProof =
-            serde_json::from_slice(&TEST_VECTOR_NEUTRON_STORAGE_PROOF).unwrap();
+            serde_json::from_slice(&get_test_vector_neutron_storage_proof()).unwrap();
         println!(
             "Value Decoded: {:?}",
             &String::from_utf8_lossy(&proof.value)
         );
-        #[allow(deprecated)]
-        proof.verify(&base64::decode(TEST_VECTOR_NEUTRON_ROOT).unwrap());
+        proof.verify(
+            &base64::engine::general_purpose::STANDARD
+                .decode(TEST_VECTOR_NEUTRON_ROOT)
+                .unwrap(),
+        );
     }
 
     #[cfg(feature = "no-sp1")]
@@ -70,7 +74,11 @@ mod tests {
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
+        neutron_proof.verify(
+            &base64::engine::general_purpose::STANDARD
+                .decode(read_test_vector_merkle_root())
+                .unwrap(),
+        );
     }
 
     #[cfg(feature = "no-sp1")]
@@ -88,6 +96,10 @@ mod tests {
             .get_merkle_proof_from_rpc(&neutron_key.serialize(), "", read_test_vector_height())
             .await;
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        neutron_proof.verify(&base64::decode(read_test_vector_merkle_root()).unwrap());
+        neutron_proof.verify(
+            &base64::engine::general_purpose::STANDARD
+                .decode(read_test_vector_merkle_root())
+                .unwrap(),
+        );
     }
 }
