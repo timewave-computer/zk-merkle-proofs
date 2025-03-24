@@ -109,29 +109,10 @@ pub async fn read_sepolia_height() -> u64 {
     block.header.number.into()
 }
 
-use std::fs;
-use std::path::PathBuf;
-
-fn read_bytes_from_file(path: &str) -> std::io::Result<Vec<u8>> {
-    fs::read(path)
-}
-
 pub fn get_test_vector_eth_storage_proof() -> Vec<u8> {
-    let path: PathBuf = [
-        env!("CARGO_MANIFEST_DIR"),
-        "src/merkle_lib/tests/data/storage_proof.bin",
-    ]
-    .iter()
-    .collect();
-    read_bytes_from_file(path.to_str().unwrap()).unwrap()
+    include_bytes!("data/storage_proof.json").to_vec()
 }
 
 pub fn get_test_vector_eth_account_proof() -> Vec<u8> {
-    let path: PathBuf = [
-        env!("CARGO_MANIFEST_DIR"),
-        "src/merkle_lib/tests/data/account_proof.bin",
-    ]
-    .iter()
-    .collect();
-    read_bytes_from_file(path.to_str().unwrap()).unwrap()
+    include_bytes!("data/account_proof.json").to_vec()
 }
