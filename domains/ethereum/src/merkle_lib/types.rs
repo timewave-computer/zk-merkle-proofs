@@ -1,3 +1,8 @@
+//! Ethereum Merkle proof types and implementations.
+//!
+//! This module provides types and implementations for working with Ethereum Merkle proofs,
+//! including account proofs, storage proofs, and receipt proofs.
+
 use alloy_primitives::{FixedBytes, B256};
 use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
@@ -18,6 +23,16 @@ use {
     url::Url,
 };
 
+/// Represents an Ethereum Merkle proof with its associated data.
+///
+/// This struct contains all the necessary components to verify a Merkle proof
+/// in the Ethereum state trie, storage trie, or receipt trie.
+///
+/// # Fields
+/// * `proof` - The list of proof nodes in the Merkle path
+/// * `key` - The key being proven (e.g., account address, storage key, or receipt index)
+/// * `root` - The root hash of the trie being proven
+/// * `value` - The RLP-encoded value being proven
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumMerkleProof {
     pub proof: Vec<Vec<u8>>,
@@ -28,22 +43,40 @@ pub struct EthereumMerkleProof {
 }
 
 impl EthereumMerkleProof {
+    /// Hashes the key using Keccak-256.
+    ///
+    /// This is used for storage proofs where the key needs to be hashed
+    /// before being used in the trie.
     pub fn hash_key(&mut self) {
         self.key = digest_keccak(&self.key).to_vec()
     }
 }
 
 use super::keccak::digest_keccak;
+
+/// A Merkle prover implementation for Ethereum.
+///
+/// This struct provides functionality to fetch and verify Merkle proofs
+/// from an Ethereum node via RPC.
 #[cfg(feature = "no-sp1")]
 pub struct MerkleProverEvm {
     pub rpc_url: String,
 }
+
 #[cfg(feature = "no-sp1")]
 impl MerkleProver for MerkleProverEvm {
-    /// returns an account proof object for the requested address
-    /// that contains a list of storage proofs for the requested keys
-    /// we can verify the combined proof or extract the account proof
-    /// and individual storage proofs
+    /// Retrieves an account proof from an Ethereum node.
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to prove
+    /// * `address` - The account address to prove
+    /// * `height` - The block height to prove at
+    ///
+    /// # Returns
+    /// A vector of bytes containing the serialized proof
+    ///
+    /// # Panics
+    /// Panics if the RPC call fails or if the proof cannot be serialized
     async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let address_object = Address::from_hex(address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
@@ -58,6 +91,20 @@ impl MerkleProver for MerkleProverEvm {
 
 #[cfg(feature = "no-sp1")]
 impl MerkleProverEvm {
+    /// Retrieves both account and storage proofs for a given account and storage key.
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to prove
+    /// * `address` - The account address to prove
+    /// * `height` - The block height to prove at
+    /// * `block_state_root` - The state root of the block
+    /// * `storage_hash` - The storage root hash of the account
+    ///
+    /// # Returns
+    /// A tuple containing the account proof and storage proof
+    ///
+    /// # Panics
+    /// Panics if the proofs cannot be retrieved or deserialized
     pub async fn get_account_and_storage_proof(
         &self,
         key: &str,
@@ -102,6 +149,17 @@ impl MerkleProverEvm {
         (account_proof, storage_proof)
     }
 
+    /// Retrieves a receipt proof for a specific transaction in a block.
+    ///
+    /// # Arguments
+    /// * `block_hash` - The hash of the block containing the receipt
+    /// * `target_index` - The index of the receipt in the block
+    ///
+    /// # Returns
+    /// A Merkle proof for the receipt
+    ///
+    /// # Panics
+    /// Panics if the block or receipts cannot be retrieved, or if the proof cannot be constructed
     pub async fn get_receipt_proof(
         &self,
         block_hash: &str,
@@ -110,11 +168,7 @@ impl MerkleProverEvm {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let block_hash_b256 = B256::from_str(block_hash).unwrap();
         let block = provider
-            .get_block_by_hash(
-                B256::from_str(block_hash).unwrap(),
-                // for alloy < 0.12
-                //alloy::rpc::types::BlockTransactionsKind::Full,
-            )
+            .get_block_by_hash(B256::from_str(block_hash).unwrap())
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
@@ -132,24 +186,24 @@ impl MerkleProverEvm {
             match inner {
                 ReceiptEnvelope::Eip2930(r) => {
                     let prefix: u8 = 0x01;
-                    insert_receipt(r, &mut trie, index_encoded, Some(prefix));
+                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
                 }
                 ReceiptEnvelope::Eip1559(r) => {
                     let prefix: u8 = 0x02;
-                    insert_receipt(r, &mut trie, index_encoded, Some(prefix));
+                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
                 }
                 ReceiptEnvelope::Eip4844(r) => {
                     let prefix: u8 = 0x03;
                     out.put_u8(0x03);
-                    insert_receipt(r, &mut trie, index_encoded, Some(prefix));
+                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
                 }
                 ReceiptEnvelope::Eip7702(r) => {
                     let prefix: u8 = 0x04;
                     out.put_u8(0x04);
-                    insert_receipt(r, &mut trie, index_encoded, Some(prefix));
+                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
                 }
                 ReceiptEnvelope::Legacy(r) => {
-                    insert_receipt(r, &mut trie, index_encoded, None);
+                    insert_receipt(r, &mut trie, &index_encoded, None);
                 }
                 #[allow(unreachable_patterns)]
                 _ => {
@@ -169,12 +223,26 @@ impl MerkleProverEvm {
     }
 }
 
+/// Implementation of Merkle proof verification for Ethereum proofs.
+///
+/// This implementation verifies proofs against the Ethereum state trie,
+/// storage trie, or receipt trie.
 impl MerkleVerifiable for EthereumMerkleProof {
+    /// Verifies a Merkle proof against an expected root hash.
+    ///
+    /// # Arguments
+    /// * `expected_root` - The expected root hash to verify against
+    ///
+    /// # Returns
+    /// A `MerkleProofOutput` containing the verification result
+    ///
+    /// # Panics
+    /// Panics if the proof is invalid or if the key does not exist
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         let root_hash: FixedBytes<32> = FixedBytes::from_slice(expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
-        for node_encoded in &self.proof.clone() {
-            let hash: B256 = crate::merkle_lib::keccak::digest_keccak(node_encoded).into();
+        for node_encoded in &self.proof {
+            let hash: B256 = digest_keccak(node_encoded).into();
             proof_db
                 .insert(hash.as_slice(), node_encoded.to_vec())
                 .unwrap();
@@ -187,7 +255,6 @@ impl MerkleVerifiable for EthereumMerkleProof {
         MerkleProofOutput {
             root: expected_root.to_vec(),
             key: self.key.clone(),
-            // for Ethereum the value is the last node (a leaf) in the proof
             value: self.proof.last().unwrap().to_vec(),
             domain: common::merkle::types::Domain::ETHEREUM,
         }

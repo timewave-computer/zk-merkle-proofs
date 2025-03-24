@@ -13,6 +13,7 @@ mod tests {
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
+
     #[tokio::test]
     async fn test_vault_contract_balance_on_sepolia() {
         let address =
@@ -38,7 +39,6 @@ mod tests {
     #[tokio::test]
     async fn test_vault_contract_shares_on_sepolia() {
         use alloy::hex;
-
         let storage_slot_key =
             hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
                 .unwrap();

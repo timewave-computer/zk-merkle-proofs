@@ -8,7 +8,7 @@
 // but I dislike the API so let's only consider this if the alloy-trie
 // offers better performance.
 
-// since currenlty preformance is not our top-priority, let's
+// since currently prrformance is not our top-priority, let's
 // delay this decision and stick with eth_trie for now.
 // It's always good to have an alternative in case something breaks.
 #[cfg(all(feature = "no-sp1", feature = "no-sp1"))]
