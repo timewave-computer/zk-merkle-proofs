@@ -1,4 +1,4 @@
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::{
@@ -35,7 +35,7 @@ mod tests {
         eth_proof.verify(&eth_proof.root.to_vec());
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     #[tokio::test]
     async fn test_vault_contract_shares_on_sepolia() {
         use alloy::hex;

@@ -3,7 +3,7 @@
 //! This module provides macros for encoding Ethereum data structures using
 //! the Recursive Length Prefix (RLP) encoding scheme.
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 #[macro_export]
 /// A macro for RLP encoding multiple values in sequence.
 ///

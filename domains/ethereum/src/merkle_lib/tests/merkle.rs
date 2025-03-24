@@ -1,5 +1,5 @@
 #[cfg(test)]
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 mod tests {
     use crate::merkle_lib::{
         tests::defaults::{get_test_vector_eth_account_proof, get_test_vector_eth_storage_proof},

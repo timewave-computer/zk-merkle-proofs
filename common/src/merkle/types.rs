@@ -12,7 +12,7 @@ pub struct MerkleProofOutput {
     /// The value hash that commits to the encoded values
     pub value: Vec<u8>,
     /// The domain identifier indicating which proving system to use
-    pub domain: Domain,
+    pub domain: Option<u64>,
 }
 
 /// A trait for types that can generate Merkle proofs from RPC calls.
@@ -44,15 +44,4 @@ pub trait MerkleVerifiable {
     /// # Returns
     /// A `MerkleProofOutput` containing the verification result
     fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput;
-}
-
-/// Represents the target domain for Merkle proof generation and verification.
-/// This enum is used to determine which proving system should be used
-/// for a particular blockchain network.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub enum Domain {
-    /// Ethereum network domain
-    ETHEREUM,
-    /// Neutron network domain (currently unsupported)
-    NEUTRON,
 }

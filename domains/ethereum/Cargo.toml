@@ -30,7 +30,7 @@ tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patch
 ], optional = true }
 
 [features]
-no-sp1 = [
+no-zkvm = [
     "tokio",
     "reqwest",
     "url",

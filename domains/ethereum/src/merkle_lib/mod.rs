@@ -16,6 +16,7 @@
 //! - [`tests`] - Test utilities and test cases
 
 pub mod keccak;
+#[cfg(feature = "no-zkvm")]
 pub mod logs;
 mod macros;
 pub mod tests;

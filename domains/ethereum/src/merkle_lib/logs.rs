@@ -3,7 +3,6 @@
 //! This module provides functionality for working with Ethereum transaction receipt logs,
 //! including encoding, decoding, and handling of ERC20 transfer events.
 
-#[cfg(feature = "no-sp1")]
 use {
     crate::encode,
     alloy::{
@@ -26,7 +25,6 @@ use {
 ///
 /// # Panics
 /// Panics if the insertion into the trie fails
-#[cfg(feature = "no-sp1")]
 pub fn insert_receipt(
     r: ReceiptWithBloom<Receipt<AlloyLog>>,
     trie: &mut EthTrie<MemoryDB>,
@@ -67,7 +65,6 @@ pub fn insert_receipt(
 /// * `address` - The address of the contract that emitted the log
 /// * `topics` - Array of indexed parameters from the event
 /// * `data` - The non-indexed parameters of the event
-#[cfg(feature = "no-sp1")]
 #[derive(Debug, Clone)]
 pub struct Log {
     pub address: Address,
@@ -75,7 +72,6 @@ pub struct Log {
     pub data: Vec<u8>,
 }
 
-#[cfg(feature = "no-sp1")]
 impl Log {
     /// Calculates the RLP header for this log entry.
     ///
@@ -91,7 +87,6 @@ impl Log {
     }
 }
 
-#[cfg(feature = "no-sp1")]
 impl Encodable for Log {
     /// Encodes the log entry using RLP encoding.
     ///
@@ -116,11 +111,9 @@ impl Encodable for Log {
 ///
 /// This type is used to represent 32-byte hashes in the Ethereum protocol,
 /// such as event topics and transaction hashes.
-#[cfg(feature = "no-sp1")]
 #[derive(Debug, RlpEncodableWrapper, PartialEq, Clone)]
 pub struct H256(pub [u8; 32]);
 
-#[cfg(feature = "no-sp1")]
 impl H256 {
     /// Creates a new H256 with all bytes set to zero.
     ///
