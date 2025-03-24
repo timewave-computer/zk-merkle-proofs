@@ -110,9 +110,9 @@ pub async fn read_sepolia_height() -> u64 {
 }
 
 pub fn get_test_vector_eth_storage_proof() -> Vec<u8> {
-    include_bytes!("data/storage_proof.json").to_vec()
+    include_bytes!("data/storage_proof.bin").to_vec()
 }
 
 pub fn get_test_vector_eth_account_proof() -> Vec<u8> {
-    include_bytes!("data/account_proof.json").to_vec()
+    include_bytes!("data/account_proof.bin").to_vec()
 }
