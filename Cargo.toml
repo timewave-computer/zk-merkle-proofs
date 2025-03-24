@@ -1,5 +1,5 @@
 [workspace]
-members = ["common", "domains/ethereum", "domains/neutron"]
+members = ["common", "domains/ethereum"]
 resolver = "2"
 
 
@@ -7,7 +7,6 @@ resolver = "2"
 opt-level = 3
 
 [workspace.dependencies]
-neutron = { path = "domains/neutron" }
 ethereum = { path = "domains/ethereum" }
 base64 = "0.22.1"
 hex = "0.4"
