@@ -66,6 +66,7 @@ To test against contracts that have been deployed on `Neutron` (pion-1) and `Eth
 $ cargo test
 ```
 
+# Documentation 
 To serve the documentation locally:
 ```shell
 $ cargo doc --no-deps --open
