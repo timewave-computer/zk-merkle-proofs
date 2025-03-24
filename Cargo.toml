@@ -1,5 +1,5 @@
 [workspace]
-members = ["common", "domains/ethereum", "prover-utils"]
+members = ["common", "domains/ethereum"]
 resolver = "2"
 
 
@@ -10,7 +10,6 @@ opt-level = 3
 ethereum = { path = "domains/ethereum" }
 base64 = "0.22.1"
 hex = "0.4"
-prover-utils = { path = "prover-utils" }
 common = { path = "common" }
 tokio = { version = "1.4.11", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
