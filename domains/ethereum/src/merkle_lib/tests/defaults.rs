@@ -1,4 +1,4 @@
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 use {
     crate::{merkle_lib::types::EthereumMerkleProof, merkle_lib::types::MerkleProverEvm},
     alloy::{hex::FromHex, serde::JsonStorageKey},
@@ -7,7 +7,7 @@ use {
     std::{env, io::Read},
 };
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub async fn get_ethereum_storage_proof(
     key: &str,
     address: &str,
@@ -55,7 +55,7 @@ pub async fn get_ethereum_storage_proof(
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     #[tokio::test]
     async fn test_get_receipt_proof() {
         use crate::merkle_lib::{tests::defaults::read_sepolia_url, types::MerkleProverEvm};
@@ -73,26 +73,26 @@ mod tests {
     }
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_ethereum_vault_contract_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_SEPOLIA_VAULT_EXAMPLE_CONTRACT_ADDRESS")
         .expect("Missing Sepolia Vault Contract Address!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_sepolia_default_account_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_sepolia_url() -> String {
     dotenv().ok();
     env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub async fn read_sepolia_height() -> u64 {
     use alloy::providers::{Provider, ProviderBuilder};
     use std::str::FromStr;
@@ -109,29 +109,10 @@ pub async fn read_sepolia_height() -> u64 {
     block.header.number.into()
 }
 
-use std::fs;
-use std::path::PathBuf;
-
-fn read_bytes_from_file(path: &str) -> std::io::Result<Vec<u8>> {
-    fs::read(path)
-}
-
 pub fn get_test_vector_eth_storage_proof() -> Vec<u8> {
-    let path: PathBuf = [
-        env!("CARGO_MANIFEST_DIR"),
-        "src/merkle_lib/tests/data/storage_proof.bin",
-    ]
-    .iter()
-    .collect();
-    read_bytes_from_file(path.to_str().unwrap()).unwrap()
+    include_bytes!("data/storage_proof.json").to_vec()
 }
 
 pub fn get_test_vector_eth_account_proof() -> Vec<u8> {
-    let path: PathBuf = [
-        env!("CARGO_MANIFEST_DIR"),
-        "src/merkle_lib/tests/data/account_proof.bin",
-    ]
-    .iter()
-    .collect();
-    read_bytes_from_file(path.to_str().unwrap()).unwrap()
+    include_bytes!("data/account_proof.json").to_vec()
 }

@@ -9,7 +9,7 @@ use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 use {
     crate::merkle_lib::logs::insert_receipt,
     alloy::hex::{self, FromHex},
@@ -53,17 +53,16 @@ impl EthereumMerkleProof {
 }
 
 use super::keccak::digest_keccak;
-
 /// A Merkle prover implementation for Ethereum.
 ///
 /// This struct provides functionality to fetch and verify Merkle proofs
 /// from an Ethereum node via RPC.
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub struct MerkleProverEvm {
     pub rpc_url: String,
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 impl MerkleProver for MerkleProverEvm {
     /// Retrieves an account proof from an Ethereum node.
     ///
@@ -89,7 +88,7 @@ impl MerkleProver for MerkleProverEvm {
     }
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 impl MerkleProverEvm {
     /// Retrieves both account and storage proofs for a given account and storage key.
     ///
@@ -256,7 +255,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
             root: expected_root.to_vec(),
             key: self.key.clone(),
             value: self.proof.last().unwrap().to_vec(),
-            domain: common::merkle::types::Domain::ETHEREUM,
+            domain: None,
         }
     }
 }
