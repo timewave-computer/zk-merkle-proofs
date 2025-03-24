@@ -1,5 +1,5 @@
 #[cfg(test)]
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 mod tests {
     use crate::merkle_lib::{
         tests::defaults::{
@@ -32,7 +32,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     #[tokio::test]
     async fn test_get_neutron_wasm_store_dictionary_merkle_proof() {
         use crate::{
@@ -53,7 +53,7 @@ mod tests {
             .await;
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     // first verifies account state, then a single storage proof
     // currently the variables need to be manually set before running the test
     #[tokio::test]
@@ -81,7 +81,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     #[tokio::test]
     pub async fn test_get_neutron_bank_store_balance_merkle_proof() {
         use crate::merkle_lib::tests::defaults::read_test_vector_merkle_root;

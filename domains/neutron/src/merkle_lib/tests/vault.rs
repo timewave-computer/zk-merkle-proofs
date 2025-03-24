@@ -1,4 +1,4 @@
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 #[cfg(test)]
 mod tests {
     use crate::{

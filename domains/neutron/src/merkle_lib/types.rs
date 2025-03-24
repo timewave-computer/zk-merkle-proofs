@@ -7,7 +7,7 @@ use ics23::{
 use serde::{Deserialize, Serialize};
 use tendermint::merkle::proof::ProofOps;
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 use {
     common::merkle::types::MerkleProver,
     tendermint::block::Height,
@@ -90,7 +90,7 @@ pub struct MerkleProverNeutron {
     pub rpc_url: String,
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 impl MerkleProver for MerkleProverNeutron {
     #[allow(unused)]
     async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {

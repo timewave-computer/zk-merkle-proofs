@@ -1,16 +1,16 @@
 #[cfg(test)]
 mod tests {}
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 use {dotenvy::dotenv, std::env};
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_rpc_url() -> String {
     dotenv().ok();
     env::var("NEUTRON_RPC").expect("Missing Neutron RPC url!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_test_vector_height() -> u64 {
     dotenv().ok();
     env::var("HEIGHT_NEUTRON")
@@ -19,20 +19,20 @@ pub fn read_test_vector_height() -> u64 {
         .expect("Failed to parse test vector as u64: Amount")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_test_vector_merkle_root() -> String {
     dotenv().ok();
     env::var("MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_pion_1_vault_contract_address() -> String {
     dotenv().ok();
     env::var("NEUTRON_PION_1_VAULT_EXAMPLE_CONTRACT_ADDRESS")
         .expect("Missing Pion 1 Vault Contract Address!")
 }
 
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 pub fn read_pion_1_default_account_address() -> String {
     dotenv().ok();
     env::var("NEUTRON_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Neutron Default Account Address!")

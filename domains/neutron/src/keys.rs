@@ -5,7 +5,7 @@
 //! WASM contract state, and other storage types.
 
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "no-sp1")]
+#[cfg(feature = "no-zkvm")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
 
 /// Represents a key used to query state on the Neutron blockchain.
@@ -42,7 +42,7 @@ impl NeutronKey {
     }
     // create a new neutron key for a mapping from address:value that lives under some contract
     // this is useful for examples where users are assigned balances
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     pub fn new_wasm_account_mapping(store: &[u8], key: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
         key_bytes.append(
@@ -62,7 +62,7 @@ impl NeutronKey {
         }
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     pub fn new_wasm_stored_value(store: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
         key_bytes.append(
@@ -78,7 +78,7 @@ impl NeutronKey {
         }
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     pub fn new_bank_total_supply(denom: &str) -> Self {
         // supply prefix is 0x00
         // see https://protective-bearberry-a26.notion.site/Query-the-state-of-a-Cosmos-chain-and-verify-the-proof-1a55cfa0622c8055816ae6e6aec7f319?pvs=4
@@ -91,7 +91,7 @@ impl NeutronKey {
         }
     }
 
-    #[cfg(feature = "no-sp1")]
+    #[cfg(feature = "no-zkvm")]
     pub fn new_bank_account_balance(denom: &str, address: &str) -> Self {
         // balance prefix is 0x02
         // see https://protective-bearberry-a26.notion.site/Query-the-state-of-a-Cosmos-chain-and-verify-the-proof-1a55cfa0622c8055816ae6e6aec7f319?pvs=4
