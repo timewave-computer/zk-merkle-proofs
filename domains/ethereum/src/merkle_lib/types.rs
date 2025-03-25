@@ -37,9 +37,9 @@ use {
 pub struct EthereumMerkleProof {
     pub proof: Vec<Vec<u8>>,
     pub key: Vec<u8>,
-    pub root: Vec<u8>,
     // the rlp encoded value
     pub value: Vec<u8>,
+    pub height: u64,
 }
 
 impl EthereumMerkleProof {
@@ -109,8 +109,6 @@ impl MerkleProverEvm {
         key: &str,
         address: &str,
         height: u64,
-        block_state_root: &[u8],
-        storage_hash: Vec<u8>,
     ) -> (EthereumMerkleProof, EthereumMerkleProof) {
         let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
         let proof_deserialized: EIP1186AccountProofResponse =
@@ -121,10 +119,10 @@ impl MerkleProverEvm {
             .map(|b| b.to_vec())
             .collect();
         let account_proof = EthereumMerkleProof {
-            root: block_state_root.to_vec(),
             proof: account_proof.clone(),
             key: hex::decode(address).unwrap(),
-            value: storage_hash,
+            value: account_proof.last().unwrap().to_vec(),
+            height,
         };
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
@@ -134,7 +132,6 @@ impl MerkleProverEvm {
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
         let storage_proof = EthereumMerkleProof {
-            root: proof_deserialized.storage_hash.to_vec(),
             proof: first_storage_proof.0.clone(),
             key: first_storage_proof
                 .1
@@ -144,6 +141,7 @@ impl MerkleProverEvm {
                 .unwrap()
                 .to_vec(),
             value: alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
+            height,
         };
         (account_proof, storage_proof)
     }
@@ -161,18 +159,19 @@ impl MerkleProverEvm {
     /// Panics if the block or receipts cannot be retrieved, or if the proof cannot be constructed
     pub async fn get_receipt_proof(
         &self,
-        block_hash: &str,
+        block_height: u64,
         target_index: u32,
     ) -> EthereumMerkleProof {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
-        let block_hash_b256 = B256::from_str(block_hash).unwrap();
         let block = provider
-            .get_block_by_hash(B256::from_str(block_hash).unwrap())
+            .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(block_height))
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
         let receipts: Vec<TransactionReceipt> = provider
-            .get_block_receipts(alloy::eips::BlockId::Hash(block_hash_b256.into()))
+            .get_block_receipts(alloy::eips::BlockId::Number(
+                alloy::eips::BlockNumberOrTag::Number(block_height),
+            ))
             .await
             .unwrap()
             .unwrap();
@@ -215,9 +214,9 @@ impl MerkleProverEvm {
         let proof = trie.get_proof(&receipt_key).unwrap();
         EthereumMerkleProof {
             proof,
-            root: block.header.receipts_root.to_vec(),
             key: receipt_key,
             value: serde_json::to_vec(&receipts).unwrap(),
+            height: block.header.number,
         }
     }
 }
@@ -237,7 +236,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
     ///
     /// # Panics
     /// Panics if the proof is invalid or if the key does not exist
-    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+    fn verify(&self, expected_root: &[u8], domain: u64) -> MerkleProofOutput {
         let root_hash: FixedBytes<32> = FixedBytes::from_slice(expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof {
@@ -248,14 +247,15 @@ impl MerkleVerifiable for EthereumMerkleProof {
         }
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
-        trie.verify_proof(root_hash, &self.key, self.proof.clone())
+        let value = trie
+            .verify_proof(root_hash, &self.key, self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
         MerkleProofOutput {
             root: expected_root.to_vec(),
             key: self.key.clone(),
-            value: self.proof.last().unwrap().to_vec(),
-            domain: None,
+            value,
+            domain,
         }
     }
 }

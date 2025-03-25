@@ -12,7 +12,7 @@ pub struct MerkleProofOutput {
     /// The value hash that commits to the encoded values
     pub value: Vec<u8>,
     /// The domain identifier indicating which proving system to use
-    pub domain: Option<u64>,
+    pub domain: u64,
 }
 
 /// A trait for types that can generate Merkle proofs from RPC calls.
@@ -43,5 +43,5 @@ pub trait MerkleVerifiable {
     ///
     /// # Returns
     /// A `MerkleProofOutput` containing the verification result
-    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput;
+    fn verify(&self, expected_root: &[u8], domain: u64) -> MerkleProofOutput;
 }
