@@ -33,7 +33,7 @@ mod tests {
         let merkle_prover = MerkleProverEvm {
             rpc_url: read_sepolia_url().to_string(),
         };
-        let (mut account_proof, mut eth_proof) = merkle_prover
+        let (account_proof, eth_proof) = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&keccak_key),
                 &read_ethereum_vault_contract_address(),
@@ -47,13 +47,9 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        // todo: remove the need for this
-        account_proof.hash_key();
         let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
         let leaf = eth_proof.proof.last().unwrap().to_owned();
-        // todo: remove the need for this
-        eth_proof.hash_key();
         eth_proof.verify(account.storage_root.as_slice(), 0);
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
@@ -73,7 +69,7 @@ mod tests {
         let merkle_prover = MerkleProverEvm {
             rpc_url: read_sepolia_url().to_string(),
         };
-        let (mut account_proof, mut eth_proof) = merkle_prover
+        let (account_proof, eth_proof) = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&storage_slot_key),
                 &read_ethereum_vault_contract_address(),
@@ -87,13 +83,9 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        // todo: remove the need for this
-        account_proof.hash_key();
         let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
         let leaf = eth_proof.proof.last().unwrap().to_owned();
-        // todo: remove the need for this
-        eth_proof.hash_key();
         eth_proof.verify(account.storage_root.as_slice(), 0);
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();

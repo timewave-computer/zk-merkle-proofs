@@ -47,6 +47,25 @@ impl EthereumMerkleProof {
     ///
     /// This is used for storage proofs where the key needs to be hashed
     /// before being used in the trie.
+    pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
+        let mut proof = Self {
+            proof,
+            key,
+            value,
+            height,
+        };
+        proof.hash_key();
+        proof
+    }
+    // we need raw proofs for the receipt proof
+    pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
+        Self {
+            proof,
+            key,
+            value,
+            height,
+        }
+    }
     pub fn hash_key(&mut self) {
         self.key = digest_keccak(&self.key).to_vec()
     }
@@ -118,12 +137,12 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let account_proof = EthereumMerkleProof {
-            proof: account_proof.clone(),
-            key: hex::decode(address).unwrap(),
-            value: account_proof.last().unwrap().to_vec(),
+        let account_proof = EthereumMerkleProof::new(
+            account_proof.clone(),
+            hex::decode(address).unwrap(),
+            account_proof.last().unwrap().to_vec(),
             height,
-        };
+        );
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
             .iter()
@@ -131,18 +150,18 @@ impl MerkleProverEvm {
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
-        let storage_proof = EthereumMerkleProof {
-            proof: first_storage_proof.0.clone(),
-            key: first_storage_proof
+        let storage_proof = EthereumMerkleProof::new(
+            first_storage_proof.0.clone(),
+            first_storage_proof
                 .1
                 .as_b256()
                 .bytes()
                 .collect::<Result<Vec<u8>, _>>()
                 .unwrap()
                 .to_vec(),
-            value: alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
+            alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
             height,
-        };
+        );
         (account_proof, storage_proof)
     }
 
@@ -212,12 +231,12 @@ impl MerkleProverEvm {
         trie.root_hash().unwrap();
         let receipt_key: Vec<u8> = alloy_rlp::encode(target_index);
         let proof = trie.get_proof(&receipt_key).unwrap();
-        EthereumMerkleProof {
+        EthereumMerkleProof::new_raw(
             proof,
-            key: receipt_key,
-            value: serde_json::to_vec(&receipts).unwrap(),
-            height: block.header.number,
-        }
+            receipt_key,
+            serde_json::to_vec(&receipts).unwrap(),
+            block.header.number,
+        )
     }
 }
 
