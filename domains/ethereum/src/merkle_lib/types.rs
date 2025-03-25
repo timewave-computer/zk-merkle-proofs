@@ -144,7 +144,7 @@ impl MerkleProverEvm {
         let account_proof = EthereumMerkleProof::new(
             account_proof.clone(),
             hex::decode(address).unwrap(),
-            account_proof.last().unwrap().to_vec(),
+            vec![],
             height,
         );
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
@@ -163,10 +163,62 @@ impl MerkleProverEvm {
                 .collect::<Result<Vec<u8>, _>>()
                 .unwrap()
                 .to_vec(),
-            alloy_rlp::encode(proof_deserialized.storage_proof.first().unwrap().value),
+            vec![],
             height,
         );
         (account_proof, storage_proof)
+    }
+
+    pub async fn get_account_proof(
+        &self,
+        key: &str,
+        address: &str,
+        height: u64,
+    ) -> EthereumMerkleProof {
+        let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
+        let proof_deserialized: EIP1186AccountProofResponse =
+            serde_json::from_slice(&proof).unwrap();
+        let account_proof: Vec<Vec<u8>> = proof_deserialized
+            .account_proof
+            .iter()
+            .map(|b| b.to_vec())
+            .collect();
+        EthereumMerkleProof::new(
+            account_proof.clone(),
+            hex::decode(address).unwrap(),
+            vec![],
+            height,
+        )
+    }
+
+    pub async fn get_storage_proof(
+        &self,
+        key: &str,
+        address: &str,
+        height: u64,
+    ) -> EthereumMerkleProof {
+        let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
+        let proof_deserialized: EIP1186AccountProofResponse =
+            serde_json::from_slice(&proof).unwrap();
+        let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
+            .storage_proof
+            .iter()
+            .cloned()
+            .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
+            .collect();
+        let first_storage_proof = raw_storage_proofs.first().unwrap();
+        EthereumMerkleProof::new(
+            first_storage_proof.0.clone(),
+            first_storage_proof
+                .1
+                .as_b256()
+                .bytes()
+                .collect::<Result<Vec<u8>, _>>()
+                .unwrap()
+                .to_vec(),
+            vec![],
+            height,
+        )
     }
 
     /// Retrieves a receipt proof for a specific transaction in a block.

@@ -11,6 +11,7 @@ mod tests {
             read_sepolia_height,
         },
     };
+    use alloy::hex;
     use alloy::{
         consensus::Account,
         hex::FromHex,
@@ -33,14 +34,14 @@ mod tests {
         let merkle_prover = MerkleProverEvm {
             rpc_url: read_sepolia_url().to_string(),
         };
-        let (account_proof, eth_proof) = merkle_prover
+        let (account_proof, storage_proof) = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&keccak_key),
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
             .await;
-        assert_eq!(eth_proof.height, sepolia_height);
+        assert_eq!(storage_proof.height, sepolia_height);
         assert_eq!(account_proof.height, sepolia_height);
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
@@ -49,18 +50,17 @@ mod tests {
             .expect("Block not found!");
         let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
-        let leaf = eth_proof.proof.last().unwrap().to_owned();
-        eth_proof.verify(account.storage_root.as_slice(), 0);
+        let leaf = storage_proof.proof.last().unwrap().to_owned();
+        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
         let value_encoded = leaf_decoded.get(1).unwrap();
-        assert_eq!(value_encoded.to_vec(), eth_proof.value);
+        assert_eq!(value_encoded.to_vec(), proof_output.value);
     }
 
     #[tokio::test]
     async fn test_vault_contract_shares_on_sepolia() {
         let sepolia_height = read_sepolia_height().await;
-        use alloy::hex;
         let storage_slot_key =
             hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
                 .unwrap();
@@ -69,27 +69,65 @@ mod tests {
         let merkle_prover = MerkleProverEvm {
             rpc_url: read_sepolia_url().to_string(),
         };
-        let (account_proof, eth_proof) = merkle_prover
+        let (account_proof, storage_proof) = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&storage_slot_key),
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
             .await;
-        assert_eq!(eth_proof.height, sepolia_height);
-        assert_eq!(account_proof.height, sepolia_height);
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
         let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
+        println!("Block Root: {:?}", block.header.state_root);
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
-        let leaf = eth_proof.proof.last().unwrap().to_owned();
-        eth_proof.verify(account.storage_root.as_slice(), 0);
+        let leaf = storage_proof.proof.last().unwrap().to_owned();
+        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
+        println!("Account Root: {:?}", account.storage_root);
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
         let value_encoded = leaf_decoded.get(1).unwrap();
-        assert_eq!(value_encoded.to_vec(), eth_proof.value);
+        assert_eq!(value_encoded.to_vec(), proof_output.value);
+    }
+
+    #[tokio::test]
+    async fn test_account_and_storage_proof_from_rpc() {
+        let sepolia_height = read_sepolia_height().await;
+        let storage_slot_key =
+            hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
+                .unwrap();
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
+        let prover = MerkleProverEvm {
+            rpc_url: read_sepolia_url().to_string(),
+        };
+        let block = provider
+            .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
+            .await
+            .expect("Failed to get Block!")
+            .expect("Block not found!");
+        let account_proof = prover
+            .get_account_proof(
+                &alloy::hex::encode(&storage_slot_key),
+                &read_ethereum_vault_contract_address(),
+                sepolia_height,
+            )
+            .await;
+        let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
+        let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
+        let storage_proof = prover
+            .get_storage_proof(
+                &alloy::hex::encode(&storage_slot_key),
+                &read_ethereum_vault_contract_address(),
+                sepolia_height,
+            )
+            .await;
+        let leaf = storage_proof.proof.last().unwrap().to_owned();
+        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
+        let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
+        let value_encoded = leaf_decoded.get(1).unwrap();
+        assert_eq!(value_encoded.to_vec(), proof_output.value);
     }
 }
