@@ -35,18 +35,18 @@ use {
 /// * `value` - The RLP-encoded value being proven
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumMerkleProof {
+    /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,
+    /// The key being proven
     pub key: Vec<u8>,
-    // the rlp encoded value
+    /// The RLP-encoded value being proven
     pub value: Vec<u8>,
+    /// The block height
     pub height: u64,
 }
 
 impl EthereumMerkleProof {
-    /// Hashes the key using Keccak-256.
-    ///
-    /// This is used for storage proofs where the key needs to be hashed
-    /// before being used in the trie.
+    /// Creates a new proof with hashed key.
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
         let mut proof = Self {
             proof,
@@ -57,7 +57,8 @@ impl EthereumMerkleProof {
         proof.hash_key();
         proof
     }
-    // we need raw proofs for the receipt proof
+
+    /// Creates a new proof without hashing the key.
     pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
         Self {
             proof,
@@ -66,6 +67,8 @@ impl EthereumMerkleProof {
             height,
         }
     }
+
+    /// Hashes the key using Keccak-256.
     pub fn hash_key(&mut self) {
         self.key = digest_keccak(&self.key).to_vec()
     }
@@ -78,6 +81,7 @@ use super::keccak::digest_keccak;
 /// from an Ethereum node via RPC.
 #[cfg(feature = "no-zkvm")]
 pub struct MerkleProverEvm {
+    /// The RPC endpoint URL
     pub rpc_url: String,
 }
 

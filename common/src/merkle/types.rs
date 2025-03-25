@@ -5,13 +5,13 @@ use serde::{Deserialize, Serialize};
 /// key, value, and domain information.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct MerkleProofOutput {
-    /// The Merkle root hash that commits to the encoded roots
+    /// The Merkle root hash
     pub root: Vec<u8>,
-    /// The key that was queried in the key-value store
+    /// The queried key
     pub key: Vec<u8>,
-    /// The value hash that commits to the encoded values
+    /// The value hash
     pub value: Vec<u8>,
-    /// The domain identifier indicating which proving system to use
+    /// The domain identifier
     pub domain: u64,
 }
 
@@ -20,7 +20,7 @@ pub struct MerkleProofOutput {
 /// from their respective blockchain networks.
 pub trait MerkleProver {
     #[allow(async_fn_in_trait)]
-    /// Retrieves a Merkle proof for a given key at a specific block height from an RPC endpoint.
+    /// Retrieves a Merkle proof for a given key at a specific block height.
     ///
     /// # Arguments
     /// * `key` - The key to generate a proof for

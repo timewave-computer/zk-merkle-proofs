@@ -31,8 +31,6 @@ pub fn insert_receipt(
     index_encoded: &[u8],
     prefix: Option<u8>,
 ) {
-    //use alloy::hex;
-    //use alloy_primitives::U256;
     let status = r.status();
     let cumulative_gas_used = r.cumulative_gas_used();
     let bloom = r.logs_bloom;
@@ -67,8 +65,11 @@ pub fn insert_receipt(
 /// * `data` - The non-indexed parameters of the event
 #[derive(Debug, Clone)]
 pub struct Log {
+    /// The address of the contract that emitted the log
     pub address: Address,
+    /// Array of indexed parameters from the event
     pub topics: Vec<H256>,
+    /// The non-indexed parameters of the event
     pub data: Vec<u8>,
 }
 
