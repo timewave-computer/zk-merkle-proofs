@@ -86,26 +86,8 @@ pub struct EthereumRawMerkleProof {
 }
 
 impl EthereumRawMerkleProof {
-    /// Creates a new raw Ethereum Merkle proof.
-    ///
-    /// # Arguments
-    /// * `proof` - The list of proof nodes in the Merkle path
-    /// * `key` - The original key before hashing
-    /// * `value` - The RLP-encoded value being proven
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self { proof, key, value }
-    }
-
-    /// Converts this raw proof into a regular Ethereum Merkle proof.
-    ///
-    /// # Returns
-    /// A new `EthereumMerkleProof` with the key hashed using keccak256
-    pub fn as_raw_merkle_proof(&self) -> EthereumMerkleProof {
-        EthereumMerkleProof {
-            proof: self.proof.clone(),
-            key: self.key.clone(),
-            value: self.value.clone(),
-        }
     }
 }
 
@@ -120,7 +102,7 @@ impl From<EthereumRawMerkleProof> for EthereumMerkleProof {
     fn from(proof: EthereumRawMerkleProof) -> Self {
         Self {
             proof: proof.proof,
-            key: digest_keccak(&proof.key).to_vec(),
+            key: proof.key,
             value: proof.value,
         }
     }
@@ -370,7 +352,7 @@ impl MerkleProverEvm {
         let proof = trie.get_proof(&receipt_key).unwrap();
         // must preserve the raw proof for the receipt
         EthereumRawMerkleProof::new(proof, receipt_key, serde_json::to_vec(&receipts).unwrap())
-            .as_raw_merkle_proof()
+            .into()
     }
 }
 
