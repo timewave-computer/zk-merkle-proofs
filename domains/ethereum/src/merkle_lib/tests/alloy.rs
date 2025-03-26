@@ -8,7 +8,7 @@
 // but I dislike the API so let's only consider this if the alloy-trie
 // offers better performance.
 
-// since currently prrformance is not our top-priority, let's
+// since currently performance is not our top-priority, let's
 // delay this decision and stick with eth_trie for now.
 // It's always good to have an alternative in case something breaks.
 #[cfg(feature = "no-zkvm")]
