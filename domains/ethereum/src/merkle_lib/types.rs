@@ -38,7 +38,7 @@ pub struct EthereumMerkleProof {
     /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,
     /// The key being proven
-    pub key: Vec<u8>,
+    pub key: (Vec<u8>, bool),
     /// The RLP-encoded value being proven
     pub value: Vec<u8>,
     /// The block height
@@ -50,7 +50,7 @@ impl EthereumMerkleProof {
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
         let mut proof = Self {
             proof,
-            key,
+            key: (key, false),
             value,
             height,
         };
@@ -62,7 +62,7 @@ impl EthereumMerkleProof {
     pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
         Self {
             proof,
-            key,
+            key: (key, false),
             value,
             height,
         }
@@ -70,7 +70,10 @@ impl EthereumMerkleProof {
 
     /// Hashes the key using Keccak-256.
     pub fn hash_key(&mut self) {
-        self.key = digest_keccak(&self.key).to_vec()
+        if self.key.1 {
+            return;
+        }
+        self.key = (digest_keccak(&self.key.0).to_vec(), true)
     }
 }
 
@@ -323,12 +326,12 @@ impl MerkleVerifiable for EthereumMerkleProof {
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
         let value = trie
-            .verify_proof(root_hash, &self.key, self.proof.clone())
+            .verify_proof(root_hash, &self.key.0, self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
         MerkleProofOutput {
             root: expected_root.to_vec(),
-            key: self.key.clone(),
+            key: self.key.0.clone(),
             value,
             domain,
         }

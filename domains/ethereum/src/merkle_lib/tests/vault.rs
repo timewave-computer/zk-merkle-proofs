@@ -1,7 +1,5 @@
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use crate::merkle_lib::tests::defaults::read_sepolia_url;
     use crate::merkle_lib::types::MerkleProverEvm;
     use crate::merkle_lib::{
@@ -20,6 +18,7 @@ mod tests {
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
+    use std::str::FromStr;
     use url::Url;
 
     #[tokio::test]
