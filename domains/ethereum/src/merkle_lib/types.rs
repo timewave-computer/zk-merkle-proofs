@@ -5,7 +5,7 @@
 
 use super::keccak::digest_keccak;
 use alloy_primitives::{FixedBytes, B256};
-use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
+use common::merkle::types::MerkleVerifiable;
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -43,6 +43,7 @@ pub struct EthereumMerkleProof {
     /// The RLP-encoded value being proven
     pub value: Vec<u8>,
 }
+
 impl EthereumMerkleProof {
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self {
@@ -151,8 +152,14 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let account_proof =
-            EthereumMerkleProof::new(account_proof.clone(), hex::decode(address).unwrap(), vec![]);
+        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+            decode_rlp_bytes(&proof_deserialized.account_proof.last().unwrap());
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        let account_proof = EthereumMerkleProof::new(
+            account_proof.clone(),
+            hex::decode(address).unwrap(),
+            stored_value,
+        );
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
             .iter()
@@ -160,6 +167,9 @@ impl MerkleProverEvm {
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
+        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+            decode_rlp_bytes(&first_storage_proof.0.to_vec().last().unwrap().to_vec());
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         let storage_proof = EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
             first_storage_proof
@@ -169,7 +179,7 @@ impl MerkleProverEvm {
                 .collect::<Result<Vec<u8>, _>>()
                 .unwrap()
                 .to_vec(),
-            vec![],
+            stored_value,
         );
         (account_proof, storage_proof)
     }
@@ -188,7 +198,13 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        EthereumMerkleProof::new(account_proof.clone(), hex::decode(address).unwrap(), vec![])
+        let leaf_node_decoded = decode_rlp_bytes(&proof_deserialized.account_proof.last().unwrap());
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        EthereumMerkleProof::new(
+            account_proof.clone(),
+            hex::decode(address).unwrap(),
+            stored_value,
+        )
     }
 
     pub async fn get_storage_proof(
@@ -207,6 +223,10 @@ impl MerkleProverEvm {
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
+        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+            alloy_rlp::decode_exact(first_storage_proof.0.to_vec().last().unwrap().to_vec())
+                .unwrap();
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
             first_storage_proof
@@ -216,7 +236,7 @@ impl MerkleProverEvm {
                 .collect::<Result<Vec<u8>, _>>()
                 .unwrap()
                 .to_vec(),
-            vec![],
+            stored_value,
         )
     }
 
@@ -302,25 +322,41 @@ impl MerkleVerifiable for EthereumMerkleProof {
     ///
     /// # Panics
     /// Panics if the proof is invalid or if the key does not exist
-    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
-        let root_hash: FixedBytes<32> = FixedBytes::from_slice(expected_root);
+    fn verify(&self, root: &[u8]) -> bool {
+        let root_hash: FixedBytes<32> = FixedBytes::from_slice(root);
         let proof_db = Arc::new(MemoryDB::new(true));
+
         for node_encoded in &self.proof {
             let hash: B256 = digest_keccak(node_encoded).into();
             proof_db
                 .insert(hash.as_slice(), node_encoded.to_vec())
-                .unwrap();
+                .expect("Failed to insert proof node!");
         }
+
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
-        assert_eq!(root_hash, trie.root_hash().unwrap());
-        let value = trie
+
+        if root_hash != trie.root_hash().unwrap() {
+            println!("Root hash mismatch!");
+            return false;
+        }
+
+        let stored_value = trie
             .verify_proof(root_hash, &self.key.clone(), self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
-        MerkleProofOutput {
-            root: expected_root.to_vec(),
-            key: self.key.clone(),
-            value,
+
+        if stored_value != self.value {
+            println!("Value mismatch!");
+            println!("Expected value: {:?}", self.value);
+            println!("Stored value: {:?}", stored_value);
+            return false;
         }
+
+        true
     }
+}
+
+pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
+    let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
+    decoded
 }
