@@ -18,7 +18,6 @@ mod tests {
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
-    use std::fs::File;
     use std::str::FromStr;
     use url::Url;
 
