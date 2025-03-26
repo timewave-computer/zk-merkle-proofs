@@ -14,58 +14,31 @@
 #[cfg(feature = "no-zkvm")]
 #[cfg(test)]
 mod tests {
-    use crate::merkle_lib::keccak::digest_keccak;
-    use alloy::hex;
-    use alloy_primitives::{Bytes, FixedBytes, B256};
-    use alloy_trie::{
-        proof::{ProofNodes, ProofRetainer},
-        HashBuilder, Nibbles,
+    use crate::merkle_lib::{
+        tests::defaults::{get_test_vector_eth_account_proof, get_test_vector_eth_block_root},
+        types::EthereumMerkleProof,
     };
-    use std::str::FromStr;
+    use alloy_primitives::{Bytes, B256};
+    use alloy_trie::{proof::verify_proof, Nibbles};
+
     #[test]
-    fn test_alloy_trie() {
-        let existing_keys = [
-            hex!("0000000000000000000000000000000000000000000000000000000000000000"),
-            hex!("3a00000000000000000000000000000000000000000000000000000000000000"),
-            hex!("3c15000000000000000000000000000000000000000000000000000000000000"),
-        ];
-        let target = Nibbles::unpack(
-            B256::from_str("0x3c19000000000000000000000000000000000000000000000000000000000000")
-                .unwrap(),
+    fn test_verify_account_proof() {
+        let block_root: Vec<u8> = get_test_vector_eth_block_root();
+        let eth_proof: EthereumMerkleProof =
+            serde_json::from_slice(&get_test_vector_eth_account_proof()).unwrap();
+        let root_hash = B256::from_slice(&block_root);
+        let proof_nodes: Vec<Bytes> = eth_proof
+            .proof
+            .iter()
+            .map(|node| Bytes::copy_from_slice(node))
+            .collect();
+        let key = Nibbles::unpack(eth_proof.key);
+        let result = verify_proof(
+            root_hash,
+            key,
+            Some(eth_proof.value.to_vec()),
+            proof_nodes.iter(),
         );
-        let value = B256::with_last_byte(1);
-        let retainer = ProofRetainer::from_iter([target.clone()]);
-        let mut hash_builder = HashBuilder::default().with_proof_retainer(retainer);
-        for key in &existing_keys {
-            hash_builder.add_leaf(Nibbles::unpack(B256::from_slice(key)), &value[..]);
-        }
-        let root = hash_builder.root();
-        assert_eq!(
-            root,
-            triehash_trie_root(existing_keys.map(|key| (B256::from_slice(&key), value)))
-        );
-        let proof = hash_builder.take_proof_nodes();
-        assert_eq!(proof, ProofNodes::from_iter([
-            (Nibbles::default(), Bytes::from_str("f851a0c530c099d779362b6bd0be05039b51ccd0a8ed39e0b2abacab8fe0e3441251878080a07d4ee4f073ae7ce32a6cbcdb015eb73dd2616f33ed2e9fb6ba51c1f9ad5b697b80808080808080808080808080").unwrap()),
-            (Nibbles::from_vec(vec![0x3]), Bytes::from_str("f85180808080808080808080a057fcbd3f97b1093cd39d0f58dafd5058e2d9f79a419e88c2498ff3952cb11a8480a07520d69a83a2bdad373a68b2c9c8c0e1e1c99b6ec80b4b933084da76d644081980808080").unwrap()),
-            (Nibbles::from_vec(vec![0x3, 0xc]), Bytes::from_str("f842a02015000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000001").unwrap())
-        ]));
-    }
-    fn triehash_trie_root<I, K, V>(iter: I) -> B256
-    where
-        I: IntoIterator<Item = (K, V)>,
-        K: AsRef<[u8]> + Ord,
-        V: AsRef<[u8]>,
-    {
-        struct Keccak256Hasher;
-        impl hash_db::Hasher for Keccak256Hasher {
-            type Out = B256;
-            type StdHasher = plain_hasher::PlainHasher;
-            const LENGTH: usize = 32;
-            fn hash(x: &[u8]) -> Self::Out {
-                FixedBytes::from_slice(&digest_keccak(&x))
-            }
-        }
-        triehash::trie_root::<Keccak256Hasher, _, _, _>(iter)
+        assert!(result.is_ok(), "Proof verification failed: {:?}", result);
     }
 }

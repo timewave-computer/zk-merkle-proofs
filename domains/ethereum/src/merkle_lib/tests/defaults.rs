@@ -72,3 +72,11 @@ pub fn get_test_vector_eth_storage_proof() -> Vec<u8> {
 pub fn get_test_vector_eth_account_proof() -> Vec<u8> {
     include_bytes!("data/account_proof.bin").to_vec()
 }
+
+pub fn get_test_vector_eth_block_root() -> Vec<u8> {
+    include_bytes!("data/block_root.bin").to_vec()
+}
+
+pub fn get_test_vector_eth_account_root() -> Vec<u8> {
+    include_bytes!("data/account_root.bin").to_vec()
+}
