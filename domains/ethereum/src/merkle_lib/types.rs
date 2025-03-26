@@ -41,30 +41,26 @@ pub struct EthereumMerkleProof {
     pub key: (Vec<u8>, bool),
     /// The RLP-encoded value being proven
     pub value: Vec<u8>,
-    /// The block height
-    pub height: u64,
 }
 
 impl EthereumMerkleProof {
     /// Creates a new proof with hashed key.
-    pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
+    pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         let mut proof = Self {
             proof,
             key: (key, false),
             value,
-            height,
         };
         proof.hash_key();
         proof
     }
 
     /// Creates a new proof without hashing the key.
-    pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>, height: u64) -> Self {
+    pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self {
             proof,
             key: (key, false),
             value,
-            height,
         }
     }
 
@@ -144,12 +140,8 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let account_proof = EthereumMerkleProof::new(
-            account_proof.clone(),
-            hex::decode(address).unwrap(),
-            vec![],
-            height,
-        );
+        let account_proof =
+            EthereumMerkleProof::new(account_proof.clone(), hex::decode(address).unwrap(), vec![]);
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
             .iter()
@@ -167,7 +159,6 @@ impl MerkleProverEvm {
                 .unwrap()
                 .to_vec(),
             vec![],
-            height,
         );
         (account_proof, storage_proof)
     }
@@ -186,12 +177,7 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        EthereumMerkleProof::new(
-            account_proof.clone(),
-            hex::decode(address).unwrap(),
-            vec![],
-            height,
-        )
+        EthereumMerkleProof::new(account_proof.clone(), hex::decode(address).unwrap(), vec![])
     }
 
     pub async fn get_storage_proof(
@@ -220,7 +206,6 @@ impl MerkleProverEvm {
                 .unwrap()
                 .to_vec(),
             vec![],
-            height,
         )
     }
 
@@ -241,11 +226,6 @@ impl MerkleProverEvm {
         target_index: u32,
     ) -> EthereumMerkleProof {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
-        let block = provider
-            .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(block_height))
-            .await
-            .expect("Failed to get Block!")
-            .expect("Block not found!");
         let receipts: Vec<TransactionReceipt> = provider
             .get_block_receipts(alloy::eips::BlockId::Number(
                 alloy::eips::BlockNumberOrTag::Number(block_height),
@@ -290,12 +270,7 @@ impl MerkleProverEvm {
         trie.root_hash().unwrap();
         let receipt_key: Vec<u8> = alloy_rlp::encode(target_index);
         let proof = trie.get_proof(&receipt_key).unwrap();
-        EthereumMerkleProof::new_raw(
-            proof,
-            receipt_key,
-            serde_json::to_vec(&receipts).unwrap(),
-            block.header.number,
-        )
+        EthereumMerkleProof::new_raw(proof, receipt_key, serde_json::to_vec(&receipts).unwrap())
     }
 }
 

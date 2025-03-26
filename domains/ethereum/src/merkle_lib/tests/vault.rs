@@ -40,8 +40,6 @@ mod tests {
                 sepolia_height,
             )
             .await;
-        assert_eq!(storage_proof.height, sepolia_height);
-        assert_eq!(account_proof.height, sepolia_height);
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
