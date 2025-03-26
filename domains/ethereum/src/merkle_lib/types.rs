@@ -1,7 +1,9 @@
 //! Ethereum Merkle proof types and implementations.
 //!
 //! This module provides types and implementations for working with Ethereum Merkle proofs,
-//! including account proofs, storage proofs, and receipt proofs.
+//! including account proofs, storage proofs, and receipt proofs. It implements the common
+//! Merkle proof traits for Ethereum-specific data structures and provides functionality
+//! to fetch and verify proofs from Ethereum nodes.
 
 use super::keccak::digest_keccak;
 use alloy_primitives::{FixedBytes, B256};
@@ -27,12 +29,13 @@ use {
 /// Represents an Ethereum Merkle proof with its associated data.
 ///
 /// This struct contains all the necessary components to verify a Merkle proof
-/// in the Ethereum state trie, storage trie, or receipt trie.
+/// in the Ethereum state trie, storage trie, or receipt trie. The proof includes
+/// the path from the leaf node to the root, the key being proven, and the RLP-encoded
+/// value at the leaf node.
 ///
 /// # Fields
 /// * `proof` - The list of proof nodes in the Merkle path
 /// * `key` - The key being proven (e.g., account address, storage key, or receipt index)
-/// * `root` - The root hash of the trie being proven
 /// * `value` - The RLP-encoded value being proven
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumMerkleProof {
@@ -45,6 +48,15 @@ pub struct EthereumMerkleProof {
 }
 
 impl EthereumMerkleProof {
+    /// Creates a new Ethereum Merkle proof.
+    ///
+    /// # Arguments
+    /// * `proof` - The list of proof nodes in the Merkle path
+    /// * `key` - The key being proven
+    /// * `value` - The RLP-encoded value being proven
+    ///
+    /// # Note
+    /// The key is automatically hashed using keccak256 before being stored
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self {
             proof,
@@ -54,29 +66,40 @@ impl EthereumMerkleProof {
     }
 }
 
+/// Represents a raw Ethereum Merkle proof before key hashing.
+///
+/// This struct is used as an intermediate representation when constructing
+/// Ethereum Merkle proofs, before the key is hashed using keccak256.
+///
+/// # Fields
+/// * `proof` - The list of proof nodes in the Merkle path
+/// * `key` - The original key before hashing
+/// * `value` - The RLP-encoded value being proven
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumRawMerkleProof {
+    /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,
+    /// The original key before hashing
     pub key: Vec<u8>,
+    /// The RLP-encoded value being proven
     pub value: Vec<u8>,
 }
+
 impl EthereumRawMerkleProof {
+    /// Creates a new raw Ethereum Merkle proof.
+    ///
+    /// # Arguments
+    /// * `proof` - The list of proof nodes in the Merkle path
+    /// * `key` - The original key before hashing
+    /// * `value` - The RLP-encoded value being proven
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self { proof, key, value }
     }
-}
 
-impl From<EthereumRawMerkleProof> for EthereumMerkleProof {
-    fn from(proof: EthereumRawMerkleProof) -> Self {
-        Self {
-            proof: proof.proof,
-            key: digest_keccak(&proof.key).to_vec(),
-            value: proof.value,
-        }
-    }
-}
-
-impl EthereumRawMerkleProof {
+    /// Converts this raw proof into a regular Ethereum Merkle proof.
+    ///
+    /// # Returns
+    /// A new `EthereumMerkleProof` with the key hashed using keccak256
     pub fn as_raw_merkle_proof(&self) -> EthereumMerkleProof {
         EthereumMerkleProof {
             proof: self.proof.clone(),
@@ -86,10 +109,30 @@ impl EthereumRawMerkleProof {
     }
 }
 
+impl From<EthereumRawMerkleProof> for EthereumMerkleProof {
+    /// Converts a raw proof into a regular Ethereum Merkle proof.
+    ///
+    /// # Arguments
+    /// * `proof` - The raw proof to convert
+    ///
+    /// # Returns
+    /// A new `EthereumMerkleProof` with the key hashed using keccak256
+    fn from(proof: EthereumRawMerkleProof) -> Self {
+        Self {
+            proof: proof.proof,
+            key: digest_keccak(&proof.key).to_vec(),
+            value: proof.value,
+        }
+    }
+}
+
 /// A Merkle prover implementation for Ethereum.
 ///
 /// This struct provides functionality to fetch and verify Merkle proofs
 /// from an Ethereum node via RPC.
+///
+/// # Fields
+/// * `rpc_url` - The RPC endpoint URL of the Ethereum node
 #[cfg(feature = "no-zkvm")]
 pub struct MerkleProverEvm {
     /// The RPC endpoint URL
@@ -184,6 +227,18 @@ impl MerkleProverEvm {
         (account_proof, storage_proof)
     }
 
+    /// Retrieves an account proof for a given address.
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to prove
+    /// * `address` - The account address to prove
+    /// * `height` - The block height to prove at
+    ///
+    /// # Returns
+    /// An account proof for the given address
+    ///
+    /// # Panics
+    /// Panics if the proof cannot be retrieved or deserialized
     pub async fn get_account_proof(
         &self,
         key: &str,
@@ -207,6 +262,18 @@ impl MerkleProverEvm {
         )
     }
 
+    /// Retrieves a storage proof for a given account and storage key.
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to prove
+    /// * `address` - The account address to prove
+    /// * `height` - The block height to prove at
+    ///
+    /// # Returns
+    /// A storage proof for the given account and storage key
+    ///
+    /// # Panics
+    /// Panics if the proof cannot be retrieved or deserialized
     pub async fn get_storage_proof(
         &self,
         key: &str,
@@ -312,16 +379,19 @@ impl MerkleProverEvm {
 /// This implementation verifies proofs against the Ethereum state trie,
 /// storage trie, or receipt trie.
 impl MerkleVerifiable for EthereumMerkleProof {
-    /// Verifies a Merkle proof against an expected root hash.
+    /// Verifies the proof against the expected Merkle root.
     ///
     /// # Arguments
-    /// * `expected_root` - The expected root hash to verify against
+    /// * `root` - The expected Merkle root to verify against
     ///
     /// # Returns
-    /// A `MerkleProofOutput` containing the verification result
+    /// A boolean indicating whether the proof is valid for the given root
     ///
-    /// # Panics
-    /// Panics if the proof is invalid or if the key does not exist
+    /// # Note
+    /// The verification process:
+    /// 1. Reconstructs the Merkle path using the proof nodes
+    /// 2. Verifies that the leaf node contains the expected key-value pair
+    /// 3. Checks that the root hash matches the expected root
     fn verify(&self, root: &[u8]) -> bool {
         let root_hash: FixedBytes<32> = FixedBytes::from_slice(root);
         let proof_db = Arc::new(MemoryDB::new(true));
@@ -356,6 +426,16 @@ impl MerkleVerifiable for EthereumMerkleProof {
     }
 }
 
+/// Decodes RLP-encoded bytes into a vector of bytes.
+///
+/// # Arguments
+/// * `bytes` - The RLP-encoded bytes to decode
+///
+/// # Returns
+/// A vector of decoded bytes
+///
+/// # Panics
+/// Panics if the bytes cannot be decoded
 pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
     let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
     decoded

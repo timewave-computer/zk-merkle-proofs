@@ -1,7 +1,9 @@
 //! Ethereum transaction receipt logs handling module.
 //!
 //! This module provides functionality for working with Ethereum transaction receipt logs,
-//! including encoding, decoding, and handling of ERC20 transfer events.
+//! including encoding, decoding, and handling of ERC20 transfer events. It implements
+//! the RLP encoding for log entries and provides utilities for working with log topics
+//! and data.
 
 use {
     crate::encode,
@@ -16,6 +18,9 @@ use {
 };
 
 /// Inserts a transaction receipt into a Merkle Patricia Trie.
+///
+/// This function takes a receipt and inserts it into the trie at the specified index.
+/// The receipt is RLP encoded and optionally prefixed before insertion.
 ///
 /// # Arguments
 /// * `r` - The receipt to insert
@@ -59,6 +64,10 @@ pub fn insert_receipt(
 
 /// Represents an Ethereum log entry containing event data from a transaction.
 ///
+/// This struct represents a log entry emitted by a smart contract during transaction
+/// execution. It contains the contract address that emitted the log, the indexed
+/// parameters (topics), and the non-indexed parameters (data).
+///
 /// # Fields
 /// * `address` - The address of the contract that emitted the log
 /// * `topics` - Array of indexed parameters from the event
@@ -76,6 +85,8 @@ pub struct Log {
 impl Log {
     /// Calculates the RLP header for this log entry.
     ///
+    /// The header contains the list flag and the total length of the encoded payload.
+    ///
     /// # Returns
     /// The RLP header containing the list flag and total payload length
     fn rlp_header(&self) -> alloy_rlp::Header {
@@ -91,6 +102,9 @@ impl Log {
 impl Encodable for Log {
     /// Encodes the log entry using RLP encoding.
     ///
+    /// The encoding follows the Ethereum RLP specification for log entries:
+    /// [address, topics[], data]
+    ///
     /// # Arguments
     /// * `out` - The buffer to write the encoded data to
     fn encode(&self, out: &mut dyn alloy_rlp::BufMut) {
@@ -99,6 +113,8 @@ impl Encodable for Log {
     }
 
     /// Returns the length of the RLP encoded log entry.
+    ///
+    /// This includes the length of the header and the encoded payload.
     ///
     /// # Returns
     /// The total length of the encoded data
@@ -111,7 +127,11 @@ impl Encodable for Log {
 /// A 32-byte hash type used for Ethereum topics and other hash values.
 ///
 /// This type is used to represent 32-byte hashes in the Ethereum protocol,
-/// such as event topics and transaction hashes.
+/// such as event topics and transaction hashes. It provides methods for
+/// creating and manipulating these hash values.
+///
+/// # Fields
+/// * `0` - The 32-byte array containing the hash value
 #[derive(Debug, RlpEncodableWrapper, PartialEq, Clone)]
 pub struct H256(pub [u8; 32]);
 
@@ -132,8 +152,8 @@ impl H256 {
     /// # Returns
     /// A new H256 instance containing the bytes from the slice
     ///
-    /// # Note
-    /// If the slice is shorter than 32 bytes, the remaining bytes will be zero
+    /// # Panics
+    /// Panics if the slice is longer than 32 bytes
     pub fn from_slice(slice: &[u8]) -> Self {
         if !validate_slice(slice) {
             panic!("Topic out of bounds");
@@ -144,10 +164,13 @@ impl H256 {
     }
 }
 
+/// Validates that a byte slice is suitable for creating an H256.
+///
+/// # Arguments
+/// * `slice` - The byte slice to validate
+///
+/// # Returns
+/// A boolean indicating whether the slice is valid
 fn validate_slice(slice: &[u8]) -> bool {
-    if slice.len() > 32 {
-        false
-    } else {
-        true
-    }
+    slice.len() <= 32
 }
