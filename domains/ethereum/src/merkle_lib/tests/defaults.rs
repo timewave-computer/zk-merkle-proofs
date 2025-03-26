@@ -29,7 +29,7 @@ mod tests {
             .expect("Failed to get Block!")
             .expect("Block not found!");
 
-        receipt_proof.verify(&block.header.receipts_root.to_vec(), 0);
+        receipt_proof.verify(&block.header.receipts_root.to_vec());
     }
 }
 

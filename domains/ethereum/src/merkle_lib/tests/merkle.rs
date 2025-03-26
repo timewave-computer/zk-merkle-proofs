@@ -15,13 +15,13 @@ mod tests {
     async fn test_verify_account_proof() {
         let eth_proof: EthereumMerkleProof =
             serde_json::from_slice(&get_test_vector_eth_account_proof()).unwrap();
-        eth_proof.verify(hex::decode(BLOCK_ROOT).unwrap().as_slice(), 0);
+        eth_proof.verify(hex::decode(BLOCK_ROOT).unwrap().as_slice());
     }
 
     #[tokio::test]
     async fn test_verify_storage_proof() {
         let eth_proof: EthereumMerkleProof =
             serde_json::from_slice(&get_test_vector_eth_storage_proof()).unwrap();
-        eth_proof.verify(hex::decode(ACCOUNT_ROOT).unwrap().as_slice(), 0);
+        eth_proof.verify(hex::decode(ACCOUNT_ROOT).unwrap().as_slice());
     }
 }

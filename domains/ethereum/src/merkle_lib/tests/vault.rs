@@ -45,10 +45,10 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
+        let proof_output = account_proof.verify(&block.header.state_root.to_vec());
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
         let leaf = storage_proof.proof.last().unwrap().to_owned();
-        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
+        let proof_output = storage_proof.verify(account.storage_root.as_slice());
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
         let value_encoded = leaf_decoded.get(1).unwrap();
@@ -78,11 +78,11 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
+        let proof_output = account_proof.verify(&block.header.state_root.to_vec());
         println!("Block Root: {:?}", block.header.state_root);
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
         let leaf = storage_proof.proof.last().unwrap().to_owned();
-        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
+        let proof_output = storage_proof.verify(account.storage_root.as_slice());
         println!("Account Root: {:?}", account.storage_root);
         // verify the stored value matches the expected value
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
@@ -112,7 +112,7 @@ mod tests {
                 sepolia_height,
             )
             .await;
-        let proof_output = account_proof.verify(&block.header.state_root.to_vec(), 0);
+        let proof_output = account_proof.verify(&block.header.state_root.to_vec());
         let account: Account = alloy_rlp::decode_exact(&proof_output.value).unwrap();
         let storage_proof = prover
             .get_storage_proof(
@@ -122,7 +122,7 @@ mod tests {
             )
             .await;
         let leaf = storage_proof.proof.last().unwrap().to_owned();
-        let proof_output = storage_proof.verify(account.storage_root.as_slice(), 0);
+        let proof_output = storage_proof.verify(account.storage_root.as_slice());
         let leaf_decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(&leaf).unwrap();
         let value_encoded = leaf_decoded.get(1).unwrap();
         assert_eq!(value_encoded.to_vec(), proof_output.value);

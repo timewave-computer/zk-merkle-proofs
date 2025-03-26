@@ -302,7 +302,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
     ///
     /// # Panics
     /// Panics if the proof is invalid or if the key does not exist
-    fn verify(&self, expected_root: &[u8], domain: u64) -> MerkleProofOutput {
+    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
         let root_hash: FixedBytes<32> = FixedBytes::from_slice(expected_root);
         let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof {
@@ -321,7 +321,6 @@ impl MerkleVerifiable for EthereumMerkleProof {
             root: expected_root.to_vec(),
             key: self.key.clone(),
             value,
-            domain,
         }
     }
 }
