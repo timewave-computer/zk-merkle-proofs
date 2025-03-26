@@ -8,7 +8,7 @@ mod tests {
         types::EthereumMerkleProof,
     };
 
-    const BLOCK_ROOT: &str = "0xe93cb3564551bb8ec869ecd49bbc4f86e7670f495d4b3d5d1632357bd6ee21ac";
+    const BLOCK_ROOT: &str = "0x55abcc2a0c3779634d5f91adadff34aaddf8d3777b13187f511eb4f177d16e78";
     const ACCOUNT_ROOT: &str = "0xdcf78f0817731beac9de067f6cc78ebd8faae572c69162a24ae9faa570d2face";
 
     #[tokio::test]

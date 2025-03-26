@@ -3,6 +3,7 @@
 //! This module provides types and implementations for working with Ethereum Merkle proofs,
 //! including account proofs, storage proofs, and receipt proofs.
 
+use super::keccak::digest_keccak;
 use alloy_primitives::{FixedBytes, B256};
 use common::{merkle::types::MerkleProofOutput, merkle::types::MerkleVerifiable};
 use eth_trie::{EthTrie, MemoryDB, Trie, DB};
@@ -38,42 +39,52 @@ pub struct EthereumMerkleProof {
     /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,
     /// The key being proven
-    pub key: (Vec<u8>, bool),
+    pub key: Vec<u8>,
     /// The RLP-encoded value being proven
     pub value: Vec<u8>,
 }
-
 impl EthereumMerkleProof {
-    /// Creates a new proof with hashed key.
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
-        let mut proof = Self {
-            proof,
-            key: (key, false),
-            value,
-        };
-        proof.hash_key();
-        proof
-    }
-
-    /// Creates a new proof without hashing the key.
-    pub fn new_raw(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self {
             proof,
-            key: (key, false),
+            key: digest_keccak(&key).to_vec(),
             value,
         }
-    }
-
-    /// Hashes the key using Keccak-256.
-    pub fn hash_key(&mut self) {
-        if self.key.1 {
-            return;
-        }
-        self.key = (digest_keccak(&self.key.0).to_vec(), true)
     }
 }
 
-use super::keccak::digest_keccak;
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EthereumRawMerkleProof {
+    pub proof: Vec<Vec<u8>>,
+    pub key: Vec<u8>,
+    pub value: Vec<u8>,
+}
+impl EthereumRawMerkleProof {
+    pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
+        Self { proof, key, value }
+    }
+}
+
+impl From<EthereumRawMerkleProof> for EthereumMerkleProof {
+    fn from(proof: EthereumRawMerkleProof) -> Self {
+        Self {
+            proof: proof.proof,
+            key: digest_keccak(&proof.key).to_vec(),
+            value: proof.value,
+        }
+    }
+}
+
+impl EthereumRawMerkleProof {
+    pub fn as_raw_merkle_proof(&self) -> EthereumMerkleProof {
+        EthereumMerkleProof {
+            proof: self.proof.clone(),
+            key: self.key.clone(),
+            value: self.value.clone(),
+        }
+    }
+}
+
 /// A Merkle prover implementation for Ethereum.
 ///
 /// This struct provides functionality to fetch and verify Merkle proofs
@@ -270,7 +281,9 @@ impl MerkleProverEvm {
         trie.root_hash().unwrap();
         let receipt_key: Vec<u8> = alloy_rlp::encode(target_index);
         let proof = trie.get_proof(&receipt_key).unwrap();
-        EthereumMerkleProof::new_raw(proof, receipt_key, serde_json::to_vec(&receipts).unwrap())
+        // must preserve the raw proof for the receipt
+        EthereumRawMerkleProof::new(proof, receipt_key, serde_json::to_vec(&receipts).unwrap())
+            .as_raw_merkle_proof()
     }
 }
 
@@ -301,12 +314,12 @@ impl MerkleVerifiable for EthereumMerkleProof {
         let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
         assert_eq!(root_hash, trie.root_hash().unwrap());
         let value = trie
-            .verify_proof(root_hash, &self.key.0, self.proof.clone())
+            .verify_proof(root_hash, &self.key.clone(), self.proof.clone())
             .expect("Failed to verify Merkle Proof")
             .expect("Key does not exist!");
         MerkleProofOutput {
             root: expected_root.to_vec(),
-            key: self.key.0.clone(),
+            key: self.key.clone(),
             value,
             domain,
         }
