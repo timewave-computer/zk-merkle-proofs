@@ -135,8 +135,19 @@ impl H256 {
     /// # Note
     /// If the slice is shorter than 32 bytes, the remaining bytes will be zero
     pub fn from_slice(slice: &[u8]) -> Self {
+        if !validate_slice(slice) {
+            panic!("Topic out of bounds");
+        }
         let mut bytes = [0u8; 32];
         bytes[..slice.len()].copy_from_slice(slice);
         Self(bytes)
+    }
+}
+
+fn validate_slice(slice: &[u8]) -> bool {
+    if slice.len() > 32 {
+        false
+    } else {
+        true
     }
 }
