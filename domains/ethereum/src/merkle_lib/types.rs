@@ -179,11 +179,11 @@ impl EvmMerkleRpcClient {
             .collect();
         let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
             decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
-        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        let stored_account = leaf_node_decoded.last().unwrap().to_vec();
         let account_proof = EthereumMerkleProof::new(
             account_proof.clone(),
             hex::decode(address).unwrap(),
-            stored_value,
+            stored_account,
         );
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
@@ -236,11 +236,11 @@ impl EvmMerkleRpcClient {
             .map(|b| b.to_vec())
             .collect();
         let leaf_node_decoded = decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
-        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        let stored_account = leaf_node_decoded.last().unwrap().to_vec();
         EthereumMerkleProof::new(
             account_proof.clone(),
             hex::decode(address).unwrap(),
-            stored_value,
+            stored_account,
         )
     }
 
@@ -351,8 +351,9 @@ impl EvmMerkleRpcClient {
         let proof = trie.get_proof(&receipt_key).unwrap();
         let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
             alloy_rlp::decode_exact(proof.last().unwrap()).unwrap();
-        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
-        EthereumRawMerkleProof::new(proof, receipt_key, stored_value).into()
+        // a single, rlp-encoded receipt
+        let receipt_rlp = leaf_node_decoded.clone().last().unwrap().to_vec();
+        EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into()
     }
 }
 
