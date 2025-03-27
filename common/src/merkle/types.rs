@@ -3,7 +3,7 @@
 /// This trait defines the interface for different proving systems to fetch proofs
 /// from their respective blockchain networks. It provides a standardized way to
 /// retrieve Merkle proofs for any key at a specific block height.
-pub trait MerkleProver {
+pub trait MerkleRpcClient {
     #[allow(async_fn_in_trait)]
     /// Retrieves a Merkle proof for a given key at a specific block height.
     ///
@@ -19,7 +19,7 @@ pub trait MerkleProver {
     /// The exact format of the proof depends on the implementing blockchain network.
     /// The proof should be sufficient to verify the existence and value of the key
     /// in the Merkle tree at the specified block height.
-    async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8>;
+    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8>;
 }
 
 /// A trait for types that can verify Merkle proofs against an expected root.

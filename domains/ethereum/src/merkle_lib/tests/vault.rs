@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::tests::defaults::read_sepolia_url;
-    use crate::merkle_lib::types::{decode_rlp_bytes, MerkleProverEvm};
+    use crate::merkle_lib::types::{decode_rlp_bytes, EvmMerkleRpcClient};
     use crate::merkle_lib::{
         keccak::digest_keccak,
         tests::defaults::{
@@ -29,7 +29,7 @@ mod tests {
         let encoded_key = (address, slot).abi_encode();
         let keccak_key = digest_keccak(&encoded_key).to_vec();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
-        let merkle_prover = MerkleProverEvm {
+        let merkle_prover = EvmMerkleRpcClient {
             rpc_url: read_sepolia_url().to_string(),
         };
         let (account_proof, storage_proof) = merkle_prover
@@ -57,7 +57,7 @@ mod tests {
                 .unwrap();
 
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
-        let merkle_prover = MerkleProverEvm {
+        let merkle_prover = EvmMerkleRpcClient {
             rpc_url: read_sepolia_url().to_string(),
         };
         let (account_proof, storage_proof) = merkle_prover
@@ -84,7 +84,7 @@ mod tests {
             hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
                 .unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
-        let prover = MerkleProverEvm {
+        let prover = EvmMerkleRpcClient {
             rpc_url: read_sepolia_url().to_string(),
         };
         let block = provider

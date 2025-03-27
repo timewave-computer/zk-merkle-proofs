@@ -56,24 +56,23 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_receipt_proof() {
-        use crate::merkle_lib::{tests::defaults::read_sepolia_url, types::MerkleProverEvm};
+        use crate::merkle_lib::{tests::defaults::read_sepolia_url, types::EvmMerkleRpcClient};
         use common::merkle::types::MerkleVerifiable;
         let rpc_url = read_sepolia_url();
-        let prover = MerkleProverEvm { rpc_url };
+        let prover = EvmMerkleRpcClient { rpc_url };
+        let sepolia_height = read_sepolia_height().await;
         let receipt_proof = prover
             // erc20 transfers etc. will be located in the logs
-            .get_receipt_proof(read_sepolia_height().await, 1)
+            .get_receipt_proof(sepolia_height, 1)
             .await;
 
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let block = provider
-            .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(
-                read_sepolia_height().await,
-            ))
+            .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
 
-        receipt_proof.verify(block.header.receipts_root.as_slice());
+        assert!(receipt_proof.verify(block.header.receipts_root.as_slice()));
     }
 }

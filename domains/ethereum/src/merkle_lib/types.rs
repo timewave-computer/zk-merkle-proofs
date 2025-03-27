@@ -21,7 +21,7 @@ use {
     alloy::{consensus::ReceiptEnvelope, rpc::types::TransactionReceipt, serde::JsonStorageKey},
     alloy_primitives::Address,
     alloy_rlp::BufMut,
-    common::merkle::types::MerkleProver,
+    common::merkle::types::MerkleRpcClient,
     std::{io::Read, str::FromStr},
     url::Url,
 };
@@ -116,13 +116,13 @@ impl From<EthereumRawMerkleProof> for EthereumMerkleProof {
 /// # Fields
 /// * `rpc_url` - The RPC endpoint URL of the Ethereum node
 #[cfg(feature = "no-zkvm")]
-pub struct MerkleProverEvm {
+pub struct EvmMerkleRpcClient {
     /// The RPC endpoint URL
     pub rpc_url: String,
 }
 
 #[cfg(feature = "no-zkvm")]
-impl MerkleProver for MerkleProverEvm {
+impl MerkleRpcClient for EvmMerkleRpcClient {
     /// Retrieves an account proof from an Ethereum node.
     ///
     /// # Arguments
@@ -135,7 +135,7 @@ impl MerkleProver for MerkleProverEvm {
     ///
     /// # Panics
     /// Panics if the RPC call fails or if the proof cannot be serialized
-    async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
+    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
         let address_object = Address::from_hex(address).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
         let proof: EIP1186AccountProofResponse = provider
@@ -148,7 +148,7 @@ impl MerkleProver for MerkleProverEvm {
 }
 
 #[cfg(feature = "no-zkvm")]
-impl MerkleProverEvm {
+impl EvmMerkleRpcClient {
     /// Retrieves both account and storage proofs for a given account and storage key.
     ///
     /// # Arguments
@@ -169,7 +169,7 @@ impl MerkleProverEvm {
         address: &str,
         height: u64,
     ) -> (EthereumMerkleProof, EthereumMerkleProof) {
-        let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
+        let proof = self.get_proof(key, address, height).await;
         let proof_deserialized: EIP1186AccountProofResponse =
             serde_json::from_slice(&proof).unwrap();
         let account_proof: Vec<Vec<u8>> = proof_deserialized
@@ -227,7 +227,7 @@ impl MerkleProverEvm {
         address: &str,
         height: u64,
     ) -> EthereumMerkleProof {
-        let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
+        let proof = self.get_proof(key, address, height).await;
         let proof_deserialized: EIP1186AccountProofResponse =
             serde_json::from_slice(&proof).unwrap();
         let account_proof: Vec<Vec<u8>> = proof_deserialized
@@ -262,7 +262,7 @@ impl MerkleProverEvm {
         address: &str,
         height: u64,
     ) -> EthereumMerkleProof {
-        let proof = self.get_merkle_proof_from_rpc(key, address, height).await;
+        let proof = self.get_proof(key, address, height).await;
         let proof_deserialized: EIP1186AccountProofResponse =
             serde_json::from_slice(&proof).unwrap();
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
@@ -349,9 +349,10 @@ impl MerkleProverEvm {
         trie.root_hash().unwrap();
         let receipt_key: Vec<u8> = alloy_rlp::encode(target_index);
         let proof = trie.get_proof(&receipt_key).unwrap();
-        // must preserve the raw proof for the receipt
-        EthereumRawMerkleProof::new(proof, receipt_key, serde_json::to_vec(&receipts).unwrap())
-            .into()
+        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+            alloy_rlp::decode_exact(proof.last().unwrap()).unwrap();
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        EthereumRawMerkleProof::new(proof, receipt_key, stored_value).into()
     }
 }
 
