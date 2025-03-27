@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::tests::defaults::read_sepolia_url;
-    use crate::merkle_lib::types::{decode_rlp_bytes, EvmMerkleRpcClient};
+    use crate::merkle_lib::types::decode_rlp_bytes;
     use crate::merkle_lib::{
         keccak::digest_keccak,
         tests::defaults::{
@@ -9,6 +9,7 @@ mod tests {
             read_sepolia_height,
         },
     };
+    use crate::rpc::EvmMerkleRpcClient;
     use alloy::hex;
     use alloy::{
         hex::FromHex,

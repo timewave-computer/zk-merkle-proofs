@@ -52,11 +52,13 @@ mod tests {
     use alloy::providers::{Provider, ProviderBuilder};
     use url::Url;
 
-    use crate::merkle_lib::tests::defaults::read_sepolia_height;
+    use crate::{
+        merkle_lib::tests::defaults::{read_sepolia_height, read_sepolia_url},
+        rpc::EvmMerkleRpcClient,
+    };
 
     #[tokio::test]
     async fn test_get_receipt_proof() {
-        use crate::merkle_lib::{tests::defaults::read_sepolia_url, types::EvmMerkleRpcClient};
         use common::merkle::types::MerkleVerifiable;
         let rpc_url = read_sepolia_url();
         let prover = EvmMerkleRpcClient { rpc_url };
