@@ -6,11 +6,10 @@
 //! to fetch and verify proofs from Ethereum nodes.
 
 use super::keccak::digest_keccak;
-use alloy_primitives::{FixedBytes, B256};
+use alloy_primitives::{Bytes, B256};
+use alloy_trie::{proof::verify_proof, Nibbles};
 use common::merkle::types::MerkleVerifiable;
-use eth_trie::{EthTrie, MemoryDB, Trie, DB};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 /// Represents an Ethereum Merkle proof with its associated data.
 ///
@@ -113,9 +112,10 @@ impl MerkleVerifiable for EthereumMerkleProof {
     /// 2. Verifies that the leaf node contains the expected key-value pair
     /// 3. Checks that the root hash matches the expected root
     fn verify(&self, root: &[u8]) -> bool {
-        let root_hash: FixedBytes<32> = FixedBytes::from_slice(root);
-        let proof_db = Arc::new(MemoryDB::new(true));
 
+        // old implementation, using eth_trie
+        /*let root_hash: FixedBytes<32> = FixedBytes::from_slice(root);
+        let proof_db = Arc::new(MemoryDB::new(true));
         for node_encoded in &self.proof {
             let hash: B256 = digest_keccak(node_encoded).into();
             proof_db
@@ -140,9 +140,39 @@ impl MerkleVerifiable for EthereumMerkleProof {
             println!("Expected value: {:?}", self.value);
             println!("Stored value: {:?}", stored_value);
             return false;
-        }
+        }*/
 
-        true
+        // new implementation, using alloy_trie
+        let root_hash = B256::from_slice(root);
+        let proof_nodes: Vec<Bytes> = self
+            .proof
+            .iter()
+            .map(|node| Bytes::copy_from_slice(node))
+            .collect();
+
+        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+            decode_rlp_bytes(proof_nodes.to_vec().last().unwrap());
+        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        if stored_value != self.value {
+            println!("Value mismatch!");
+            println!("Expected value: {:?}", self.value);
+            println!("Stored value: {:?}", stored_value);
+            return false;
+        }
+        let key = Nibbles::unpack(&self.key);
+        let result = verify_proof(
+            root_hash,
+            key,
+            Some(self.value.to_vec()),
+            proof_nodes.iter(),
+        );
+        match result {
+            Ok(_) => true,
+            Err(e) => {
+                println!("Proof verification failed: {:?}", e);
+                false
+            }
+        }
     }
 }
 
