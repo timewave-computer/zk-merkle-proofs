@@ -418,6 +418,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
+#[cfg(feature="no-zkvm")]
 pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
     let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
     decoded
