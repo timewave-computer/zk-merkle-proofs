@@ -44,9 +44,9 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        assert!(account_proof.verify(&block.header.state_root.to_vec()));
+        assert!(account_proof.verify(block.header.state_root.as_slice()));
         let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(&account_decoded.get(2).unwrap().to_vec()));
+        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
     }
 
     #[tokio::test]
@@ -72,9 +72,9 @@ mod tests {
             .await
             .expect("Failed to get Block!")
             .expect("Block not found!");
-        assert!(account_proof.verify(&block.header.state_root.to_vec()));
+        assert!(account_proof.verify(block.header.state_root.as_slice()));
         let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(&account_decoded.get(2).unwrap().to_vec()));
+        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
     }
 
     #[tokio::test]
@@ -99,7 +99,7 @@ mod tests {
                 sepolia_height,
             )
             .await;
-        assert!(account_proof.verify(&block.header.state_root.to_vec()));
+        assert!(account_proof.verify(block.header.state_root.as_slice()));
         let storage_proof = prover
             .get_storage_proof(
                 &alloy::hex::encode(&storage_slot_key),
@@ -109,6 +109,6 @@ mod tests {
             .await;
 
         let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(&account_decoded.get(2).unwrap().to_vec()));
+        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
     }
 }

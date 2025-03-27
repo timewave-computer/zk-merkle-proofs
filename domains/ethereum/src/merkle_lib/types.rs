@@ -178,7 +178,7 @@ impl MerkleProverEvm {
             .map(|b| b.to_vec())
             .collect();
         let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
-            decode_rlp_bytes(&proof_deserialized.account_proof.last().unwrap());
+            decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         let account_proof = EthereumMerkleProof::new(
             account_proof.clone(),
@@ -235,7 +235,7 @@ impl MerkleProverEvm {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded = decode_rlp_bytes(&proof_deserialized.account_proof.last().unwrap());
+        let leaf_node_decoded = decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         EthereumMerkleProof::new(
             account_proof.clone(),
@@ -273,8 +273,7 @@ impl MerkleProverEvm {
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
         let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
-            alloy_rlp::decode_exact(first_storage_proof.0.to_vec().last().unwrap().to_vec())
-                .unwrap();
+            alloy_rlp::decode_exact(first_storage_proof.0.to_vec().last().unwrap()).unwrap();
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
@@ -418,7 +417,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-#[cfg(feature="no-zkvm")]
+#[cfg(feature = "no-zkvm")]
 pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
     let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
     decoded
