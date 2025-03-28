@@ -5,8 +5,6 @@
 
 pub mod keccak;
 #[cfg(feature = "no-zkvm")]
-pub mod logs;
-#[cfg(feature = "no-zkvm")]
 mod macros;
 pub mod tests;
 pub mod types;

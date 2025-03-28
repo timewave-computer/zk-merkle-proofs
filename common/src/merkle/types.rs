@@ -3,7 +3,7 @@
 /// This trait defines the interface for different proving systems to fetch proofs
 /// from their respective blockchain networks. It provides a standardized way to
 /// retrieve Merkle proofs for any key at a specific block height.
-pub trait MerkleRpcClient {
+pub trait MerkleClient {
     #[allow(async_fn_in_trait)]
     /// Retrieves a Merkle proof for a given key at a specific block height.
     ///

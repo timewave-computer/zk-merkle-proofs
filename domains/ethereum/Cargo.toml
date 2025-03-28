@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-eth_trie = "0.5.0"
 common.workspace = true
 tokio = { workspace = true, optional = true }
 serde.workspace = true

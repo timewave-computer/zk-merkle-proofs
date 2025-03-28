@@ -1,22 +1,18 @@
-use std::{io::Read, str::FromStr, sync::Arc};
+use std::{io::Read, str::FromStr};
 
 use alloy::{
-    consensus::ReceiptEnvelope,
+    consensus::{Receipt, ReceiptWithBloom, TxReceipt, TxType},
     hex::{self, FromHex},
     providers::{Provider, ProviderBuilder},
     rpc::types::{EIP1186AccountProofResponse, TransactionReceipt},
     serde::JsonStorageKey,
 };
 use alloy_primitives::{Address, FixedBytes};
-use alloy_rlp::BufMut;
-use common::merkle::types::MerkleRpcClient;
-use eth_trie::{EthTrie, MemoryDB, Trie};
+use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
+use common::merkle::types::MerkleClient;
 use url::Url;
 
-use crate::merkle_lib::{
-    logs::insert_receipt,
-    types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof},
-};
+use crate::merkle_lib::types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof};
 
 /// A Merkle prover implementation for Ethereum.
 ///
@@ -30,7 +26,7 @@ pub struct EvmMerkleRpcClient {
     pub rpc_url: String,
 }
 
-impl MerkleRpcClient for EvmMerkleRpcClient {
+impl MerkleClient for EvmMerkleRpcClient {
     /// Retrieves an account proof from an Ethereum node.
     ///
     /// # Arguments
@@ -219,47 +215,66 @@ impl EvmMerkleRpcClient {
             .await
             .unwrap()
             .unwrap();
-        let memdb = Arc::new(MemoryDB::new(true));
-        let mut trie = EthTrie::new(memdb.clone());
-        for (index, receipt) in receipts.clone().into_iter().enumerate() {
-            let inner: ReceiptEnvelope<alloy::rpc::types::Log> = receipt.inner;
-            let mut out: Vec<u8> = Vec::new();
-            let index_encoded = alloy_rlp::encode(index);
-            match inner {
-                ReceiptEnvelope::Eip2930(r) => {
-                    let prefix: u8 = 0x01;
-                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
-                }
-                ReceiptEnvelope::Eip1559(r) => {
-                    let prefix: u8 = 0x02;
-                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
-                }
-                ReceiptEnvelope::Eip4844(r) => {
-                    let prefix: u8 = 0x03;
-                    out.put_u8(0x03);
-                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
-                }
-                ReceiptEnvelope::Eip7702(r) => {
-                    let prefix: u8 = 0x04;
-                    out.put_u8(0x04);
-                    insert_receipt(r, &mut trie, &index_encoded, Some(prefix));
-                }
-                ReceiptEnvelope::Legacy(r) => {
-                    insert_receipt(r, &mut trie, &index_encoded, None);
-                }
-                #[allow(unreachable_patterns)]
-                _ => {
-                    eprintln!("Unknown Receipt Type!")
-                }
-            }
+        let retainer = ProofRetainer::new(vec![Nibbles::unpack(alloy_rlp::encode_fixed_size(
+            &target_index,
+        ))]);
+        let mut hb: HashBuilder = HashBuilder::default().with_proof_retainer(retainer);
+        for i in 0..receipts.len() {
+            let index = adjust_index_for_rlp(i, receipts.len());
+            let index_buffer = alloy_rlp::encode_fixed_size(&index);
+            hb.add_leaf(
+                Nibbles::unpack(&index_buffer),
+                encode_receipt(&receipts[index]).as_slice(),
+            );
         }
-        trie.root_hash().unwrap();
         let receipt_key: Vec<u8> = alloy_rlp::encode(target_index);
-        let proof = trie.get_proof(&receipt_key).unwrap();
+        hb.root();
+        let proof = hb
+            .take_proof_nodes()
+            .into_nodes_sorted()
+            .into_iter()
+            .map(|n| n.1)
+            .collect::<Vec<_>>()
+            .iter()
+            .map(|n| n.to_vec())
+            .collect::<Vec<_>>(); //trie.get_proof(&receipt_key).unwrap();
         let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
-            alloy_rlp::decode_exact(proof.last().unwrap()).unwrap();
-        // a single, rlp-encoded receipt
-        let receipt_rlp = leaf_node_decoded.clone().last().unwrap().to_vec();
+            decode_rlp_bytes(proof.to_vec().last().unwrap());
+        let receipt_rlp = leaf_node_decoded.last().unwrap().to_vec();
         EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into()
+    }
+}
+
+pub const fn adjust_index_for_rlp(i: usize, len: usize) -> usize {
+    if i > 0x7f {
+        i
+    } else if i == 0x7f || i + 1 == len {
+        0
+    } else {
+        i + 1
+    }
+}
+
+fn encode_receipt(receipt: &TransactionReceipt) -> Vec<u8> {
+    let tx_type = receipt.transaction_type();
+    let receipt = receipt.inner.as_receipt_with_bloom().unwrap();
+    let logs = receipt
+        .logs()
+        .iter()
+        .map(|l| l.inner.clone())
+        .collect::<Vec<_>>();
+
+    let consensus_receipt = Receipt {
+        cumulative_gas_used: receipt.cumulative_gas_used(),
+        status: receipt.status_or_post_state(),
+        logs,
+    };
+
+    let rwb = ReceiptWithBloom::new(consensus_receipt, receipt.bloom());
+    let encoded = alloy::rlp::encode(rwb);
+
+    match tx_type {
+        TxType::Legacy => encoded,
+        _ => [vec![tx_type as u8], encoded].concat(),
     }
 }
