@@ -108,41 +108,10 @@ impl MerkleVerifiable for EthereumMerkleProof {
     ///
     /// # Note
     /// The verification process:
-    /// 1. Reconstructs the Merkle path using the proof nodes
+    /// 1. Constructs the trie from the proof nodes and computes the root hash
     /// 2. Verifies that the leaf node contains the expected key-value pair
     /// 3. Checks that the root hash matches the expected root
     fn verify(&self, root: &[u8]) -> bool {
-
-        // old implementation, using eth_trie
-        /*let root_hash: FixedBytes<32> = FixedBytes::from_slice(root);
-        let proof_db = Arc::new(MemoryDB::new(true));
-        for node_encoded in &self.proof {
-            let hash: B256 = digest_keccak(node_encoded).into();
-            proof_db
-                .insert(hash.as_slice(), node_encoded.to_vec())
-                .expect("Failed to insert proof node!");
-        }
-
-        let mut trie = EthTrie::from(proof_db, root_hash).expect("Invalid merkle proof");
-
-        if root_hash != trie.root_hash().unwrap() {
-            println!("Root hash mismatch!");
-            return false;
-        }
-
-        let stored_value = trie
-            .verify_proof(root_hash, &self.key.clone(), self.proof.clone())
-            .expect("Failed to verify Merkle Proof")
-            .expect("Key does not exist!");
-
-        if stored_value != self.value {
-            println!("Value mismatch!");
-            println!("Expected value: {:?}", self.value);
-            println!("Stored value: {:?}", stored_value);
-            return false;
-        }*/
-
-        // new implementation, using alloy_trie
         let root_hash = B256::from_slice(root);
         let proof_nodes: Vec<Bytes> = self
             .proof
@@ -186,7 +155,6 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-#[cfg(feature = "no-zkvm")]
 pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
     let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
     decoded

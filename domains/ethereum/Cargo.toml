@@ -22,7 +22,7 @@ alloy-sol-types = { version = "0.8.23", optional = true }
 alloy-rlp = { version = "0.3.11", features = [
     "derive",
     "arrayvec",
-], optional = true }
+] }
 tiny-keccak = "2.0.2"
 
 # ZKVM precompiles (hash functions)
@@ -38,7 +38,6 @@ no-zkvm = [
     "url",
     "dotenvy",
     "alloy",
-    "alloy-rlp",
     "alloy-sol-types",
 ]
 sp1 = ["tiny-keccak-sp1"]
