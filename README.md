@@ -5,6 +5,29 @@ In the broader context of Valence, we call this unified state the `zk-coprocesso
 
 Our modular design of (ZK) Valence libraries allows us to easily integrate with new zk lightclients and enable developers to choose their own security / verification stack, aside from the default stack that we provide.
 
+## Getting Started
+
+### Prerequisites
+- Rust 1.84.0 or later
+- Basic understanding of blockchain concepts and zero-knowledge proofs
+- Familiarity with Merkle trees and cryptographic proofs
+
+### Core Components
+| Component | Description |
+|-----------|-------------|
+| Common Library | Core traits and types for Merkle proof verification |
+| Chain Libraries | Chain-specific implementations of Merkle proof generation and verification |
+| ZK Programs | Example programs demonstrating cross-chain operations |
+| SP1 Integration | Zero-knowledge virtual machine integration for proof generation |
+
+### Key Features
+
+- **Cross-Chain Merkle Proofs**: Generate and verify Merkle proofs across different blockchain networks
+- **Storage Proof Verification**: Verify storage slot values using Merkle proofs
+- **Account Proof Verification**: Verify account state using Merkle proofs
+- **Receipt Proof Verification**: Verify transaction receipts using Merkle proofs
+- **Modular Design**: Easy integration with new blockchain networks and ZK proving systems
+
 # Adding new Chains to ZK Valence
 At the core of this project are chain-specific merkle proof libraries that implements the `MerkleVerifiable` generic from  [common](common/src/merkle/types.rs).
 This trait must be implemented for every supported chain. Any chain can easily be added to Valence by simply implementing this trait and choosing either a combination of light clients or utilizing Valence's `zk-coprocessor`.
@@ -12,10 +35,42 @@ This trait must be implemented for every supported chain. Any chain can easily b
 Ideally the `MerkleProver` trait is also implemented, as well as some helper functions to construct keys and obtain the full scope of merkle proofs.
 Ultimately we want to be able to prove any state on any network.
 
+### Implementing a New Chain
+
+To add support for a new blockchain network, you'll need to:
+
+1. Create a new directory in `domains/`
+2. Implement the `MerkleVerifiable` trait
+3. Implement the `MerkleRpcClient` trait
+4. Add chain-specific proof generation and verification logic
+5. Add tests for the new implementation
+
+Example implementation structure:
+```rust
+pub struct NewChainMerkleProof {
+    proof: Vec<Vec<u8>>,
+    key: Vec<u8>,
+    value: Vec<u8>,
+}
+
+impl MerkleVerifiable for NewChainMerkleProof {
+    fn verify(&self, root: &[u8]) -> bool {
+        // Chain-specific verification logic
+    }
+}
+```
+
 # ZK Valence Supported Chains
 | Ethereum | Neutron |
 |---|---|
 | [Readme](domains/ethereum/README.md) | [Readme](domains/neutron/README.md) |
+
+### Chain-Specific Features
+
+| Chain | Account Proofs | Storage Proofs | Receipt Proofs |
+|-------|---------------|----------------|----------------|
+| Ethereum | ✅ | ✅ | ✅ |
+| Neutron | ✅ | ✅ | ❌ |
 
 # ZK Rate calculation for a Cross Chain Vault
 We currently have two mock vault contracts deployed on Sepolia (Ethereum) and Pion-1 (Neutron).
@@ -66,7 +121,6 @@ To test against contracts that have been deployed on `Neutron` (pion-1) and `Eth
 $ cargo test
 ```
 
-# Documentation 
 To serve the documentation locally:
 ```shell
 $ cargo doc --no-deps --open

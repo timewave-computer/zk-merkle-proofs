@@ -11,3 +11,5 @@
 
 pub mod keys;
 pub mod merkle_lib;
+#[cfg(feature = "no-zkvm")]
+pub mod rpc;

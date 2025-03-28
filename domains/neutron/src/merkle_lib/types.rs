@@ -1,18 +1,11 @@
 use crate::{keys::NeutronKey, merkle_lib::helpers::convert_tm_to_ics_merkle_proof};
-use common::merkle::types::{MerkleProofOutput, MerkleVerifiable};
+use common::merkle::types::MerkleVerifiable;
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
     verify_membership,
 };
 use serde::{Deserialize, Serialize};
 use tendermint::merkle::proof::ProofOps;
-
-#[cfg(feature = "no-zkvm")]
-use {
-    common::merkle::types::MerkleProver,
-    tendermint::block::Height,
-    tendermint_rpc::{Client, HttpClient},
-};
 
 /// Represents a Merkle proof for state on the Neutron blockchain.
 ///
@@ -41,13 +34,13 @@ pub struct NeutronMerkleProofWithRoot {
 }
 
 impl MerkleVerifiable for NeutronMerkleProofWithRoot {
-    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+    fn verify(&self, expected_root: &[u8]) -> bool {
         self.proof.verify(expected_root)
     }
 }
 
 impl MerkleVerifiable for NeutronMerkleProof {
-    fn verify(&self, expected_root: &[u8]) -> MerkleProofOutput {
+    fn verify(&self, expected_root: &[u8]) -> bool {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
         let inner_proof = proof_decoded.first().unwrap();
         let Some(Proof::Exist(existence_proof)) = &inner_proof.proof else {
@@ -71,49 +64,7 @@ impl MerkleVerifiable for NeutronMerkleProof {
             self.key.prefix.as_bytes(),
             &inner_root,
         );
-        assert!(is_valid);
-        MerkleProofOutput {
-            root: expected_root.to_vec(),
-            key: serde_json::to_vec(&self.key).unwrap(),
-            value: self.value.clone(),
-            domain: common::merkle::types::Domain::NEUTRON,
-        }
-    }
-}
-
-/// A prover implementation for retrieving Merkle proofs from a Neutron RPC endpoint.
-///
-/// This type provides functionality to interact with a Neutron node's RPC interface
-/// to retrieve Merkle proofs for specific state queries.
-pub struct MerkleProverNeutron {
-    /// The URL of the Neutron RPC endpoint
-    pub rpc_url: String,
-}
-
-#[cfg(feature = "no-zkvm")]
-impl MerkleProver for MerkleProverNeutron {
-    #[allow(unused)]
-    async fn get_merkle_proof_from_rpc(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
-        let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
-        let neutron_key: NeutronKey = NeutronKey::deserialize(key);
-        let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
-            .abci_query(
-                // "store/bank/key", "store/wasm/key", ...
-                Some(format!("{}{}{}", "store/", neutron_key.prefix, "/key")),
-                hex::decode(neutron_key.key.clone()).unwrap(),
-                Some(Height::from(height as u32)),
-                true, // Include proof
-            )
-            .await
-            .unwrap();
-        let proof = response.proof.unwrap();
-        assert!(response.value.len() > 0);
-        serde_json::to_vec(&NeutronMerkleProof {
-            proof: proof.clone(),
-            key: neutron_key,
-            value: response.value,
-        })
-        .unwrap()
+        is_valid
     }
 }
 
