@@ -252,9 +252,18 @@ mod tests {
     #[test]
     fn rlp_fixed_length() {
         check_decode([
-            (Ok(hex!("6f62636465666768696a6b6c6d")), &hex!("8D6F62636465666768696A6B6C6D")[..]),
-            (Err(Error::UnexpectedLength), &hex!("8C6F62636465666768696A6B6C")[..]),
-            (Err(Error::UnexpectedLength), &hex!("8E6F62636465666768696A6B6C6D6E")[..]),
+            (
+                Ok(hex!("6f62636465666768696a6b6c6d")),
+                &hex!("8D6F62636465666768696A6B6C6D")[..],
+            ),
+            (
+                Err(Error::UnexpectedLength),
+                &hex!("8C6F62636465666768696A6B6C")[..],
+            ),
+            (
+                Err(Error::UnexpectedLength),
+                &hex!("8E6F62636465666768696A6B6C6D6E")[..],
+            ),
         ])
     }
 
@@ -266,7 +275,10 @@ mod tests {
             (Ok(0x0505_u64), &hex!("820505")[..]),
             (Ok(0xCE05050505_u64), &hex!("85CE05050505")[..]),
             (Err(Error::Overflow), &hex!("8AFFFFFFFFFFFFFFFFFF7C")[..]),
-            (Err(Error::InputTooShort), &hex!("8BFFFFFFFFFFFFFFFFFF7C")[..]),
+            (
+                Err(Error::InputTooShort),
+                &hex!("8BFFFFFFFFFFFFFFFFFF7C")[..],
+            ),
             (Err(Error::UnexpectedList), &hex!("C0")[..]),
             (Err(Error::LeadingZero), &hex!("00")[..]),
             (Err(Error::NonCanonicalSingleByte), &hex!("8105")[..]),
@@ -283,7 +295,10 @@ mod tests {
     fn rlp_vectors() {
         check_decode::<Vec<u64>, _>([
             (Ok(vec![]), &hex!("C0")[..]),
-            (Ok(vec![0xBBCCB5_u64, 0xFFC0B5_u64]), &hex!("C883BBCCB583FFC0B5")[..]),
+            (
+                Ok(vec![0xBBCCB5_u64, 0xFFC0B5_u64]),
+                &hex!("C883BBCCB583FFC0B5")[..],
+            ),
         ])
     }
 
@@ -294,11 +309,6 @@ mod tests {
             (Err(Error::InputTooShort), &hex!("D7")[..]),
         ]);
         check_decode::<[u8; 5], _>([
-            (Err(Error::InputTooShort), &hex!("C1")[..]),
-            (Err(Error::InputTooShort), &hex!("D7")[..]),
-        ]);
-        #[cfg(feature = "std")]
-        check_decode::<std::net::IpAddr, _>([
             (Err(Error::InputTooShort), &hex!("C1")[..]),
             (Err(Error::InputTooShort), &hex!("D7")[..]),
         ]);

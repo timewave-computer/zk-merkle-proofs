@@ -1,5 +1,5 @@
 //! RLP (Recursive Length Prefix) encoding utilities for Ethereum data structures.
-//! 
+//!
 //! This module provides functions for encoding Ethereum-specific data structures
 //! using the RLP encoding scheme.
 
@@ -9,11 +9,11 @@ use alloy::{
 };
 
 /// Adjusts an index for RLP encoding based on its value and the total length.
-/// 
+///
 /// # Arguments
 /// * `i` - The index to adjust
 /// * `len` - The total length of the sequence
-/// 
+///
 /// # Returns
 /// The adjusted index value
 pub const fn adjust_index_for_rlp(i: usize, len: usize) -> usize {
@@ -27,10 +27,10 @@ pub const fn adjust_index_for_rlp(i: usize, len: usize) -> usize {
 }
 
 /// Encodes a transaction receipt into RLP format.
-/// 
+///
 /// # Arguments
 /// * `receipt` - The transaction receipt to encode
-/// 
+///
 /// # Returns
 /// The RLP-encoded receipt as a vector of bytes
 pub fn encode_receipt(receipt: &TransactionReceipt) -> Vec<u8> {

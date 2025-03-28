@@ -72,7 +72,10 @@ impl Header {
             return Err(Error::InputTooShort);
         }
 
-        Ok(Self { list, payload_length })
+        Ok(Self {
+            list,
+            payload_length,
+        })
     }
 
     /// Decodes the next payload from the given buffer, advancing it.
@@ -82,10 +85,17 @@ impl Header {
     /// Returns an error if the buffer is too short or the header is invalid.
     #[inline]
     pub fn decode_bytes<'a>(buf: &mut &'a [u8], is_list: bool) -> Result<&'a [u8]> {
-        let Self { list, payload_length } = Self::decode(buf)?;
+        let Self {
+            list,
+            payload_length,
+        } = Self::decode(buf)?;
 
         if list != is_list {
-            return Err(if is_list { Error::UnexpectedString } else { Error::UnexpectedList });
+            return Err(if is_list {
+                Error::UnexpectedString
+            } else {
+                Error::UnexpectedList
+            });
         }
 
         // SAFETY: this is already checked in `decode`
@@ -117,7 +127,10 @@ impl Header {
     /// - Any nested headers (for list items) are invalid
     #[inline]
     pub fn decode_raw<'a>(buf: &mut &'a [u8]) -> Result<PayloadView<'a>> {
-        let Self { list, payload_length } = Self::decode(buf)?;
+        let Self {
+            list,
+            payload_length,
+        } = Self::decode(buf)?;
         // SAFETY: this is already checked in `decode`
         let mut payload = unsafe { advance_unchecked(buf, payload_length) };
 
@@ -148,7 +161,11 @@ impl Header {
     #[inline]
     pub fn encode(&self, out: &mut dyn BufMut) {
         if self.payload_length < 56 {
-            let code = if self.list { EMPTY_LIST_CODE } else { EMPTY_STRING_CODE };
+            let code = if self.list {
+                EMPTY_LIST_CODE
+            } else {
+                EMPTY_STRING_CODE
+            };
             out.put_u8(code + self.payload_length as u8);
         } else {
             let len_be;

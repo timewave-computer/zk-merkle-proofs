@@ -1,6 +1,5 @@
 pub struct FixedBytes<const N: usize>(pub [u8; N]);
 
-
 impl<const N: usize> FixedBytes<N> {
     /// Returns a slice containing the entire array.
     #[inline]
@@ -14,7 +13,6 @@ impl<const N: usize> FixedBytes<N> {
         self.0.to_vec()
     }
 }
-
 
 use alloc::{boxed::Box, vec::Vec};
 use core::{
@@ -346,7 +344,6 @@ impl Bytes {
         Self(self.0.split_to(at))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
