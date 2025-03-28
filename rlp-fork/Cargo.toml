@@ -1,0 +1,17 @@
+[package]
+name = "rlp-fork"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytes.workspace=true
+hex-literal.workspace=true
+hex = { package = "const-hex", version = "1.14", default-features = false, features = [
+    "alloc",
+    "core-error",
+] }
+arrayvec = { version = "0.7", default-features = false, optional = true }
+
+[features]
+default = []
+arrayvec = ["dep:arrayvec"]

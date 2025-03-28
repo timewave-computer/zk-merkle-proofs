@@ -18,11 +18,9 @@ plain_hasher = "0.2"
 triehash = "0.8.4"
 alloy = { version = "0.12.5", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true }
-alloy-rlp = { version = "0.3.11", features = [
-    "derive",
-    "arrayvec",
-] }
 tiny-keccak = "2.0.2"
+
+rlp-fork={path="../../rlp-fork", features=["arrayvec"]}
 
 # ZKVM precompiles (hash functions)
 # when the sp1 feature is enabled, we leverage their precompile

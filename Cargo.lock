@@ -1493,7 +1493,6 @@ version = "0.1.0"
 dependencies = [
  "alloy",
  "alloy-primitives",
- "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
  "common",
@@ -1501,6 +1500,7 @@ dependencies = [
  "hash-db",
  "plain_hasher",
  "reqwest",
+ "rlp-fork",
  "serde",
  "serde_json",
  "tiny-keccak 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1823,6 +1823,12 @@ checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "hex-literal"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
 
 [[package]]
 name = "hmac"
@@ -2916,6 +2922,16 @@ checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
 dependencies = [
  "bytes",
  "rustc-hex",
+]
+
+[[package]]
+name = "rlp-fork"
+version = "0.1.0"
+dependencies = [
+ "arrayvec",
+ "bytes",
+ "const-hex",
+ "hex-literal",
 ]
 
 [[package]]

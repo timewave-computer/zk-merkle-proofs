@@ -118,7 +118,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
             .iter()
             .map(|node| Bytes::copy_from_slice(node))
             .collect();
-        let leaf_node_decoded: Vec<alloy_primitives::Bytes> =
+        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
             decode_rlp_bytes(proof_nodes.to_vec().last().unwrap());
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         if stored_value != self.value {
@@ -154,7 +154,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<alloy_primitives::Bytes> {
-    let decoded: Vec<alloy_primitives::Bytes> = alloy_rlp::decode_exact(bytes).unwrap();
+pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<rlp_fork::Bytes> {
+    let decoded: Vec<rlp_fork::Bytes> = rlp_fork::decode_exact(bytes).unwrap();
     decoded
 }

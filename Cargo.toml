@@ -1,5 +1,5 @@
 [workspace]
-members = ["common", "domains/ethereum"]
+members = ["common", "domains/ethereum", "rlp-fork"]
 resolver = "2"
 
 [workspace.dependencies]
@@ -13,3 +13,5 @@ serde_json = "1"
 reqwest = "0.12"
 url = "2.5"
 dotenvy = "0.15"
+bytes = { version = "1.4", default-features = false }
+hex-literal = "0.4"
