@@ -53,8 +53,8 @@ mod tests {
     use url::Url;
 
     use crate::{
+        ethereum_rpc::rpc::EvmMerkleRpcClient,
         merkle_lib::tests::defaults::{read_sepolia_height, read_sepolia_url},
-        rpc::EvmMerkleRpcClient,
     };
 
     #[tokio::test]

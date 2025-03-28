@@ -12,8 +12,8 @@ use common::merkle::types::MerkleClient;
 use url::Url;
 
 use crate::{
+    ethereum_rpc::rlp::encode_receipt,
     merkle_lib::types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof},
-    rlp::encode_receipt,
 };
 
 /// A Merkle prover implementation for Ethereum.
