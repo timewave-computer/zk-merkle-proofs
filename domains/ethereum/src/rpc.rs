@@ -1,18 +1,20 @@
 use std::{io::Read, str::FromStr};
 
 use alloy::{
-    consensus::{Receipt, ReceiptWithBloom, TxReceipt, TxType},
     hex::{self, FromHex},
     providers::{Provider, ProviderBuilder},
     rpc::types::{EIP1186AccountProofResponse, TransactionReceipt},
     serde::JsonStorageKey,
 };
 use alloy_primitives::{Address, FixedBytes};
-use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
+use alloy_trie::{proof::ProofRetainer, root::adjust_index_for_rlp, HashBuilder, Nibbles};
 use common::merkle::types::MerkleClient;
 use url::Url;
 
-use crate::merkle_lib::types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof};
+use crate::{
+    merkle_lib::types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof},
+    rlp::encode_receipt,
+};
 
 /// A Merkle prover implementation for Ethereum.
 ///
@@ -242,39 +244,5 @@ impl EvmMerkleRpcClient {
             decode_rlp_bytes(proof.to_vec().last().unwrap());
         let receipt_rlp = leaf_node_decoded.last().unwrap().to_vec();
         EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into()
-    }
-}
-
-pub const fn adjust_index_for_rlp(i: usize, len: usize) -> usize {
-    if i > 0x7f {
-        i
-    } else if i == 0x7f || i + 1 == len {
-        0
-    } else {
-        i + 1
-    }
-}
-
-fn encode_receipt(receipt: &TransactionReceipt) -> Vec<u8> {
-    let tx_type = receipt.transaction_type();
-    let receipt = receipt.inner.as_receipt_with_bloom().unwrap();
-    let logs = receipt
-        .logs()
-        .iter()
-        .map(|l| l.inner.clone())
-        .collect::<Vec<_>>();
-
-    let consensus_receipt = Receipt {
-        cumulative_gas_used: receipt.cumulative_gas_used(),
-        status: receipt.status_or_post_state(),
-        logs,
-    };
-
-    let rwb = ReceiptWithBloom::new(consensus_receipt, receipt.bloom());
-    let encoded = alloy::rlp::encode(rwb);
-
-    match tx_type {
-        TxType::Legacy => encoded,
-        _ => [vec![tx_type as u8], encoded].concat(),
     }
 }

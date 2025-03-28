@@ -3,4 +3,6 @@
 
 pub mod merkle_lib;
 #[cfg(feature = "no-zkvm")]
+pub mod rlp;
+#[cfg(feature = "no-zkvm")]
 pub mod rpc;
