@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
     use crate::ethereum_rpc::rpc::EvmMerkleRpcClient;
-    use crate::merkle_lib::tests::defaults::read_sepolia_url;
+    use crate::merkle_lib::tests::defaults::{
+        read_ethereum_vault_balances_storage_key, read_sepolia_url,
+    };
     use crate::merkle_lib::types::decode_rlp_bytes;
     use crate::merkle_lib::{
         keccak::digest_keccak,
@@ -53,9 +55,7 @@ mod tests {
     #[tokio::test]
     async fn test_vault_contract_shares_on_sepolia() {
         let sepolia_height = read_sepolia_height().await;
-        let storage_slot_key =
-            hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
-                .unwrap();
+        let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
 
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let merkle_prover = EvmMerkleRpcClient {
@@ -81,9 +81,7 @@ mod tests {
     #[tokio::test]
     async fn test_account_and_storage_proof_from_rpc() {
         let sepolia_height = read_sepolia_height().await;
-        let storage_slot_key =
-            hex::decode("0x0000000000000000000000000000000000000000000000000000000000000001")
-                .unwrap();
+        let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let prover = EvmMerkleRpcClient {
             rpc_url: read_sepolia_url().to_string(),

@@ -6,6 +6,12 @@ pub fn read_ethereum_vault_contract_address() -> String {
         .expect("Missing Sepolia Vault Contract Address!")
 }
 
+pub fn read_ethereum_vault_balances_storage_key() -> String {
+    dotenv().ok();
+    env::var("ETHEREUM_SEPOLIA_VAULT_BALANCES_STORAGE_KEY")
+        .expect("Missing Sepolia Vault Balances Storage Key!")
+}
+
 pub fn read_sepolia_default_account_address() -> String {
     dotenv().ok();
     env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
