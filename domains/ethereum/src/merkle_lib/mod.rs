@@ -4,7 +4,5 @@
 //! including computing and verifying proofs for accounts, storage, and receipts.
 
 pub mod keccak;
-#[cfg(feature = "no-zkvm")]
-mod macros;
 pub mod tests;
 pub mod types;
