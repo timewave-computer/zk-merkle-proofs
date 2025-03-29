@@ -91,7 +91,7 @@ impl RlpNode {
             // SAFETY: `rlp` is less than max capacity (33).
             unsafe { Self::from_raw(rlp).unwrap_unchecked() }
         } else {
-            Self::word_rlp(&digest_keccak(rlp).into())
+            Self::word_rlp(&digest_keccak(rlp))
         }
     }
 
