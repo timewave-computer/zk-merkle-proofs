@@ -4,5 +4,6 @@
 //! including computing and verifying proofs for accounts, storage, and receipts.
 
 pub mod keccak;
-pub mod tests;
 pub mod types;
+mod tests;
+

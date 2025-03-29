@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::{
-        tests::defaults::{
+        tests::defaults::constants::{
             get_test_vector_eth_account_proof, get_test_vector_eth_account_root,
             get_test_vector_eth_block_root, get_test_vector_eth_storage_proof,
         },

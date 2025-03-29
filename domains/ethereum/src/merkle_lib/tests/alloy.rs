@@ -2,7 +2,7 @@
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::{
-        tests::defaults::{get_test_vector_eth_account_proof, get_test_vector_eth_block_root},
+        tests::defaults::constants::{get_test_vector_eth_account_proof, get_test_vector_eth_block_root},
         types::EthereumMerkleProof,
     };
     use alloy_primitives::{Bytes, B256};

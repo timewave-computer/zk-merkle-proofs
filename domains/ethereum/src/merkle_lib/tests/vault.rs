@@ -1,13 +1,13 @@
 #[cfg(test)]
 mod tests {
     use crate::ethereum_rpc::rpc::EvmMerkleRpcClient;
-    use crate::merkle_lib::tests::defaults::{
+    use crate::merkle_lib::tests::defaults::constants::{
         read_ethereum_vault_balances_storage_key, read_sepolia_url,
     };
     use crate::merkle_lib::types::decode_rlp_bytes;
     use crate::merkle_lib::{
         keccak::digest_keccak,
-        tests::defaults::{
+        tests::defaults::constants::{
             read_ethereum_vault_contract_address, read_sepolia_default_account_address,
             read_sepolia_height,
         },

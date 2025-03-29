@@ -1,54 +1,59 @@
-use {dotenvy::dotenv, std::env};
+#[allow(unused)]
+pub (crate) mod constants{
+    use std::env;
 
-pub fn read_ethereum_vault_contract_address() -> String {
-    dotenv().ok();
-    env::var("ETHEREUM_SEPOLIA_VAULT_EXAMPLE_CONTRACT_ADDRESS")
-        .expect("Missing Sepolia Vault Contract Address!")
-}
+    use dotenvy::dotenv;
 
-pub fn read_ethereum_vault_balances_storage_key() -> String {
-    dotenv().ok();
-    env::var("ETHEREUM_SEPOLIA_VAULT_BALANCES_STORAGE_KEY")
-        .expect("Missing Sepolia Vault Balances Storage Key!")
-}
-
-pub fn read_sepolia_default_account_address() -> String {
-    dotenv().ok();
-    env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
-}
-
-pub fn read_sepolia_url() -> String {
-    dotenv().ok();
-    env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
-}
-
-pub async fn read_sepolia_height() -> u64 {
-    use alloy::providers::{Provider, ProviderBuilder};
-    use std::str::FromStr;
-    use url::Url;
-    let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
-    let block = provider
-        .get_block_by_number(alloy::eips::BlockNumberOrTag::Latest)
-        .await
-        .expect("Failed to get Block!")
-        .expect("Block not found!");
-    block.header.number
-}
-
-pub fn get_test_vector_eth_storage_proof() -> Vec<u8> {
-    include_bytes!("data/storage_proof.bin").to_vec()
-}
-
-pub fn get_test_vector_eth_account_proof() -> Vec<u8> {
-    include_bytes!("data/account_proof.bin").to_vec()
-}
-
-pub fn get_test_vector_eth_block_root() -> Vec<u8> {
-    include_bytes!("data/block_root.bin").to_vec()
-}
-
-pub fn get_test_vector_eth_account_root() -> Vec<u8> {
-    include_bytes!("data/account_root.bin").to_vec()
+    pub (crate) fn read_ethereum_vault_contract_address() -> String {
+        dotenv().ok();
+        env::var("ETHEREUM_SEPOLIA_VAULT_EXAMPLE_CONTRACT_ADDRESS")
+            .expect("Missing Sepolia Vault Contract Address!")
+    }
+    
+    pub (crate) fn read_ethereum_vault_balances_storage_key() -> String {
+        dotenv().ok();
+        env::var("ETHEREUM_SEPOLIA_VAULT_BALANCES_STORAGE_KEY")
+            .expect("Missing Sepolia Vault Balances Storage Key!")
+    }
+    
+    pub (crate) fn read_sepolia_default_account_address() -> String {
+        dotenv().ok();
+        env::var("ETHEREUM_DEFAULT_ACCOUNT_ADDRESS").expect("Missing Ethereum Default Account Address!")
+    }
+    
+    pub (crate) fn read_sepolia_url() -> String {
+        dotenv().ok();
+        env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
+    }
+    
+    pub (crate) async fn read_sepolia_height() -> u64 {
+        use alloy::providers::{Provider, ProviderBuilder};
+        use std::str::FromStr;
+        use url::Url;
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
+        let block = provider
+            .get_block_by_number(alloy::eips::BlockNumberOrTag::Latest)
+            .await
+            .expect("Failed to get Block!")
+            .expect("Block not found!");
+        block.header.number
+    }
+    
+    pub (crate) fn get_test_vector_eth_storage_proof() -> Vec<u8> {
+        include_bytes!("data/storage_proof.bin").to_vec()
+    }
+    
+    pub (crate) fn get_test_vector_eth_account_proof() -> Vec<u8> {
+        include_bytes!("data/account_proof.bin").to_vec()
+    }
+    
+    pub (crate) fn get_test_vector_eth_block_root() -> Vec<u8> {
+        include_bytes!("data/block_root.bin").to_vec()
+    }
+    
+    pub (crate) fn get_test_vector_eth_account_root() -> Vec<u8> {
+        include_bytes!("data/account_root.bin").to_vec()
+    }
 }
 
 #[cfg(test)]
@@ -60,7 +65,7 @@ mod tests {
 
     use crate::{
         ethereum_rpc::rpc::EvmMerkleRpcClient,
-        merkle_lib::tests::defaults::{read_sepolia_height, read_sepolia_url},
+        merkle_lib::tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
     };
 
     #[tokio::test]
