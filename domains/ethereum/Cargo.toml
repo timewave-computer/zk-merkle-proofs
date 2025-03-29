@@ -18,7 +18,7 @@ alloy = { version = "0.12.5", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true }
 alloy-primitives={version="0.8.25", optional=true}
 alloy-trie={version="0.7.9", optional=true}
-tiny-keccak = "2.0.2"
+tiny-keccak = {version="2.0.2", features=["keccak"]}
 bytes.workspace=true
 hex-literal.workspace=true
 hex = { package = "const-hex", version = "1.14", default-features = false, features = [

@@ -4,13 +4,10 @@ use core::{
     borrow::Borrow,
     marker::{PhantomData, PhantomPinned},
 };
-
 extern crate alloc;
 #[allow(unused_imports)]
 use alloc::vec::Vec;
-
 use arrayvec::ArrayVec;
-
 /// A type that can be encoded via RLP.
 pub trait Encodable {
     /// Encodes the type into the `out` buffer.
