@@ -5,6 +5,8 @@
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
 
+use crate::timewave_rlp;
+
 use super::keccak::digest_keccak;
 use alloy_primitives::{Bytes, B256};
 use alloy_trie::{proof::verify_proof, Nibbles};
@@ -118,7 +120,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
             .iter()
             .map(|node| Bytes::copy_from_slice(node))
             .collect();
-        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
+        let leaf_node_decoded: Vec<timewave_rlp::Bytes> =
             decode_rlp_bytes(proof_nodes.to_vec().last().unwrap());
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         if stored_value != self.value {
@@ -154,7 +156,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<rlp_fork::Bytes> {
-    let decoded: Vec<rlp_fork::Bytes> = rlp_fork::decode_exact(bytes).unwrap();
+pub fn decode_rlp_bytes(bytes: &[u8]) -> Vec<timewave_rlp::Bytes> {
+    let decoded: Vec<timewave_rlp::Bytes> = timewave_rlp::decode_exact(bytes).unwrap();
     decoded
 }

@@ -1,5 +1,5 @@
 [workspace]
-members = ["common", "domains/ethereum", "rlp-fork"]
+members = ["common", "domains/ethereum"]
 resolver = "2"
 
 [workspace.dependencies]

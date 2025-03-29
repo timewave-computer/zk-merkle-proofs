@@ -82,7 +82,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
             decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
         let stored_account = leaf_node_decoded.last().unwrap().to_vec();
         let account_proof = EthereumMerkleProof::new(
@@ -97,7 +97,7 @@ impl EvmMerkleRpcClient {
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
-        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
             decode_rlp_bytes(&first_storage_proof.0.to_vec().last().unwrap().to_vec());
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         let storage_proof = EthereumMerkleProof::new(
@@ -177,8 +177,9 @@ impl EvmMerkleRpcClient {
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
         let first_storage_proof = raw_storage_proofs.first().unwrap();
-        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
-            rlp_fork::decode_exact(first_storage_proof.0.to_vec().last().unwrap()).unwrap();
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
+            crate::timewave_rlp::decode_exact(first_storage_proof.0.to_vec().last().unwrap())
+                .unwrap();
         let stored_value = leaf_node_decoded.last().unwrap().to_vec();
         EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
@@ -217,19 +218,19 @@ impl EvmMerkleRpcClient {
             .await
             .unwrap()
             .unwrap();
-        let retainer = ProofRetainer::new(vec![Nibbles::unpack(rlp_fork::encode_fixed_size(
-            &target_index,
-        ))]);
+        let retainer = ProofRetainer::new(vec![Nibbles::unpack(
+            crate::timewave_rlp::encode_fixed_size(&target_index),
+        )]);
         let mut hb: HashBuilder = HashBuilder::default().with_proof_retainer(retainer);
         for i in 0..receipts.len() {
             let index = adjust_index_for_rlp(i, receipts.len());
-            let index_buffer = rlp_fork::encode_fixed_size(&index);
+            let index_buffer = crate::timewave_rlp::encode_fixed_size(&index);
             hb.add_leaf(
                 Nibbles::unpack(&index_buffer),
                 encode_receipt(&receipts[index]).as_slice(),
             );
         }
-        let receipt_key: Vec<u8> = rlp_fork::encode(target_index);
+        let receipt_key: Vec<u8> = crate::timewave_rlp::encode(target_index);
         hb.root();
         let proof = hb
             .take_proof_nodes()
@@ -240,7 +241,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|n| n.to_vec())
             .collect::<Vec<_>>(); //trie.get_proof(&receipt_key).unwrap();
-        let leaf_node_decoded: Vec<rlp_fork::Bytes> =
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
             decode_rlp_bytes(proof.to_vec().last().unwrap());
         let receipt_rlp = leaf_node_decoded.last().unwrap().to_vec();
         EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into()

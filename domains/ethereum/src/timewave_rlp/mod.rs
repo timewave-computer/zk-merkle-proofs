@@ -9,7 +9,6 @@ pub use error::{Error, Result};
 pub mod alloy_bytes;
 
 mod encode;
-#[cfg(feature = "arrayvec")]
 pub use encode::encode_fixed_size;
 pub use encode::{
     encode, encode_iter, encode_list, length_of_length, list_length, Encodable, MaxEncodedLen,

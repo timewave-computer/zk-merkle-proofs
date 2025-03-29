@@ -1,4 +1,5 @@
-use crate::{Error, Header, Result};
+extern crate alloc;
+use crate::{timewave_rlp::Error, timewave_rlp::Header, timewave_rlp::Result};
 use bytes::{Bytes, BytesMut};
 use core::marker::{PhantomData, PhantomPinned};
 
@@ -125,7 +126,6 @@ macro_rules! wrap_impl {
 }
 
 wrap_impl! {
-    #[cfg(feature = "arrayvec")]
     [const N: usize] <arrayvec::ArrayVec<u8, N>>::from([u8; N]),
     [T: Decodable] <alloc::boxed::Box<T>>::new(T),
     [T: Decodable] <alloc::rc::Rc<T>>::new(T),
@@ -191,7 +191,7 @@ pub(crate) fn static_left_pad<const N: usize>(data: &[u8]) -> Result<[u8; N]> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{encode, Encodable};
+    use crate::{timewave_rlp::encode, timewave_rlp::Encodable};
     use core::fmt::Debug;
     use hex_literal::hex;
 
@@ -205,7 +205,7 @@ mod tests {
     {
         for (expected, mut input) in fixtures {
             if let Ok(expected) = &expected {
-                assert_eq!(crate::encode(expected), input, "{expected:?}");
+                assert_eq!(crate::timewave_rlp::encode(expected), input, "{expected:?}");
             }
 
             let orig = input;
@@ -216,12 +216,15 @@ mod tests {
                 hex::encode(orig),
                 expected.as_ref().map_or_else(
                     |_| String::new(),
-                    |expected| format!("; expected: {}", hex::encode(crate::encode(expected)))
+                    |expected| format!(
+                        "; expected: {}",
+                        hex::encode(crate::timewave_rlp::encode(expected))
+                    )
                 )
             );
 
             if expected.is_ok() {
-                assert_eq!(input, &[]);
+                assert_eq!(input, &[] as &[u8]);
             }
         }
     }

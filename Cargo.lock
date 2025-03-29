@@ -1495,12 +1495,15 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "alloy-trie",
+ "arrayvec",
+ "bytes",
  "common",
+ "const-hex",
  "dotenvy",
  "hash-db",
+ "hex-literal",
  "plain_hasher",
  "reqwest",
- "rlp-fork",
  "serde",
  "serde_json",
  "tiny-keccak 2.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2922,16 +2925,6 @@ checksum = "bb919243f34364b6bd2fc10ef797edbfa75f33c252e7998527479c6d6b47e1ec"
 dependencies = [
  "bytes",
  "rustc-hex",
-]
-
-[[package]]
-name = "rlp-fork"
-version = "0.1.0"
-dependencies = [
- "arrayvec",
- "bytes",
- "const-hex",
- "hex-literal",
 ]
 
 [[package]]

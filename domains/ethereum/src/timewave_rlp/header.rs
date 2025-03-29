@@ -1,4 +1,8 @@
-use crate::{decode::static_left_pad, Error, Result, EMPTY_LIST_CODE, EMPTY_STRING_CODE};
+extern crate alloc;
+use crate::{
+    timewave_rlp::decode::static_left_pad, timewave_rlp::Error, timewave_rlp::Result,
+    timewave_rlp::EMPTY_LIST_CODE, timewave_rlp::EMPTY_STRING_CODE,
+};
 use bytes::{Buf, BufMut};
 use core::hint::unreachable_unchecked;
 
@@ -169,7 +173,8 @@ impl Header {
             out.put_u8(code + self.payload_length as u8);
         } else {
             let len_be;
-            let len_be = crate::encode::to_be_bytes_trimmed!(len_be, self.payload_length);
+            let len_be =
+                crate::timewave_rlp::encode::to_be_bytes_trimmed!(len_be, self.payload_length);
             let code = if self.list { 0xF7 } else { 0xB7 };
             out.put_u8(code + len_be.len() as u8);
             out.put_slice(len_be);
@@ -179,7 +184,7 @@ impl Header {
     /// Returns the length of the encoded header.
     #[inline]
     pub const fn length(&self) -> usize {
-        crate::length_of_length(self.payload_length)
+        crate::timewave_rlp::length_of_length(self.payload_length)
     }
 
     /// Returns the total length of the encoded header and payload.
@@ -221,13 +226,13 @@ unsafe fn advance_unchecked<'a>(buf: &mut &'a [u8], cnt: usize) -> &'a [u8] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Encodable;
+    use crate::timewave_rlp::Encodable;
     use alloc::vec::Vec;
     use core::fmt::Debug;
 
     fn check_decode_raw_list<T: Encodable + Debug>(input: Vec<T>) {
-        let encoded = crate::encode(&input);
-        let expected: Vec<_> = input.iter().map(crate::encode).collect();
+        let encoded = crate::timewave_rlp::encode(&input);
+        let expected: Vec<_> = input.iter().map(crate::timewave_rlp::encode).collect();
         let mut buf = encoded.as_slice();
         assert!(
             matches!(Header::decode_raw(&mut buf), Ok(PayloadView::List(v)) if v == expected),
@@ -239,7 +244,7 @@ mod tests {
     }
 
     fn check_decode_raw_string(input: &str) {
-        let encoded = crate::encode(input);
+        let encoded = crate::timewave_rlp::encode(input);
         let expected = Header::decode_bytes(&mut &encoded[..], false).unwrap();
         let mut buf = encoded.as_slice();
         assert!(

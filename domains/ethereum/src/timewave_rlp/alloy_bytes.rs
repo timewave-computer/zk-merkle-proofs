@@ -14,6 +14,7 @@ impl<const N: usize> FixedBytes<N> {
     }
 }
 
+extern crate alloc;
 use alloc::{boxed::Box, vec::Vec};
 use core::{
     borrow::Borrow,

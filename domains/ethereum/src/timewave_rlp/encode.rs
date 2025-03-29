@@ -1,14 +1,14 @@
-use crate::{Header, EMPTY_STRING_CODE};
+use crate::timewave_rlp::{Header, EMPTY_STRING_CODE};
 use bytes::{BufMut, Bytes, BytesMut};
 use core::{
     borrow::Borrow,
     marker::{PhantomData, PhantomPinned},
 };
 
+extern crate alloc;
 #[allow(unused_imports)]
 use alloc::vec::Vec;
 
-#[cfg(feature = "arrayvec")]
 use arrayvec::ArrayVec;
 
 /// A type that can be encoded via RLP.
@@ -58,8 +58,8 @@ pub unsafe trait MaxEncodedLenAssoc: Encodable {
 #[macro_export]
 macro_rules! impl_max_encoded_len {
     ($t:ty, $len:expr) => {
-        unsafe impl $crate::MaxEncodedLen<{ $len }> for $t {}
-        unsafe impl $crate::MaxEncodedLenAssoc for $t {
+        unsafe impl $crate::timewave_rlp::MaxEncodedLen<{ $len }> for $t {}
+        unsafe impl $crate::timewave_rlp::MaxEncodedLenAssoc for $t {
             const LEN: usize = $len;
         }
     };
@@ -231,7 +231,6 @@ deref_impl! {
     [] alloc::string::String,
     [] Bytes,
     [] BytesMut,
-    #[cfg(feature = "arrayvec")]
     [const N: usize] ArrayVec<u8, N>,
     [T: ?Sized + Encodable] &T,
     [T: ?Sized + Encodable] &mut T,
@@ -252,7 +251,6 @@ pub fn encode<T: Encodable>(value: T) -> Vec<u8> {
 }
 
 /// Encode a type with a known maximum size.
-#[cfg(feature = "arrayvec")]
 #[inline]
 pub fn encode_fixed_size<T: MaxEncodedLen<LEN>, const LEN: usize>(value: &T) -> ArrayVec<u8, LEN> {
     let mut vec = ArrayVec::<u8, LEN>::new();
@@ -433,7 +431,6 @@ mod tests {
         ($fixtures:expr) => {
             for (input, output) in $fixtures {
                 assert_eq!(encode(input), output, "encode({input})");
-                #[cfg(feature = "arrayvec")]
                 assert_eq!(
                     &encode_fixed_size(&input)[..],
                     output,
@@ -450,84 +447,7 @@ mod tests {
         uint_rlp_test!(u32_fixtures());
         uint_rlp_test!(u64_fixtures());
         uint_rlp_test!(u128_fixtures());
-        // #[cfg(feature = "ethnum")]
-        // uint_rlp_test!(u256_fixtures());
     }
-
-    /*
-    #[cfg(feature = "ethnum")]
-    fn u256_fixtures() -> impl IntoIterator<Item = (ethnum::U256, &'static [u8])> {
-        c(u128_fixtures()).chain(vec![(
-            ethnum::U256::from_str_radix(
-                "0100020003000400050006000700080009000A0B4B000C000D000E01",
-                16,
-            )
-            .unwrap(),
-            &hex!("9c0100020003000400050006000700080009000a0b4b000c000d000e01")[..],
-        )])
-    }
-
-    #[cfg(feature = "ethereum-types")]
-    fn eth_u64_fixtures() -> impl IntoIterator<Item = (ethereum_types::U64, &'static [u8])> {
-        c(u64_fixtures()).chain(vec![
-            (
-                ethereum_types::U64::from_str_radix("FFCCB5DDFF", 16).unwrap(),
-                &hex!("85ffccb5ddff")[..],
-            ),
-            (
-                ethereum_types::U64::from_str_radix("FFCCB5DDFFEE", 16).unwrap(),
-                &hex!("86ffccb5ddffee")[..],
-            ),
-            (
-                ethereum_types::U64::from_str_radix("FFCCB5DDFFEE14", 16).unwrap(),
-                &hex!("87ffccb5ddffee14")[..],
-            ),
-            (
-                ethereum_types::U64::from_str_radix("FFCCB5DDFFEE1483", 16).unwrap(),
-                &hex!("88ffccb5ddffee1483")[..],
-            ),
-        ])
-    }
-
-    fn eth_u128_fixtures() -> impl IntoIterator<Item = (ethereum_types::U128, &'static [u8])> {
-        c(u128_fixtures()).chain(vec![(
-            ethereum_types::U128::from_str_radix("10203E405060708090A0B0C0D0E0F2", 16).unwrap(),
-            &hex!("8f10203e405060708090a0b0c0d0e0f2")[..],
-        )])
-    }
-
-    fn eth_u256_fixtures() -> impl IntoIterator<Item = (ethereum_types::U256, &'static [u8])> {
-        c(u128_fixtures()).chain(vec![(
-            ethereum_types::U256::from_str_radix(
-                "0100020003000400050006000700080009000A0B4B000C000D000E01",
-                16,
-            )
-            .unwrap(),
-            &hex!("9c0100020003000400050006000700080009000a0b4b000c000d000e01")[..],
-        )])
-    }
-
-    #[cfg(feature = "ethereum-types")]
-    fn eth_u512_fixtures() -> impl IntoIterator<Item = (ethereum_types::U512, &'static [u8])> {
-        c(eth_u256_fixtures()).chain(vec![(
-            ethereum_types::U512::from_str_radix(
-                "0100020003000400050006000700080009000A0B4B000C000D000E010100020003000400050006000700080009000A0B4B000C000D000E01",
-                16,
-            )
-            .unwrap(),
-            &hex!("b8380100020003000400050006000700080009000A0B4B000C000D000E010100020003000400050006000700080009000A0B4B000C000D000E01")[..],
-        )])
-    }
-
-    #[cfg(feature = "ethereum-types")]
-    #[test]
-    fn rlp_eth_uints() {
-        uint_rlp_test!(eth_u64_fixtures());
-        uint_rlp_test!(eth_u128_fixtures());
-        uint_rlp_test!(eth_u256_fixtures());
-        uint_rlp_test!(eth_u512_fixtures());
-    }
-    */
 
     #[test]
     fn rlp_list() {
@@ -546,44 +466,5 @@ mod tests {
             encoded_iter([0xFFCCB5_u64, 0xFFC0B5_u64].iter()),
             &hex!("c883ffccb583ffc0b5")[..]
         );
-    }
-
-    #[test]
-    fn to_be_bytes_trimmed() {
-        macro_rules! test_to_be_bytes_trimmed {
-            ($($x:expr => $expected:expr),+ $(,)?) => {$(
-                let be;
-                assert_eq!(to_be_bytes_trimmed!(be, $x), $expected);
-            )+};
-        }
-
-        test_to_be_bytes_trimmed! {
-            0u8 => [],
-            0u16 => [],
-            0u32 => [],
-            0u64 => [],
-            0usize => [],
-            0u128 => [],
-
-            1u8 => [1],
-            1u16 => [1],
-            1u32 => [1],
-            1u64 => [1],
-            1usize => [1],
-            1u128 => [1],
-
-            u8::MAX => [0xff],
-            u16::MAX => [0xff, 0xff],
-            u32::MAX => [0xff, 0xff, 0xff, 0xff],
-            u64::MAX => [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
-            u128::MAX => [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
-
-            1u8 => [1],
-            255u8 => [255],
-            256u16 => [1, 0],
-            65535u16 => [255, 255],
-            65536u32 => [1, 0, 0],
-            65536u64 => [1, 0, 0],
-        }
     }
 }
