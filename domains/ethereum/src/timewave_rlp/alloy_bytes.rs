@@ -1,3 +1,5 @@
+use crate::timewave_rlp::Decodable;
+#[derive(Clone, Copy)]
 pub struct FixedBytes<const N: usize>(pub [u8; N]);
 
 impl<const N: usize> FixedBytes<N> {
@@ -7,10 +9,55 @@ impl<const N: usize> FixedBytes<N> {
         &self.0
     }
 
+    /// Returns a new `FixedBytes` from a slice.
+    pub fn from_slice(src: &[u8]) -> Self {
+        match Self::try_from(src) {
+            Ok(x) => x,
+            Err(_) => panic!(
+                "cannot convert a slice of length {} to FixedBytes<{N}>",
+                src.len()
+            ),
+        }
+    }
+
     /// Converts the fixed byte array into a `Vec<u8>`.
     #[inline]
     pub fn to_vec(&self) -> Vec<u8> {
         self.0.to_vec()
+    }
+}
+
+/// Tries to create a `FixedBytes<N>` by copying from a slice `&[u8]`. Succeeds
+/// if `slice.len() == N`.
+impl<const N: usize> TryFrom<&[u8]> for FixedBytes<N> {
+    type Error = core::array::TryFromSliceError;
+
+    #[inline]
+    fn try_from(slice: &[u8]) -> Result<Self, Self::Error> {
+        <&Self>::try_from(slice).copied()
+    }
+}
+
+/// Tries to create a `FixedBytes<N>` by copying from a mutable slice `&mut
+/// [u8]`. Succeeds if `slice.len() == N`.
+impl<const N: usize> TryFrom<&mut [u8]> for FixedBytes<N> {
+    type Error = core::array::TryFromSliceError;
+
+    #[inline]
+    fn try_from(slice: &mut [u8]) -> Result<Self, Self::Error> {
+        Self::try_from(&*slice)
+    }
+}
+
+/// Tries to create a ref `FixedBytes<N>` by copying from a slice `&[u8]`.
+/// Succeeds if `slice.len() == N`.
+impl<'a, const N: usize> TryFrom<&'a [u8]> for &'a FixedBytes<N> {
+    type Error = core::array::TryFromSliceError;
+
+    #[inline]
+    fn try_from(slice: &'a [u8]) -> Result<&'a FixedBytes<N>, Self::Error> {
+        // SAFETY: `FixedBytes<N>` is `repr(transparent)` for `[u8; N]`
+        <&[u8; N]>::try_from(slice).map(|array_ref| unsafe { core::mem::transmute(array_ref) })
     }
 }
 
@@ -32,6 +79,13 @@ impl Default for &Bytes {
     fn default() -> Self {
         static EMPTY: Bytes = Bytes::new();
         &EMPTY
+    }
+}
+
+impl Decodable for Bytes {
+    #[inline]
+    fn decode(buf: &mut &[u8]) -> crate::timewave_rlp::Result<Self, crate::timewave_rlp::Error> {
+        bytes::Bytes::decode(buf).map(Self)
     }
 }
 

@@ -5,12 +5,14 @@
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
 
-use crate::timewave_rlp;
+use crate::{
+    timewave_rlp::{self, alloy_bytes::Bytes},
+    timewave_trie::verify::verify_proof,
+};
 
 use super::keccak::digest_keccak;
-use alloy_primitives::{Bytes, B256};
-use alloy_trie::{proof::verify_proof, Nibbles};
 use common::merkle::types::MerkleVerifiable;
+use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 
 /// Represents an Ethereum Merkle proof with its associated data.
@@ -114,7 +116,6 @@ impl MerkleVerifiable for EthereumMerkleProof {
     /// 2. Verifies that the leaf node contains the expected key-value pair
     /// 3. Checks that the root hash matches the expected root
     fn verify(&self, root: &[u8]) -> bool {
-        let root_hash = B256::from_slice(root);
         let proof_nodes: Vec<Bytes> = self
             .proof
             .iter()
@@ -131,7 +132,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
         }
         let key = Nibbles::unpack(&self.key);
         let result = verify_proof(
-            root_hash,
+            &root.try_into().unwrap(),
             key,
             Some(self.value.to_vec()),
             proof_nodes.iter(),
