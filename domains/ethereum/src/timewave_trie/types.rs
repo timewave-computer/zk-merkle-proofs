@@ -1,5 +1,4 @@
-use std::ops::Range;
-
+use crate::timewave_trie::constants::*;
 use arrayvec::ArrayVec;
 use nybbles::Nibbles;
 
@@ -7,12 +6,6 @@ use crate::{
     merkle_lib::keccak::digest_keccak,
     timewave_rlp::{self, alloy_bytes::Bytes, Decodable},
 };
-pub const EMPTY_STRING_CODE: u8 = 0x80;
-const MAX: usize = 33;
-pub const CHILD_INDEX_RANGE: Range<u8> = 0..16;
-
-pub const EVEN_FLAG: u8 = 0x20;
-pub const ODD_FLAG: u8 = 0x30;
 
 #[derive(PartialEq, Eq)]
 pub struct RlpNode(ArrayVec<u8, MAX>);

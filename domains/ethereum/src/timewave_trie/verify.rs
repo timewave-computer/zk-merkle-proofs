@@ -5,7 +5,7 @@ use core::ops::Deref;
 use crate::timewave_rlp::{Decodable, EMPTY_STRING_CODE};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
-    timewave_trie::types::{BranchNode, RlpNode, TrieNode, CHILD_INDEX_RANGE},
+    timewave_trie::{types::{BranchNode, RlpNode, TrieNode}, constants::CHILD_INDEX_RANGE},
 };
 
 #[derive(PartialEq, Eq, Debug)]
