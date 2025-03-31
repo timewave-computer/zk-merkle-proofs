@@ -5,7 +5,10 @@ use core::ops::Deref;
 use crate::timewave_rlp::{Decodable, EMPTY_STRING_CODE};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
-    timewave_trie::{types::{BranchNode, RlpNode, TrieNode}, constants::CHILD_INDEX_RANGE},
+    timewave_trie::{
+        constants::{CHILD_INDEX_RANGE, EMPTY_ROOT_HASH},
+        types::{BranchNode, RlpNode, TrieNode},
+    },
 };
 
 #[derive(PartialEq, Eq, Debug)]
@@ -50,9 +53,6 @@ where
     I: IntoIterator<Item = &'a Bytes>,
 {
     let mut proof = proof.into_iter().peekable();
-
-    const EMPTY_ROOT_HASH: &str =
-        "56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
     #[allow(non_snake_case)]
     let EMPTY_ROOT_HASH_BYTES: [u8; 32] = hex::decode(EMPTY_ROOT_HASH)
         .expect("Invalid hex or wrong length")
