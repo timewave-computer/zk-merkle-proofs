@@ -1,5 +1,3 @@
-use std::{io::Read, str::FromStr};
-
 use alloy::{
     hex::{self, FromHex},
     providers::{Provider, ProviderBuilder},
@@ -8,7 +6,9 @@ use alloy::{
 };
 use alloy_primitives::{Address, FixedBytes};
 use alloy_trie::{proof::ProofRetainer, root::adjust_index_for_rlp, HashBuilder, Nibbles};
+use anyhow::{Context, Result};
 use common::merkle::types::MerkleClient;
+use std::{io::Read, str::FromStr};
 use url::Url;
 
 use crate::{
@@ -41,15 +41,14 @@ impl MerkleClient for EvmMerkleRpcClient {
     ///
     /// # Panics
     /// Panics if the RPC call fails or if the proof cannot be serialized
-    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
-        let address_object = Address::from_hex(address).unwrap();
-        let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
+    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Result<Vec<u8>> {
+        let address_object = Address::from_hex(address)?;
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url)?);
         let proof: EIP1186AccountProofResponse = provider
-            .get_proof(address_object, vec![FixedBytes::from_hex(key).unwrap()])
+            .get_proof(address_object, vec![FixedBytes::from_hex(key)?])
             .block_id(height.into())
-            .await
-            .expect("Failed to get storage proof!");
-        serde_json::to_vec(&proof).expect("Failed to serialize proof!")
+            .await?;
+        Ok(serde_json::to_vec(&proof)?)
     }
 }
 
@@ -73,45 +72,60 @@ impl EvmMerkleRpcClient {
         key: &str,
         address: &str,
         height: u64,
-    ) -> (EthereumMerkleProof, EthereumMerkleProof) {
-        let proof = self.get_proof(key, address, height).await;
-        let proof_deserialized: EIP1186AccountProofResponse =
-            serde_json::from_slice(&proof).unwrap();
+    ) -> Result<(EthereumMerkleProof, EthereumMerkleProof)> {
+        let proof = self.get_proof(key, address, height).await?;
+        let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
         let account_proof: Vec<Vec<u8>> = proof_deserialized
             .account_proof
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
-            decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
-        let stored_account = leaf_node_decoded.last().unwrap().to_vec();
-        let account_proof = EthereumMerkleProof::new(
-            account_proof.clone(),
-            hex::decode(address).unwrap(),
-            stored_account,
-        );
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+            proof_deserialized
+                .account_proof
+                .last()
+                .context("Failed to get last account proof")?,
+        )?;
+        let stored_account = leaf_node_decoded
+            .last()
+            .context("Failed to extract leaf from account proof")?
+            .to_vec();
+        let account_proof =
+            EthereumMerkleProof::new(account_proof.clone(), hex::decode(address)?, stored_account);
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
             .iter()
             .cloned()
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
-        let first_storage_proof = raw_storage_proofs.first().unwrap();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
-            decode_rlp_bytes(&first_storage_proof.0.to_vec().last().unwrap().to_vec());
-        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
+        let first_storage_proof = raw_storage_proofs
+            .first()
+            .context("Failed to get first storage proof");
+        let first_storage_proof = first_storage_proof?;
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+            &first_storage_proof
+                .0
+                .to_vec()
+                .last()
+                .context("Failed to get last storage proof")?
+                .to_vec(),
+        )?;
+        let stored_value = leaf_node_decoded
+            .last()
+            .context("Failed to extract leaf from storage proof");
         let storage_proof = EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
             first_storage_proof
                 .1
                 .as_b256()
                 .bytes()
-                .collect::<Result<Vec<u8>, _>>()
-                .unwrap()
+                .collect::<Result<Vec<u8>, _>>()?
                 .to_vec(),
-            stored_value,
+            stored_value
+                .context("Failed to extract leaf from storage proof")?
+                .to_vec(),
         );
-        (account_proof, storage_proof)
+        Ok((account_proof, storage_proof))
     }
 
     /// Retrieves an account proof for a given address.
@@ -131,22 +145,29 @@ impl EvmMerkleRpcClient {
         key: &str,
         address: &str,
         height: u64,
-    ) -> EthereumMerkleProof {
-        let proof = self.get_proof(key, address, height).await;
-        let proof_deserialized: EIP1186AccountProofResponse =
-            serde_json::from_slice(&proof).unwrap();
+    ) -> Result<EthereumMerkleProof> {
+        let proof = self.get_proof(key, address, height).await?;
+        let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
         let account_proof: Vec<Vec<u8>> = proof_deserialized
             .account_proof
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded = decode_rlp_bytes(proof_deserialized.account_proof.last().unwrap());
-        let stored_account = leaf_node_decoded.last().unwrap().to_vec();
-        EthereumMerkleProof::new(
+        let leaf_node_decoded = decode_rlp_bytes(
+            proof_deserialized
+                .account_proof
+                .last()
+                .context("Failed to get leaf from account proof")?,
+        )?;
+        let stored_account = leaf_node_decoded
+            .last()
+            .context("Failed to extract account root from leaf")?
+            .to_vec();
+        Ok(EthereumMerkleProof::new(
             account_proof.clone(),
-            hex::decode(address).unwrap(),
+            hex::decode(address)?,
             stored_account,
-        )
+        ))
     }
 
     /// Retrieves a storage proof for a given account and storage key.
@@ -166,32 +187,40 @@ impl EvmMerkleRpcClient {
         key: &str,
         address: &str,
         height: u64,
-    ) -> EthereumMerkleProof {
-        let proof = self.get_proof(key, address, height).await;
-        let proof_deserialized: EIP1186AccountProofResponse =
-            serde_json::from_slice(&proof).unwrap();
+    ) -> Result<EthereumMerkleProof> {
+        let proof = self.get_proof(key, address, height).await?;
+        let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof
             .iter()
             .cloned()
             .map(|p| (p.proof.into_iter().map(|b| b.to_vec()).collect(), p.key))
             .collect();
-        let first_storage_proof = raw_storage_proofs.first().unwrap();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
-            crate::timewave_rlp::decode_exact(first_storage_proof.0.to_vec().last().unwrap())
-                .unwrap();
-        let stored_value = leaf_node_decoded.last().unwrap().to_vec();
-        EthereumMerkleProof::new(
+        let first_storage_proof = raw_storage_proofs
+            .first()
+            .context("Failed to get first storage proof")?;
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = crate::timewave_rlp::decode_exact(
+            first_storage_proof
+                .0
+                .to_vec()
+                .last()
+                .context("Failed to extract leaf from storage proof")?,
+        )
+        .expect("Failed to rlp decode leaf");
+        let stored_value = leaf_node_decoded
+            .last()
+            .context("Failed to extract value from leaf")?
+            .to_vec();
+        Ok(EthereumMerkleProof::new(
             first_storage_proof.0.clone(),
             first_storage_proof
                 .1
                 .as_b256()
                 .bytes()
-                .collect::<Result<Vec<u8>, _>>()
-                .unwrap()
+                .collect::<Result<Vec<u8>, _>>()?
                 .to_vec(),
             stored_value,
-        )
+        ))
     }
 
     /// Retrieves a receipt proof for a specific transaction in a block.
@@ -209,15 +238,14 @@ impl EvmMerkleRpcClient {
         &self,
         block_height: u64,
         target_index: u32,
-    ) -> EthereumMerkleProof {
-        let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url).unwrap());
+    ) -> Result<EthereumMerkleProof> {
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url)?);
         let receipts: Vec<TransactionReceipt> = provider
             .get_block_receipts(alloy::eips::BlockId::Number(
                 alloy::eips::BlockNumberOrTag::Number(block_height),
             ))
-            .await
-            .unwrap()
-            .unwrap();
+            .await?
+            .context("Failed to get block receipts")?;
         let retainer = ProofRetainer::new(vec![Nibbles::unpack(
             crate::timewave_rlp::encode_fixed_size(&target_index),
         )]);
@@ -227,7 +255,7 @@ impl EvmMerkleRpcClient {
             let index_buffer = crate::timewave_rlp::encode_fixed_size(&index);
             hb.add_leaf(
                 Nibbles::unpack(&index_buffer),
-                encode_receipt(&receipts[index]).as_slice(),
+                encode_receipt(&receipts[index])?.as_slice(),
             );
         }
         let receipt_key: Vec<u8> = crate::timewave_rlp::encode(target_index);
@@ -240,10 +268,17 @@ impl EvmMerkleRpcClient {
             .collect::<Vec<_>>()
             .iter()
             .map(|n| n.to_vec())
-            .collect::<Vec<_>>(); //trie.get_proof(&receipt_key).unwrap();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
-            decode_rlp_bytes(proof.to_vec().last().unwrap());
-        let receipt_rlp = leaf_node_decoded.last().unwrap().to_vec();
-        EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into()
+            .collect::<Vec<_>>();
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+            proof
+                .to_vec()
+                .last()
+                .context("Failed to extract leaf from receipt proof")?,
+        )?;
+        let receipt_rlp = leaf_node_decoded
+            .last()
+            .context("Failed to extract value from leaf")?
+            .to_vec();
+        Ok(EthereumRawMerkleProof::new(proof, receipt_key, receipt_rlp).into())
     }
 }

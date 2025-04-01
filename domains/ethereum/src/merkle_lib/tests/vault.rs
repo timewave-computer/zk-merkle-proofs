@@ -25,7 +25,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_vault_contract_balance_on_sepolia() {
-        let sepolia_height = read_sepolia_height().await;
+        let sepolia_height = read_sepolia_height().await.unwrap();
         let address =
             alloy_primitives::Address::from_hex(read_sepolia_default_account_address()).unwrap();
         let slot: U256 = alloy_primitives::U256::from(0);
@@ -41,20 +41,25 @@ mod tests {
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
-            .await;
+            .await
+            .unwrap();
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
-            .expect("Failed to get Block!")
-            .expect("Block not found!");
-        assert!(account_proof.verify(block.header.state_root.as_slice()));
-        let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
+            .unwrap()
+            .unwrap();
+        assert!(account_proof
+            .verify(block.header.state_root.as_slice())
+            .unwrap());
+        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        assert!(storage_proof
+            .verify(account_decoded.get(2).unwrap())
+            .unwrap());
     }
 
     #[tokio::test]
     async fn test_vault_contract_shares_on_sepolia() {
-        let sepolia_height = read_sepolia_height().await;
+        let sepolia_height = read_sepolia_height().await.unwrap();
         let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
 
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
@@ -67,20 +72,25 @@ mod tests {
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
-            .await;
+            .await
+            .unwrap();
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
-            .expect("Failed to get Block!")
-            .expect("Block not found!");
-        assert!(account_proof.verify(block.header.state_root.as_slice()));
-        let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
+            .unwrap()
+            .unwrap();
+        assert!(account_proof
+            .verify(block.header.state_root.as_slice())
+            .unwrap());
+        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        assert!(storage_proof
+            .verify(account_decoded.get(2).unwrap())
+            .unwrap());
     }
 
     #[tokio::test]
     async fn test_account_and_storage_proof_from_rpc() {
-        let sepolia_height = read_sepolia_height().await;
+        let sepolia_height = read_sepolia_height().await.unwrap();
         let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let prover = EvmMerkleRpcClient {
@@ -89,25 +99,31 @@ mod tests {
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Number(sepolia_height))
             .await
-            .expect("Failed to get Block!")
-            .expect("Block not found!");
+            .unwrap()
+            .unwrap();
         let account_proof = prover
             .get_account_proof(
                 &alloy::hex::encode(&storage_slot_key),
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
-            .await;
-        assert!(account_proof.verify(block.header.state_root.as_slice()));
+            .await
+            .unwrap();
+        assert!(account_proof
+            .verify(block.header.state_root.as_slice())
+            .unwrap());
         let storage_proof = prover
             .get_storage_proof(
                 &alloy::hex::encode(&storage_slot_key),
                 &read_ethereum_vault_contract_address(),
                 sepolia_height,
             )
-            .await;
+            .await
+            .unwrap();
 
-        let account_decoded = decode_rlp_bytes(&account_proof.value);
-        assert!(storage_proof.verify(account_decoded.get(2).unwrap()));
+        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        assert!(storage_proof
+            .verify(account_decoded.get(2).unwrap())
+            .unwrap());
     }
 }

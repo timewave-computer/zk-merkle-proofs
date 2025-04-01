@@ -6,7 +6,7 @@ use crate::timewave_rlp::{Decodable, EMPTY_STRING_CODE};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
     timewave_trie::{
-        constants::{CHILD_INDEX_RANGE, EMPTY_ROOT_HASH},
+        constants::{CHILD_INDEX_RANGE, EMPTY_ROOT_HASH_BYTES},
         types::{BranchNode, RlpNode, TrieNode},
     },
 };
@@ -53,12 +53,6 @@ where
     I: IntoIterator<Item = &'a Bytes>,
 {
     let mut proof = proof.into_iter().peekable();
-    #[allow(non_snake_case)]
-    let EMPTY_ROOT_HASH_BYTES: [u8; 32] = hex::decode(EMPTY_ROOT_HASH)
-        .expect("Invalid hex or wrong length")
-        .try_into()
-        .expect("Invalid hex or wrong length");
-
     // If the proof is empty or contains only an empty node, the expected value must be None.
     if proof
         .peek()

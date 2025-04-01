@@ -27,17 +27,16 @@ pub(crate) mod constants {
         env::var("ETHEREUM_URL").expect("Missing Sepolia url!")
     }
 
-    pub(crate) async fn read_sepolia_height() -> u64 {
+    pub(crate) async fn read_sepolia_height() -> Result<u64, anyhow::Error> {
         use alloy::providers::{Provider, ProviderBuilder};
         use std::str::FromStr;
         use url::Url;
-        let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url())?);
         let block = provider
             .get_block_by_number(alloy::eips::BlockNumberOrTag::Latest)
-            .await
-            .expect("Failed to get Block!")
-            .expect("Block not found!");
-        block.header.number
+            .await?
+            .expect("Failed to get Block!");
+        Ok(block.header.number)
     }
 
     pub(crate) fn get_test_vector_eth_storage_proof() -> Vec<u8> {
@@ -74,11 +73,12 @@ mod tests {
         use common::merkle::types::MerkleVerifiable;
         let rpc_url = read_sepolia_url();
         let prover = EvmMerkleRpcClient { rpc_url };
-        let sepolia_height = read_sepolia_height().await;
+        let sepolia_height = read_sepolia_height().await.unwrap();
         let receipt_proof = prover
             // erc20 transfers etc. will be located in the logs
             .get_receipt_proof(sepolia_height, 1)
-            .await;
+            .await
+            .unwrap();
 
         let provider = ProviderBuilder::new().on_http(Url::from_str(&read_sepolia_url()).unwrap());
         let block = provider
@@ -87,6 +87,8 @@ mod tests {
             .expect("Failed to get Block!")
             .expect("Block not found!");
 
-        assert!(receipt_proof.verify(block.header.receipts_root.as_slice()));
+        assert!(receipt_proof
+            .verify(block.header.receipts_root.as_slice())
+            .unwrap());
     }
 }

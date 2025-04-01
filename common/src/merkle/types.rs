@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 /// A trait for types that can generate Merkle proofs from RPC calls.
 ///
 /// This trait defines the interface for different proving systems to fetch proofs
@@ -19,7 +21,7 @@ pub trait MerkleClient {
     /// The exact format of the proof depends on the implementing blockchain network.
     /// The proof should be sufficient to verify the existence and value of the key
     /// in the Merkle tree at the specified block height.
-    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8>;
+    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Result<Vec<u8>>;
 }
 
 /// A trait for types that can verify Merkle proofs against an expected root.
@@ -41,5 +43,5 @@ pub trait MerkleVerifiable {
     /// 1. The proof nodes form a valid path from the leaf to the root
     /// 2. The leaf node contains the expected key-value pair
     /// 3. The root hash matches the expected root
-    fn verify(&self, root: &[u8]) -> bool;
+    fn verify(&self, root: &[u8]) -> Result<bool>;
 }

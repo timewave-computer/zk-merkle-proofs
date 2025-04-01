@@ -2,11 +2,11 @@
 //!
 //! This module provides functions for encoding Ethereum-specific data structures
 //! using the RLP encoding scheme.
-
 use alloy::{
     consensus::{Receipt, ReceiptWithBloom, TxReceipt, TxType},
     rpc::types::TransactionReceipt,
 };
+use anyhow::{Context, Result};
 
 /// Adjusts an index for RLP encoding based on its value and the total length.
 ///
@@ -33,9 +33,12 @@ pub const fn adjust_index_for_rlp(i: usize, len: usize) -> usize {
 ///
 /// # Returns
 /// The RLP-encoded receipt as a vector of bytes
-pub fn encode_receipt(receipt: &TransactionReceipt) -> Vec<u8> {
+pub fn encode_receipt(receipt: &TransactionReceipt) -> Result<Vec<u8>> {
     let tx_type = receipt.transaction_type();
-    let receipt = receipt.inner.as_receipt_with_bloom().unwrap();
+    let receipt = receipt
+        .inner
+        .as_receipt_with_bloom()
+        .context("Failed to extract inner receipts with bloom")?;
     let logs = receipt
         .logs()
         .iter()
@@ -52,7 +55,7 @@ pub fn encode_receipt(receipt: &TransactionReceipt) -> Vec<u8> {
     let encoded = alloy::rlp::encode(rwb);
 
     match tx_type {
-        TxType::Legacy => encoded,
-        _ => [vec![tx_type as u8], encoded].concat(),
+        TxType::Legacy => Ok(encoded),
+        _ => Ok([vec![tx_type as u8], encoded].concat()),
     }
 }

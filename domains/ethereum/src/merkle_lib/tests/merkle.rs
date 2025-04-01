@@ -14,7 +14,7 @@ mod tests {
         let block_root: Vec<u8> = get_test_vector_eth_block_root();
         let eth_proof: EthereumMerkleProof =
             serde_json::from_slice(&get_test_vector_eth_account_proof()).unwrap();
-        assert!(eth_proof.verify(&block_root));
+        assert!(eth_proof.verify(&block_root).unwrap());
     }
 
     #[tokio::test]
@@ -22,6 +22,6 @@ mod tests {
         let account_root: Vec<u8> = get_test_vector_eth_account_root();
         let eth_proof: EthereumMerkleProof =
             serde_json::from_slice(&get_test_vector_eth_storage_proof()).unwrap();
-        assert!(eth_proof.verify(&account_root));
+        assert!(eth_proof.verify(&account_root).unwrap());
     }
 }
