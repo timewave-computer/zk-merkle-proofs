@@ -199,14 +199,19 @@ impl EvmMerkleRpcClient {
         let first_storage_proof = raw_storage_proofs
             .first()
             .context("Failed to get first storage proof")?;
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = crate::timewave_rlp::decode_exact(
-            first_storage_proof
-                .0
-                .to_vec()
-                .last()
-                .context("Failed to extract leaf from storage proof")?,
-        )
-        .expect("Failed to rlp decode leaf");
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
+            match crate::timewave_rlp::decode_exact(
+                first_storage_proof
+                    .0
+                    .to_vec()
+                    .last()
+                    .context("Failed to extract leaf from storage proof")?,
+            ) {
+                Ok(decoded) => decoded,
+                Err(e) => {
+                    return Err(anyhow::anyhow!("Failed to decode RLP bytes: {:?}", e));
+                }
+            };
         let stored_value = leaf_node_decoded
             .last()
             .context("Failed to extract value from leaf")?
