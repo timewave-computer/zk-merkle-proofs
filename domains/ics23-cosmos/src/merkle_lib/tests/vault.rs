@@ -23,7 +23,7 @@ mod tests {
             &read_pion_1_vault_contract_address(),
         );
         let proofs = prover
-            .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
+            .get_proof(&neutron_key.to_string(), "", read_test_vector_height())
             .await
             .unwrap();
         let neutron_proof: Ics23MerkleProof = serde_json::from_slice(&proofs).unwrap();
@@ -43,7 +43,7 @@ mod tests {
         let neutron_key =
             Ics23Key::new_wasm_stored_value("shares", &read_pion_1_vault_contract_address());
         let proofs = prover
-            .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
+            .get_proof(&neutron_key.to_string(), "", read_test_vector_height())
             .await
             .unwrap();
         let neutron_proof: Ics23MerkleProof = serde_json::from_slice(&proofs).unwrap();

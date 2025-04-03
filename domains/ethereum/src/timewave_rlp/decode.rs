@@ -5,8 +5,17 @@ use core::marker::{PhantomData, PhantomPinned};
 
 /// A type that can be decoded from an RLP blob.
 pub trait Decodable: Sized {
-    /// Decodes the blob into the appropriate type. `buf` must be advanced past
-    /// the decoded object.
+    /// Decodes the blob into the appropriate type.
+    ///
+    /// # Arguments
+    /// * `buf` - A mutable reference to the buffer containing RLP-encoded data
+    ///
+    /// # Returns
+    /// * `Ok(Self)` if decoding was successful
+    /// * `Err(Error)` if decoding failed
+    ///
+    /// # Note
+    /// The buffer must be advanced past the decoded object.
     fn decode(buf: &mut &[u8]) -> Result<Self>;
 }
 
@@ -18,12 +27,27 @@ pub struct Rlp<'a> {
 
 impl<'a> Rlp<'a> {
     /// Instantiate an RLP decoder with a payload slice.
+    ///
+    /// # Arguments
+    /// * `payload` - The RLP-encoded payload to decode
+    ///
+    /// # Returns
+    /// * `Ok(Self)` if the payload is valid RLP
+    /// * `Err(Error)` if the payload is invalid
     pub fn new(mut payload: &'a [u8]) -> Result<Self> {
         let payload_view = Header::decode_bytes(&mut payload, true)?;
         Ok(Self { payload_view })
     }
 
     /// Decode the next item from the buffer.
+    ///
+    /// # Arguments
+    /// * `T` - The type to decode into
+    ///
+    /// # Returns
+    /// * `Ok(Some(T))` if an item was successfully decoded
+    /// * `Ok(None)` if there are no more items to decode
+    /// * `Err(Error)` if decoding failed
     #[inline]
     pub fn get_next<T: Decodable>(&mut self) -> Result<Option<T>> {
         if self.payload_view.is_empty() {

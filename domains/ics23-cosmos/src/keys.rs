@@ -4,6 +4,9 @@
 //! different types of state on the Ics23 blockchain, including bank balances,
 //! WASM contract state, and other storage types.
 
+use core::fmt;
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "no-zkvm")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
@@ -22,14 +25,15 @@ pub struct Ics23Key {
     pub key: String,
 }
 
-impl Ics23Key {
-    /// Serializes the Ics23Key by encoding prefix_len explicitly.
-    /// Maximum prefix length is 3 digits e.g. 999
-    pub fn serialize(&self) -> String {
-        format!("{:03}{}{}", self.prefix_len, self.prefix, self.key)
+impl Display for Ics23Key {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:03}{}{}", self.prefix_len, self.prefix, self.key)
     }
+}
+
+impl Ics23Key {
     /// Deserializes a string back into a Ics23Key.
-    pub fn deserialize(encoded: &str) -> Self {
+    pub fn from_string(encoded: &str) -> Self {
         let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
         let prefix = &encoded[3..(3 + prefix_len)];
         let key = &encoded[(3 + prefix_len)..];

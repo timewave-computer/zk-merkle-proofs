@@ -7,6 +7,9 @@ use bytes::{Buf, BufMut};
 use core::hint::unreachable_unchecked;
 
 /// The header of an RLP item.
+///
+/// This struct represents the header information for an RLP-encoded item,
+/// including whether it's a list and its payload length.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Header {
     /// True if list, false otherwise.
@@ -18,9 +21,12 @@ pub struct Header {
 impl Header {
     /// Decodes an RLP header from the given buffer.
     ///
-    /// # Errors
+    /// # Arguments
+    /// * `buf` - A mutable reference to the buffer containing the RLP header
     ///
-    /// Returns an error if the buffer is too short or the header is invalid.
+    /// # Returns
+    /// * `Ok(Self)` if the header was successfully decoded
+    /// * `Err(Error)` if the buffer is too short or the header is invalid
     #[inline]
     pub fn decode(buf: &mut &[u8]) -> Result<Self> {
         let payload_length;
@@ -84,9 +90,13 @@ impl Header {
 
     /// Decodes the next payload from the given buffer, advancing it.
     ///
-    /// # Errors
+    /// # Arguments
+    /// * `buf` - A mutable reference to the buffer containing the RLP data
+    /// * `is_list` - Whether the payload is expected to be a list
     ///
-    /// Returns an error if the buffer is too short or the header is invalid.
+    /// # Returns
+    /// * `Ok(&[u8])` if the payload was successfully decoded
+    /// * `Err(Error)` if the buffer is too short or the header is invalid
     #[inline]
     pub fn decode_bytes<'a>(buf: &mut &'a [u8], is_list: bool) -> Result<&'a [u8]> {
         let Self {
@@ -109,9 +119,12 @@ impl Header {
 
     /// Decodes a string slice from the given buffer, advancing it.
     ///
-    /// # Errors
+    /// # Arguments
+    /// * `buf` - A mutable reference to the buffer containing the RLP data
     ///
-    /// Returns an error if the buffer is too short or the header is invalid.
+    /// # Returns
+    /// * `Ok(&str)` if the string was successfully decoded
+    /// * `Err(Error)` if the buffer is too short or contains invalid UTF-8
     #[inline]
     pub fn decode_str<'a>(buf: &mut &'a [u8]) -> Result<&'a str> {
         let bytes = Self::decode_bytes(buf, false)?;
@@ -182,11 +195,17 @@ impl Header {
     }
 
     /// Returns the length of the encoded header.
+    ///
+    /// # Returns
+    /// The number of bytes required to encode the header
     pub const fn length(&self) -> usize {
         crate::timewave_rlp::length_of_length(self.payload_length)
     }
 
     /// Returns the total length of the encoded header and payload.
+    ///
+    /// # Returns
+    /// The total number of bytes required to encode the header and payload
     pub const fn length_with_payload(&self) -> usize {
         self.length() + self.payload_length
     }

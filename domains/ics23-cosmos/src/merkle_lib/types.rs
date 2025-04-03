@@ -75,7 +75,7 @@ fn test_neutron_key_serialization() {
         prefix_len: "some_long_key_to_rule_out_issues".to_string().len(),
         key: "0x000".to_string(),
     };
-    let key_serialized = key.serialize();
-    let key_deserialized = Ics23Key::deserialize(&key_serialized);
+    let key_serialized = key.to_string();
+    let key_deserialized = Ics23Key::from_string(&key_serialized);
     assert_eq!(key_deserialized, key);
 }

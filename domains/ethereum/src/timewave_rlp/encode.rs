@@ -10,14 +10,20 @@ use alloc::vec::Vec;
 use arrayvec::ArrayVec;
 /// A type that can be encoded via RLP.
 pub trait Encodable {
-    /// Encodes the type into the `out` buffer.
+    /// Encodes the type into the output buffer.
+    ///
+    /// # Arguments
+    /// * `out` - A mutable reference to the buffer to write the encoded data to
     fn encode(&self, out: &mut dyn BufMut);
 
     /// Returns the length of the encoding of this type in bytes.
     ///
+    /// # Returns
+    /// The number of bytes required to encode this type
+    ///
+    /// # Note
     /// The default implementation computes this by encoding the type.
-    /// When possible, we recommender implementers override this with a
-    /// specialized implementation.
+    /// When possible, implementers should override this with a specialized implementation.
     #[inline]
     fn length(&self) -> usize {
         let mut out = Vec::new();
@@ -48,6 +54,10 @@ pub unsafe trait MaxEncodedLenAssoc: Encodable {
 }
 
 /// Implement [`MaxEncodedLen`] and [`MaxEncodedLenAssoc`] for a type.
+///
+/// # Arguments
+/// * `$t` - The type to implement the traits for
+/// * `$len` - The maximum length of the encoded type
 ///
 /// # Safety
 ///

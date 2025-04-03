@@ -42,7 +42,7 @@ mod tests {
         let rpc_url = read_rpc_url();
         let prover = Ics23MerkleRpcClient { rpc_url };
         let proofs = prover
-            .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
+            .get_proof(&neutron_key.to_string(), "", read_test_vector_height())
             .await
             .unwrap();
         let neutron_proof: Ics23MerkleProof = serde_json::from_slice(&proofs).unwrap();
@@ -70,7 +70,7 @@ mod tests {
         let prover = Ics23MerkleRpcClient { rpc_url };
         let neutron_key = Ics23Key::new_bank_total_supply("untrn");
         let proofs = prover
-            .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
+            .get_proof(&neutron_key.to_string(), "", read_test_vector_height())
             .await
             .unwrap();
         let neutron_proof: Ics23MerkleProof = serde_json::from_slice(&proofs).unwrap();
@@ -100,7 +100,7 @@ mod tests {
             "neutron1m9l358xunhhwds0568za49mzhvuxx9ux8xafx2",
         );
         let proofs = prover
-            .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
+            .get_proof(&neutron_key.to_string(), "", read_test_vector_height())
             .await
             .unwrap();
         let neutron_proof: Ics23MerkleProof = serde_json::from_slice(&proofs).unwrap();
