@@ -18,22 +18,26 @@ use {cosmrs::proto::prost, ics23::CommitmentProof, tendermint::merkle::proof::Pr
 /// # Returns
 ///
 /// A vector of ICS23 commitment proofs
-pub fn convert_tm_to_ics_merkle_proof(tm_proof: &ProofOps) -> Vec<CommitmentProof> {
+use anyhow::{Context, Result};
+pub fn convert_tm_to_ics_merkle_proof(tm_proof: &ProofOps) -> Result<Vec<CommitmentProof>> {
     let mut out: Vec<CommitmentProof> = vec![];
     assert_eq!(tm_proof.ops.len(), 2);
     let proof_op = tm_proof
         .ops
         .first()
         //.find(|op| op.r#field_type == "ics23:iavl")
-        .unwrap();
+        .context("Failed to find proof op")?;
 
     let mut parsed = CommitmentProof { proof: None };
-    prost::Message::merge(&mut parsed, proof_op.data.as_slice()).unwrap();
+    prost::Message::merge(&mut parsed, proof_op.data.as_slice())?;
     out.push(parsed);
 
-    let proof_op = tm_proof.ops.last().unwrap();
+    let proof_op = tm_proof
+        .ops
+        .last()
+        .context("Failed to extract last proof op")?;
     let mut parsed = CommitmentProof { proof: None };
-    prost::Message::merge(&mut parsed, proof_op.data.as_slice()).unwrap();
+    prost::Message::merge(&mut parsed, proof_op.data.as_slice())?;
     out.push(parsed);
-    out
+    Ok(out)
 }

@@ -1,4 +1,5 @@
 use crate::{keys::NeutronKey, merkle_lib::helpers::convert_tm_to_ics_merkle_proof};
+use anyhow::{Context, Result};
 use common::merkle::types::MerkleVerifiable;
 use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
@@ -6,7 +7,6 @@ use ics23::{
 };
 use serde::{Deserialize, Serialize};
 use tendermint::merkle::proof::ProofOps;
-use anyhow::Result;
 /// Represents a Merkle proof for state on the Neutron blockchain.
 ///
 /// This type combines the proof data from Tendermint with the key and value
@@ -41,22 +41,21 @@ impl MerkleVerifiable for NeutronMerkleProofWithRoot {
 
 impl MerkleVerifiable for NeutronMerkleProof {
     fn verify(&self, expected_root: &[u8]) -> Result<bool> {
-        let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
-        let inner_proof = proof_decoded.first().unwrap();
+        let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof)?;
+        let inner_proof = proof_decoded.first().context("Failed to decode proof")?;
         let Some(Proof::Exist(existence_proof)) = &inner_proof.proof else {
             panic!("Wrong proof type!");
         };
-        let inner_root =
-            calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof).unwrap();
+        let inner_root = calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof)?;
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
             inner_proof,
             &iavl_spec(),
             &inner_root,
-            &hex::decode(&self.key.key).unwrap(),
+            &hex::decode(&self.key.key)?,
             &self.value,
         );
         assert!(is_valid);
-        let outer_proof = proof_decoded.last().unwrap();
+        let outer_proof = proof_decoded.last().context("Failed to decode proof")?;
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
             outer_proof,
             &tendermint_spec(),

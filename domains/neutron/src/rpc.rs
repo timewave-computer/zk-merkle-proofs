@@ -1,7 +1,7 @@
+use anyhow::{Context, Result};
 use common::merkle::types::MerkleClient;
 use tendermint::block::Height;
 use tendermint_rpc::{Client, HttpClient};
-use anyhow::Result;
 
 use crate::{keys::NeutronKey, merkle_lib::types::NeutronMerkleProof};
 
@@ -17,25 +17,23 @@ pub struct NeutronMerkleRpcClient {
 impl MerkleClient for NeutronMerkleRpcClient {
     #[allow(unused)]
     async fn get_proof(&self, key: &str, address: &str, height: u64) -> Result<Vec<u8>> {
-        let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
+        let client = HttpClient::new(self.rpc_url.as_str())?;
         let neutron_key: NeutronKey = NeutronKey::deserialize(key);
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
             .abci_query(
                 // "store/bank/key", "store/wasm/key", ...
                 Some(format!("{}{}{}", "store/", neutron_key.prefix, "/key")),
-                hex::decode(neutron_key.key.clone()).unwrap(),
+                hex::decode(neutron_key.key.clone())?,
                 Some(Height::from(height as u32)),
                 true, // Include proof
             )
-            .await
-            .unwrap();
-        let proof = response.proof.unwrap();
+            .await?;
+        let proof = response.proof.context("Failed to get proof")?;
         assert!(!response.value.is_empty());
         Ok(serde_json::to_vec(&NeutronMerkleProof {
             proof: proof.clone(),
             key: neutron_key,
             value: response.value,
-        })
-        .unwrap())
+        })?)
     }
 }

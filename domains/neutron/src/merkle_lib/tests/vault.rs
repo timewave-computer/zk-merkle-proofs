@@ -3,7 +3,7 @@ mod tests {
     use crate::{
         keys::NeutronKey,
         merkle_lib::{
-            tests::defaults::{
+            tests::defaults::constants::{
                 read_pion_1_default_account_address, read_pion_1_vault_contract_address,
                 read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
             },
@@ -24,13 +24,16 @@ mod tests {
         );
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await.unwrap();
+            .await
+            .unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        assert!(neutron_proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(read_test_vector_merkle_root())
-                .unwrap(),
-        ).unwrap());
+        assert!(neutron_proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(read_test_vector_merkle_root())
+                    .unwrap(),
+            )
+            .unwrap());
     }
 
     #[tokio::test]
@@ -41,12 +44,15 @@ mod tests {
             NeutronKey::new_wasm_stored_value("shares", &read_pion_1_vault_contract_address());
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await.unwrap();
+            .await
+            .unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        assert!(neutron_proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(read_test_vector_merkle_root())
-                .unwrap(),
-        ).unwrap());
+        assert!(neutron_proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(read_test_vector_merkle_root())
+                    .unwrap(),
+            )
+            .unwrap());
     }
 }

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::merkle_lib::{
-        tests::defaults::{
+        tests::defaults::constants::{
             get_test_vector_neutron_storage_proof, read_pion_1_default_account_address,
             TEST_VECTOR_NEUTRON_ROOT,
         },
@@ -17,18 +17,20 @@ mod tests {
             "Value Decoded: {:?}",
             &String::from_utf8_lossy(&proof.value)
         );*/
-        assert!(proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(TEST_VECTOR_NEUTRON_ROOT)
-                .unwrap(),
-        ).unwrap());
+        assert!(proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(TEST_VECTOR_NEUTRON_ROOT)
+                    .unwrap(),
+            )
+            .unwrap());
     }
 
     #[tokio::test]
     async fn test_get_neutron_wasm_store_dictionary_merkle_proof() {
         use crate::{
             keys::NeutronKey,
-            merkle_lib::tests::defaults::{
+            merkle_lib::tests::defaults::constants::{
                 read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
             },
             rpc::NeutronMerkleRpcClient,
@@ -41,13 +43,16 @@ mod tests {
         let prover = NeutronMerkleRpcClient { rpc_url };
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await.unwrap();
+            .await
+            .unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        assert!(neutron_proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(read_test_vector_merkle_root())
-                .unwrap(),
-        ).unwrap());
+        assert!(neutron_proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(read_test_vector_merkle_root())
+                    .unwrap(),
+            )
+            .unwrap());
     }
 
     // first verifies account state, then a single storage proof
@@ -56,7 +61,7 @@ mod tests {
     pub async fn test_get_neutron_bank_store_supply_merkle_proof() {
         use crate::{
             keys::NeutronKey,
-            merkle_lib::tests::defaults::{
+            merkle_lib::tests::defaults::constants::{
                 read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
             },
             rpc::NeutronMerkleRpcClient,
@@ -66,20 +71,23 @@ mod tests {
         let neutron_key = NeutronKey::new_bank_total_supply("untrn");
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await.unwrap();
+            .await
+            .unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        assert!(neutron_proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(read_test_vector_merkle_root())
-                .unwrap(),
-        ).unwrap());
+        assert!(neutron_proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(read_test_vector_merkle_root())
+                    .unwrap(),
+            )
+            .unwrap());
     }
 
     #[tokio::test]
     pub async fn test_get_neutron_bank_store_balance_merkle_proof() {
         use crate::{
             keys::NeutronKey,
-            merkle_lib::tests::defaults::{
+            merkle_lib::tests::defaults::constants::{
                 read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
             },
             rpc::NeutronMerkleRpcClient,
@@ -93,12 +101,15 @@ mod tests {
         );
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await.unwrap();
+            .await
+            .unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
-        assert!(neutron_proof.verify(
-            &base64::engine::general_purpose::STANDARD
-                .decode(read_test_vector_merkle_root())
-                .unwrap(),
-        ).unwrap());
+        assert!(neutron_proof
+            .verify(
+                &base64::engine::general_purpose::STANDARD
+                    .decode(read_test_vector_merkle_root())
+                    .unwrap(),
+            )
+            .unwrap());
     }
 }
