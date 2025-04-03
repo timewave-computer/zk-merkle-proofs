@@ -1,13 +1,15 @@
 #[cfg(test)]
 mod tests {
     use crate::{
-        keys::Ics23Key, merkle_lib::{
+        keys::Ics23Key,
+        merkle_lib::{
             tests::defaults::constants::{
                 read_pion_1_default_account_address, read_pion_1_vault_contract_address,
                 read_rpc_url, read_test_vector_height, read_test_vector_merkle_root,
             },
             types::Ics23MerkleProof,
-        }, rpc::Ics23MerkleRpcClient
+        },
+        rpc::Ics23MerkleRpcClient,
     };
     use base64::Engine;
     use common::merkle::types::{MerkleClient, MerkleVerifiable};

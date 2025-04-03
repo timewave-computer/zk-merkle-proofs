@@ -56,7 +56,8 @@ where
     // If the proof is empty or contains only an empty node, the expected value must be None.
     if proof
         .peek()
-        .map_or(true, |node| node.as_ref() == [EMPTY_STRING_CODE])
+        .map(|node| node.as_ref() == [EMPTY_STRING_CODE])
+        .unwrap_or(true)
     {
         return if root == &EMPTY_ROOT_HASH_BYTES {
             if expected_value.is_none() {
