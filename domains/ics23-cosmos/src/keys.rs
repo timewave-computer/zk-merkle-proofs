@@ -1,19 +1,19 @@
-//! Key management for Neutron blockchain state queries.
+//! Key management for Ics23 blockchain state queries.
 //!
 //! This module provides functionality for creating and managing keys used to query
-//! different types of state on the Neutron blockchain, including bank balances,
+//! different types of state on the Ics23 blockchain, including bank balances,
 //! WASM contract state, and other storage types.
 
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "no-zkvm")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
 
-/// Represents a key used to query state on the Neutron blockchain.
+/// Represents a key used to query state on the Ics23 blockchain.
 ///
 /// The key consists of a prefix (e.g., "bank", "wasm") and a key string that identifies
 /// the specific state to query. The prefix_len field is used for serialization purposes.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct NeutronKey {
+pub struct Ics23Key {
     /// The prefix indicating the type of state (e.g., "bank", "wasm")
     pub prefix: String,
     /// The length of the prefix string
@@ -22,19 +22,19 @@ pub struct NeutronKey {
     pub key: String,
 }
 
-impl NeutronKey {
-    /// Serializes the NeutronKey by encoding prefix_len explicitly.
+impl Ics23Key {
+    /// Serializes the Ics23Key by encoding prefix_len explicitly.
     /// Maximum prefix length is 3 digits e.g. 999
     pub fn serialize(&self) -> String {
         format!("{:03}{}{}", self.prefix_len, self.prefix, self.key)
     }
-    /// Deserializes a string back into a NeutronKey.
+    /// Deserializes a string back into a Ics23Key.
     pub fn deserialize(encoded: &str) -> Self {
         let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
         let prefix = &encoded[3..(3 + prefix_len)];
         let key = &encoded[(3 + prefix_len)..];
 
-        NeutronKey {
+        Ics23Key {
             prefix: prefix.to_string(),
             prefix_len,
             key: key.to_string(),

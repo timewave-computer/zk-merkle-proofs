@@ -1,4 +1,4 @@
-use crate::{keys::NeutronKey, merkle_lib::helpers::convert_tm_to_ics_merkle_proof};
+use crate::{keys::Ics23Key, merkle_lib::helpers::convert_tm_to_ics_merkle_proof};
 use anyhow::{Context, Result};
 use common::merkle::types::MerkleVerifiable;
 use ics23::{
@@ -12,11 +12,11 @@ use tendermint::merkle::proof::ProofOps;
 /// This type combines the proof data from Tendermint with the key and value
 /// being proven, allowing for verification of state existence.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NeutronMerkleProof {
+pub struct Ics23MerkleProof {
     /// The Tendermint proof operations
     pub proof: ProofOps,
     /// The key being proven
-    pub key: NeutronKey,
+    pub key: Ics23Key,
     /// The value being proven
     pub value: Vec<u8>,
 }
@@ -26,20 +26,20 @@ pub struct NeutronMerkleProof {
 /// This type is used as input for verification operations, providing both
 /// the proof and the expected root hash that the proof should verify against.
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct NeutronMerkleProofWithRoot {
+pub struct Ics23MerkleProofWithRoot {
     /// The Merkle proof to verify
-    pub proof: NeutronMerkleProof,
+    pub proof: Ics23MerkleProof,
     /// The expected root hash
     pub root: Vec<u8>,
 }
 
-impl MerkleVerifiable for NeutronMerkleProofWithRoot {
+impl MerkleVerifiable for Ics23MerkleProofWithRoot {
     fn verify(&self, expected_root: &[u8]) -> Result<bool> {
         self.proof.verify(expected_root)
     }
 }
 
-impl MerkleVerifiable for NeutronMerkleProof {
+impl MerkleVerifiable for Ics23MerkleProof {
     fn verify(&self, expected_root: &[u8]) -> Result<bool> {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof)?;
         let inner_proof = proof_decoded.first().context("Failed to decode proof")?;
@@ -69,13 +69,13 @@ impl MerkleVerifiable for NeutronMerkleProof {
 
 #[test]
 fn test_neutron_key_serialization() {
-    let key = NeutronKey {
+    let key = Ics23Key {
         // max supported key length is 999, which is unrealistic for neutron.
         prefix: "some_long_key_to_rule_out_issues".to_string(),
         prefix_len: "some_long_key_to_rule_out_issues".to_string().len(),
         key: "0x000".to_string(),
     };
     let key_serialized = key.serialize();
-    let key_deserialized = NeutronKey::deserialize(&key_serialized);
+    let key_deserialized = Ics23Key::deserialize(&key_serialized);
     assert_eq!(key_deserialized, key);
 }

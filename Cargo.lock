@@ -2494,6 +2494,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "ics23-cosmos"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "common",
+ "cosmrs",
+ "cosmwasm-std",
+ "dotenvy",
+ "hex",
+ "ics23",
+ "serde",
+ "serde_json",
+ "tendermint",
+ "tendermint-proto",
+ "tendermint-rpc",
+ "tokio",
+]
+
+[[package]]
 name = "icu_collections"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2887,26 +2907,6 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
-]
-
-[[package]]
-name = "neutron"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "common",
- "cosmrs",
- "cosmwasm-std",
- "dotenvy",
- "hex",
- "ics23",
- "serde",
- "serde_json",
- "tendermint",
- "tendermint-proto",
- "tendermint-rpc",
- "tokio",
 ]
 
 [[package]]

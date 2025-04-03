@@ -61,7 +61,7 @@ impl MerkleVerifiable for NewChainMerkleProof {
 ```
 
 # ZK Valence Supported Chains
-| Ethereum | Neutron |
+| Ethereum | Ics23 (Cosmos, Neutron) |
 |---|---|
 | [Readme](domains/ethereum/README.md) | [Readme](domains/neutron/README.md) |
 
@@ -70,7 +70,7 @@ impl MerkleVerifiable for NewChainMerkleProof {
 | Chain | Account Proofs | Storage Proofs | Receipt Proofs |
 |-------|---------------|----------------|----------------|
 | Ethereum | ✅ | ✅ | ✅ |
-| Neutron | ✅ | ✅ | ❌ |
+| Ics23 | ✅ | ✅ | ❌ |
 
 # ZK Rate calculation for a Cross Chain Vault
 We currently have two mock vault contracts deployed on Sepolia (Ethereum) and Pion-1 (Neutron).
