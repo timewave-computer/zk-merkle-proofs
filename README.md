@@ -123,5 +123,5 @@ $ cargo test
 
 To serve the documentation locally:
 ```shell
-$ cargo doc --no-deps --open
+$ cargo doc --no-deps --open --features no-zkvm
 ```
