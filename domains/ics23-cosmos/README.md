@@ -1,4 +1,4 @@
-# Neutron libraries
+# Ics23-Cosmos libraries
 
 ## Merkle Proofs
 The Neutron `merkle_lib` library exposes functions to obtain different kinds of storage and account proofs from an Neutron node, as well as verify them against a `trusted root`.

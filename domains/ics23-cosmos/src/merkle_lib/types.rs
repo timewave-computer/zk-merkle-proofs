@@ -63,7 +63,10 @@ impl MerkleVerifiable for Ics23MerkleProof {
             self.key.prefix.as_bytes(),
             &inner_root,
         );
-        Ok(is_valid)
+        match is_valid {
+            true => Ok(true),
+            false => anyhow::bail!("Invalid proof"),
+        }
     }
 }
 
