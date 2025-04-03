@@ -46,6 +46,9 @@ impl Ics23Key {
     }
     // create a new neutron key for a mapping from address:value that lives under some contract
     // this is useful for examples where users are assigned balances
+    // store: name of the storage module (bank, wasm, etc)
+    // key: the key of the mapping
+    // contract_address: the address of the contract under which the mapping lives
     #[cfg(feature = "no-zkvm")]
     pub fn new_wasm_account_mapping(store: &[u8], key: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
@@ -66,15 +69,19 @@ impl Ics23Key {
         }
     }
 
+    // create a new neutron key for a stored value under a WASM contract
+    // this is useful for accessing simple key-value storage in a contract
+    // key: the key of the mapping e.g. "shares"
+    // contract_address: the address of the contract where the value is stored
     #[cfg(feature = "no-zkvm")]
-    pub fn new_wasm_stored_value(store: &str, contract_address: &str) -> Self {
+    pub fn new_wasm_stored_value(key: &str, contract_address: &str) -> Self {
         let mut key_bytes = vec![0x03];
         key_bytes.append(
             &mut AccountId::from_str(contract_address)
                 .expect("Invalid contract address")
                 .to_bytes(),
         );
-        key_bytes.extend_from_slice(store.as_bytes());
+        key_bytes.extend_from_slice(key.as_bytes());
         Self {
             prefix: "wasm".to_string(),
             prefix_len: 4,
@@ -82,6 +89,9 @@ impl Ics23Key {
         }
     }
 
+    // create a new neutron key for the total supply of a denom
+    // this is useful for accessing the total supply of a denom in the bank module
+    // denom: the denom of the supply to query
     #[cfg(feature = "no-zkvm")]
     pub fn new_bank_total_supply(denom: &str) -> Self {
         // supply prefix is 0x00
@@ -95,6 +105,10 @@ impl Ics23Key {
         }
     }
 
+    // create a new neutron key for the balance of an account
+    // this is useful for accessing the balance of an account in the bank module
+    // denom: the denom of the balance to query
+    // address: the address of the account to query
     #[cfg(feature = "no-zkvm")]
     pub fn new_bank_account_balance(denom: &str, address: &str) -> Self {
         // balance prefix is 0x02
