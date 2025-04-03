@@ -6,7 +6,7 @@ use ics23::{
 };
 use serde::{Deserialize, Serialize};
 use tendermint::merkle::proof::ProofOps;
-
+use anyhow::Result;
 /// Represents a Merkle proof for state on the Neutron blockchain.
 ///
 /// This type combines the proof data from Tendermint with the key and value
@@ -34,13 +34,13 @@ pub struct NeutronMerkleProofWithRoot {
 }
 
 impl MerkleVerifiable for NeutronMerkleProofWithRoot {
-    fn verify(&self, expected_root: &[u8]) -> bool {
+    fn verify(&self, expected_root: &[u8]) -> Result<bool> {
         self.proof.verify(expected_root)
     }
 }
 
 impl MerkleVerifiable for NeutronMerkleProof {
-    fn verify(&self, expected_root: &[u8]) -> bool {
+    fn verify(&self, expected_root: &[u8]) -> Result<bool> {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof);
         let inner_proof = proof_decoded.first().unwrap();
         let Some(Proof::Exist(existence_proof)) = &inner_proof.proof else {
@@ -64,7 +64,7 @@ impl MerkleVerifiable for NeutronMerkleProof {
             self.key.prefix.as_bytes(),
             &inner_root,
         );
-        is_valid
+        Ok(is_valid)
     }
 }
 

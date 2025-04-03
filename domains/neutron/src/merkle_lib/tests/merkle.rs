@@ -8,20 +8,20 @@ mod tests {
         types::NeutronMerkleProof,
     };
     use base64::Engine;
-    use common::merkle::types::{MerkleRpcClient, MerkleVerifiable};
+    use common::merkle::types::{MerkleClient, MerkleVerifiable};
     #[tokio::test]
     async fn test_verify_storage_proof_single() {
         let proof: NeutronMerkleProof =
             serde_json::from_slice(&get_test_vector_neutron_storage_proof()).unwrap();
-        println!(
+        /*println!(
             "Value Decoded: {:?}",
             &String::from_utf8_lossy(&proof.value)
-        );
+        );*/
         assert!(proof.verify(
             &base64::engine::general_purpose::STANDARD
                 .decode(TEST_VECTOR_NEUTRON_ROOT)
                 .unwrap(),
-        ));
+        ).unwrap());
     }
 
     #[tokio::test]
@@ -41,13 +41,13 @@ mod tests {
         let prover = NeutronMerkleRpcClient { rpc_url };
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await;
+            .await.unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
         assert!(neutron_proof.verify(
             &base64::engine::general_purpose::STANDARD
                 .decode(read_test_vector_merkle_root())
                 .unwrap(),
-        ));
+        ).unwrap());
     }
 
     // first verifies account state, then a single storage proof
@@ -66,13 +66,13 @@ mod tests {
         let neutron_key = NeutronKey::new_bank_total_supply("untrn");
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await;
+            .await.unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
         assert!(neutron_proof.verify(
             &base64::engine::general_purpose::STANDARD
                 .decode(read_test_vector_merkle_root())
                 .unwrap(),
-        ));
+        ).unwrap());
     }
 
     #[tokio::test]
@@ -93,12 +93,12 @@ mod tests {
         );
         let proofs = prover
             .get_proof(&neutron_key.serialize(), "", read_test_vector_height())
-            .await;
+            .await.unwrap();
         let neutron_proof: NeutronMerkleProof = serde_json::from_slice(&proofs).unwrap();
         assert!(neutron_proof.verify(
             &base64::engine::general_purpose::STANDARD
                 .decode(read_test_vector_merkle_root())
                 .unwrap(),
-        ));
+        ).unwrap());
     }
 }

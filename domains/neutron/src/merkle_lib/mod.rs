@@ -10,5 +10,5 @@
 //! specific support for Neutron's implementation of this standard.
 
 pub mod helpers;
-pub mod tests;
+mod tests;
 pub mod types;

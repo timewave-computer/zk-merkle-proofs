@@ -1,0 +1,51 @@
+[package]
+name = "ethereum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+common.workspace = true
+tokio = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+reqwest = { workspace = true, optional = true }
+url = { workspace = true, optional = true }
+dotenvy = { workspace = true, optional = true }
+hash-db = "0.15"
+plain_hasher = "0.2"
+triehash = "0.8.4"
+alloy = { version = "0.12.5", features = ["full"], optional = true }
+alloy-sol-types = { version = "0.8.23", optional = true }
+alloy-primitives = { version = "0.8.25", optional = true }
+alloy-trie = { version = "0.7.9", optional = true }
+tiny-keccak = { version = "2.0.2", features = ["keccak"] }
+bytes.workspace = true
+hex-literal.workspace = true
+hex = { package = "const-hex", version = "1.14", default-features = false, features = [
+    "alloc",
+    "core-error",
+] }
+arrayvec = { version = "0.7", default-features = false }
+nybbles = "0.3.4"
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# ZKVM precompiles (hash functions)
+# when the sp1 feature is enabled, we leverage their precompile
+tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patches/tiny-keccak", tag = "patch-2.0.2-sp1-4.0.0", features = [
+    "keccak",
+], optional = true }
+
+[features]
+no-zkvm = [
+    "tokio",
+    "reqwest",
+    "url",
+    "dotenvy",
+    "alloy",
+    "alloy-sol-types",
+    "alloy-primitives",
+    "alloy-trie",
+]
+sp1 = ["tiny-keccak-sp1"]

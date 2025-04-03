@@ -1,6 +1,7 @@
-use common::merkle::types::MerkleRpcClient;
+use common::merkle::types::MerkleClient;
 use tendermint::block::Height;
 use tendermint_rpc::{Client, HttpClient};
+use anyhow::Result;
 
 use crate::{keys::NeutronKey, merkle_lib::types::NeutronMerkleProof};
 
@@ -13,9 +14,9 @@ pub struct NeutronMerkleRpcClient {
     pub rpc_url: String,
 }
 
-impl MerkleRpcClient for NeutronMerkleRpcClient {
+impl MerkleClient for NeutronMerkleRpcClient {
     #[allow(unused)]
-    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Vec<u8> {
+    async fn get_proof(&self, key: &str, address: &str, height: u64) -> Result<Vec<u8>> {
         let client = HttpClient::new(self.rpc_url.as_str()).unwrap();
         let neutron_key: NeutronKey = NeutronKey::deserialize(key);
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
@@ -30,11 +31,11 @@ impl MerkleRpcClient for NeutronMerkleRpcClient {
             .unwrap();
         let proof = response.proof.unwrap();
         assert!(!response.value.is_empty());
-        serde_json::to_vec(&NeutronMerkleProof {
+        Ok(serde_json::to_vec(&NeutronMerkleProof {
             proof: proof.clone(),
             key: neutron_key,
             value: response.value,
         })
-        .unwrap()
+        .unwrap())
     }
 }
