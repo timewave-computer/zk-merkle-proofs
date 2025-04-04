@@ -44,7 +44,7 @@ impl MerkleVerifiable for Ics23MerkleProof {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof)?;
         let inner_proof = proof_decoded.first().context("Failed to decode proof")?;
         let Some(Proof::Exist(existence_proof)) = &inner_proof.proof else {
-            panic!("Wrong proof type!");
+            anyhow::bail!("Wrong proof type!");
         };
         let inner_root = calculate_existence_root::<ics23::HostFunctionsManager>(existence_proof)?;
         let is_valid = verify_membership::<ics23::HostFunctionsManager>(
@@ -79,6 +79,6 @@ fn test_neutron_key_serialization() {
         key: "0x000".to_string(),
     };
     let key_serialized = key.to_string();
-    let key_deserialized = Ics23Key::from_string(&key_serialized);
+    let key_deserialized = Ics23Key::from_string(&key_serialized).unwrap();
     assert_eq!(key_deserialized, key);
 }

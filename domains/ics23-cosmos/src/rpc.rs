@@ -18,7 +18,7 @@ impl MerkleClient for Ics23MerkleRpcClient {
     #[allow(unused)]
     async fn get_proof(&self, key: &str, address: &str, height: u64) -> Result<Vec<u8>> {
         let client = HttpClient::new(self.rpc_url.as_str())?;
-        let neutron_key = Ics23Key::from_string(key);
+        let neutron_key = Ics23Key::from_string(key).unwrap();
         let response: tendermint_rpc::endpoint::abci_query::AbciQuery = client
             .abci_query(
                 // "store/bank/key", "store/wasm/key", ...

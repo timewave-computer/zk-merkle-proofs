@@ -5,8 +5,10 @@
 //! WASM contract state, and other storage types.
 
 use core::fmt;
+use anyhow::Result;
 use std::fmt::Display;
 
+use anyhow::Context;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "no-zkvm")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
@@ -33,16 +35,16 @@ impl Display for Ics23Key {
 
 impl Ics23Key {
     /// Deserializes a string back into a Ics23Key.
-    pub fn from_string(encoded: &str) -> Self {
-        let prefix_len: usize = encoded[..3].parse().expect("Invalid prefix length");
+    pub fn from_string(encoded: &str) -> Result<Self> {
+        let prefix_len: usize = encoded[..3].parse().context("Invalid prefix length")?;
         let prefix = &encoded[3..(3 + prefix_len)];
         let key = &encoded[(3 + prefix_len)..];
 
-        Ics23Key {
+        Ok(Ics23Key {
             prefix: prefix.to_string(),
             prefix_len,
             key: key.to_string(),
-        }
+        })
     }
     // create a new neutron key for a mapping from address:value that lives under some contract
     // this is useful for examples where users are assigned balances
