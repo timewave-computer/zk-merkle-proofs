@@ -3,7 +3,6 @@
 This directory contains Ethereum-specific implementations for working with Merkle proofs and interacting with Ethereum nodes.
 
 ## Merkle Proofs
-
 The `merkle_lib` library provides a comprehensive set of tools for working with Ethereum Merkle proofs. It supports:
 
 - Account proofs

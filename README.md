@@ -1,4 +1,5 @@
 # Introduction to Valence ZK
+
 This workspace exposes different libraries that can be used to write Valence co-programs in ZK. The idea is to move some of the math that would usually happen inside smart contracts on different chains off-chain, where anyone in the world can perform the necessary computations locally, to then submit a cryptographic proof to all of our supported networks that will verify the results against a unified state. 
 
 In the broader context of Valence, we call this unified state the `zk-coprocessor`, which aggregates information from different [light clients](https://a16zcrypto.com/posts/article/an-introduction-to-light-clients/) into a single cryptographic commitment. By offloading some of the computations that happen inside our cross-chain Valence programs, we not only strive to optimize gas costs, but also minimize trust assumptions across  the wider blockchain ecosystem. 
@@ -103,7 +104,8 @@ See details about the ZK program that does the cross-chain LP token rate calcula
 # Simple Examples of ZK programs
 These are only on the dev branch and don't suit our MVP design, so view them as premature concepts.
 We are working towards the MVP and will have a general-purpose state sharing demo soon! 
-[Click to see Context](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
+
+[![Learn More About Valence ZK](https://img.shields.io/badge/_Learn_More_About_Valence_ZK-2EA44F?style=for-the-badge&logo=github&logoColor=white)](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
 
 1. Cross-chain merkle openings in ZK, [here](examples/sp1/cross-chain-merkle-program/prover/README.md)
 
