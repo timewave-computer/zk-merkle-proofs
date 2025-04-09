@@ -5,8 +5,6 @@ In the broader context of Valence, we call this unified state the `zk-coprocesso
 
 Our modular design of (ZK) Valence libraries allows us to easily integrate with new zk lightclients and enable developers to choose their own security / verification stack, aside from the default stack that we provide.
 
-## Getting Started
-
 ### Prerequisites
 - Rust 1.84.0 or later
 - Basic understanding of blockchain concepts and zero-knowledge proofs
@@ -103,6 +101,10 @@ The values in the respective contracts can be updated by anyone. You can review 
 See details about the ZK program that does the cross-chain LP token rate calculation [here](examples/sp1/vault-zk-rate-program/prover/README.md).
 
 # Simple Examples of ZK programs
+These are only on the dev branch and don't suit our MVP design, so view them as premature concepts.
+We are working towards the MVP and will have a general-purpose state sharing demo soon! 
+[Click to see Context](https://github.com/timewave-computer/recursive-sp1-verifier/blob/master/context.md)
+
 1. Cross-chain merkle openings in ZK, [here](examples/sp1/cross-chain-merkle-program/prover/README.md)
 
 2. Executable message builder in ZK, [here](examples/sp1/cross-chain-message-builder-program/prover/README.md)
