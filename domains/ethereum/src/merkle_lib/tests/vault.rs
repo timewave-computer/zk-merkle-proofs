@@ -52,7 +52,6 @@ mod tests {
             .verify(block.header.state_root.as_slice())
             .unwrap());
         let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
-        println!("account_decoded: {:?}", account_decoded);
         assert!(storage_proof
             .verify(account_decoded.get(2).unwrap())
             .unwrap());
