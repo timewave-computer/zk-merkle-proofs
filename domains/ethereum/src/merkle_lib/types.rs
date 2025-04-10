@@ -13,7 +13,7 @@ use anyhow::{anyhow, Context, Ok, Result};
 use common::merkle::types::MerkleVerifiable;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
-use tracing::{error, info};
+use tracing::info;
 
 /// Represents an Ethereum Merkle proof with its associated data.
 ///
@@ -147,8 +147,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
         match result {
             std::result::Result::Ok(_) => Ok(true),
             Err(e) => {
-                error!("Proof verification failed: {:?}", e);
-                Ok(false)
+                anyhow::bail!("Proof verification failed: {:?}", e);
             }
         }
     }
