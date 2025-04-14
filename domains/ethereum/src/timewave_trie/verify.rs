@@ -1,6 +1,8 @@
 //! Proof verification logic.
 
 use core::ops::Deref;
+use std::error::Error as StdError;
+use std::fmt;
 
 use crate::timewave_rlp::{Decodable, EMPTY_STRING_CODE};
 use crate::{
@@ -34,6 +36,31 @@ pub enum ProofVerificationError {
     /// Error during RLP decoding of trie node.
     Rlp(timewave_rlp::Error),
 }
+
+impl fmt::Display for ProofVerificationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::RootMismatch { got, expected } => {
+                write!(f, "Root mismatch: got {:?}, expected {:?}", got, expected)
+            }
+            Self::ValueMismatch {
+                path,
+                got,
+                expected,
+            } => {
+                write!(
+                    f,
+                    "Value mismatch at path {:?}: got {:?}, expected {:?}",
+                    path, got, expected
+                )
+            }
+            Self::UnexpectedEmptyRoot => write!(f, "Unexpected empty root node"),
+            Self::Rlp(e) => write!(f, "RLP decoding error: {}", e),
+        }
+    }
+}
+
+impl StdError for ProofVerificationError {}
 
 extern crate alloc;
 use alloc::vec::Vec;

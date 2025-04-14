@@ -7,9 +7,9 @@ edition = "2021"
 cosmwasm-std = { version = "2.2.2", optional = true }
 tendermint = { git = "https://github.com/jonas089/tendermint-rs", branch = "v0.38.1-borsh", features = [
     "borsh",
-], optional = false }
-tendermint-proto = { version = "=0.38.1", optional = true }
-tendermint-rpc = { version = "=0.38.1", features = [
+] }
+tendermint-proto = { git = "https://github.com/jonas089/tendermint-rs", branch = "v0.38.1-borsh", optional = true }
+tendermint-rpc = { git = "https://github.com/jonas089/tendermint-rs", branch = "v0.38.1-borsh", features = [
     "http-client",
 ], optional = true }
 tokio = { version = "1.43", optional = true }
@@ -27,6 +27,7 @@ dotenvy = { workspace = true, optional = true }
 anyhow.workspace = true
 
 [features]
+default = ["serde", "borsh"]
 no-zkvm = [
     "tokio",
     "dotenvy",

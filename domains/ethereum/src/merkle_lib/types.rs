@@ -7,11 +7,12 @@
 use super::keccak::digest_keccak;
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
-    timewave_trie::verify::verify_proof,
+    timewave_trie::verify::{verify_proof, ProofVerificationError},
 };
-use anyhow::{anyhow, Context, Ok, Result};
+use anyhow::{anyhow, Context, Result};
 use common::merkle::types::MerkleVerifiable;
 use nybbles::Nibbles;
+use std::result::Result as StdResult;
 use tracing::info;
 
 /// Represents an Ethereum Merkle proof with its associated data.
@@ -134,11 +135,21 @@ impl MerkleVerifiable for EthereumMerkleProof {
             proof_nodes
                 .to_vec()
                 .last()
-                .context("Failed to extract leaf node from proof")?,
+                .ok_or_else(|| ProofVerificationError::ValueMismatch {
+                    path: Nibbles::unpack(&self.key),
+                    got: None,
+                    expected: Some(Bytes::copy_from_slice(&self.value)),
+                })
+                .map_err(|e| anyhow::anyhow!("Failed to extract leaf node from proof: {:?}", e))?,
         )?;
         let stored_value = leaf_node_decoded
             .last()
-            .context("Failed to get stored value from leaf")?
+            .ok_or_else(|| ProofVerificationError::ValueMismatch {
+                path: Nibbles::unpack(&self.key),
+                got: None,
+                expected: Some(Bytes::copy_from_slice(&self.value)),
+            })
+            .map_err(|e| anyhow::anyhow!("Failed to get stored value from leaf: {:?}", e))?
             .to_vec();
         if stored_value != self.value {
             info!("Value mismatch!");
@@ -148,16 +159,19 @@ impl MerkleVerifiable for EthereumMerkleProof {
         }
         let key = Nibbles::unpack(&self.key);
         let result = verify_proof(
-            &root.try_into()?,
+            &root
+                .try_into()
+                .map_err(|_| ProofVerificationError::RootMismatch {
+                    got: [0; 32],
+                    expected: root.try_into().unwrap_or([0; 32]),
+                })?,
             key,
             Some(self.value.to_vec()),
             proof_nodes.iter(),
         );
         match result {
-            std::result::Result::Ok(_) => Ok(true),
-            Err(e) => {
-                anyhow::bail!("Proof verification failed: {:?}", e);
-            }
+            Ok(_) => Ok(true),
+            Err(e) => Err(anyhow::anyhow!("Proof verification failed: {:?}", e)),
         }
     }
 }
@@ -174,6 +188,6 @@ impl MerkleVerifiable for EthereumMerkleProof {
 /// Panics if the bytes cannot be decoded
 pub fn decode_rlp_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
     let decoded = timewave_rlp::decode_exact(bytes)
-        .map_err(|e| anyhow!("Failed to decode RLP bytes: {:?}", e))?;
+        .map_err(|e| anyhow::anyhow!("Failed to decode RLP bytes: {:?}", e))?;
     Ok(decoded)
 }

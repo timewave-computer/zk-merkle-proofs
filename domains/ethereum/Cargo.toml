@@ -39,7 +39,7 @@ tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patch
 ], optional = true }
 
 [features]
-default = ["serde"]
+default = ["serde", "borsh"]
 no-zkvm = [
     "tokio",
     "reqwest",
