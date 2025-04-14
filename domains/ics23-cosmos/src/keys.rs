@@ -4,12 +4,11 @@
 //! different types of state on the Ics23 blockchain, including bank balances,
 //! WASM contract state, and other storage types.
 
-use core::fmt;
 use anyhow::Result;
+use core::fmt;
 use std::fmt::Display;
 
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
 #[cfg(feature = "no-zkvm")]
 use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
 
@@ -17,7 +16,12 @@ use {cosmrs::AccountId, cosmwasm_std::Addr, std::str::FromStr};
 ///
 /// The key consists of a prefix (e.g., "bank", "wasm") and a key string that identifies
 /// the specific state to query. The prefix_len field is used for serialization purposes.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg_attr(
+    feature = "borsh",
+    derive(borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Ics23Key {
     /// The prefix indicating the type of state (e.g., "bank", "wasm")
     pub prefix: String,

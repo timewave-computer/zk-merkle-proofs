@@ -18,10 +18,11 @@ ics23 = { version = "0.12.0", default-features = false, features = [
     "host-functions",
 ] }
 common.workspace = true
-serde.workspace = true
+serde = { workspace = true, optional = true }
 serde_json.workspace = true
+borsh = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
-anyhow.workspace=true
+anyhow.workspace = true
 
 [features]
 no-zkvm = [
@@ -31,3 +32,5 @@ no-zkvm = [
     "tendermint-rpc",
     "cosmwasm-std",
 ]
+borsh = ["dep:borsh"]
+serde = ["dep:serde"]

@@ -12,7 +12,6 @@ use crate::{
 use anyhow::{anyhow, Context, Ok, Result};
 use common::merkle::types::MerkleVerifiable;
 use nybbles::Nibbles;
-use serde::{Deserialize, Serialize};
 use tracing::info;
 
 /// Represents an Ethereum Merkle proof with its associated data.
@@ -26,7 +25,12 @@ use tracing::info;
 /// * `proof` - The list of proof nodes in the Merkle path
 /// * `key` - The key being proven (e.g., account address, storage key, or receipt index)
 /// * `value` - The RLP-encoded value being proven
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(
+    feature = "borsh",
+    derive(borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct EthereumMerkleProof {
     /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,
@@ -64,7 +68,12 @@ impl EthereumMerkleProof {
 /// * `proof` - The list of proof nodes in the Merkle path
 /// * `key` - The original key before hashing
 /// * `value` - The RLP-encoded value being proven
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(
+    feature = "borsh",
+    derive(borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct EthereumRawMerkleProof {
     /// The list of proof nodes in the Merkle path
     pub proof: Vec<Vec<u8>>,

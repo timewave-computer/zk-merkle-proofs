@@ -5,13 +5,17 @@ use ics23::{
     calculate_existence_root, commitment_proof::Proof, iavl_spec, tendermint_spec,
     verify_membership,
 };
-use serde::{Deserialize, Serialize};
 use tendermint::merkle::proof::ProofOps;
 /// Represents a Merkle proof for state on the Neutron blockchain.
 ///
 /// This type combines the proof data from Tendermint with the key and value
 /// being proven, allowing for verification of state existence.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(
+    feature = "borsh",
+    derive(borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct Ics23MerkleProof {
     /// The Tendermint proof operations
     pub proof: ProofOps,
@@ -25,7 +29,12 @@ pub struct Ics23MerkleProof {
 ///
 /// This type is used as input for verification operations, providing both
 /// the proof and the expected root hash that the proof should verify against.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(
+    feature = "borsh",
+    derive(borsh::BorshSerialize, borsh::BorshDeserialize)
+)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone)]
 pub struct Ics23MerkleProofWithRoot {
     /// The Merkle proof to verify
     pub proof: Ics23MerkleProof,
