@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 cosmwasm-std = { version = "2.2.2", optional = true }
-tendermint = { version = "=0.38.1", optional = false }
+tendermint = { git = "https://github.com/jonas089/tendermint-rs", branch = "v0.38.1-borsh", features = [
+    "borsh",
+], optional = false }
 tendermint-proto = { version = "=0.38.1", optional = true }
 tendermint-rpc = { version = "=0.38.1", features = [
     "http-client",
