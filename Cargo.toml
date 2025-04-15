@@ -1,9 +1,10 @@
 [workspace]
-members = ["common", "domains/ethereum"]
+members = ["common", "domains/ethereum", "domains/ics23-cosmos"]
 resolver = "2"
 
 [workspace.dependencies]
 ethereum = { path = "domains/ethereum" }
+ics23-cosmos = { path = "domains/ics23-cosmos" }
 base64 = "0.22.1"
 hex = "0.4"
 common = { path = "common" }
