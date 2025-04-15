@@ -25,7 +25,7 @@ use tracing::info;
 /// # Fields
 /// * `proof` - The list of proof nodes in the Merkle path
 /// * `key` - The key being proven (e.g., account address, storage key, or receipt index)
-/// * `value` - The RLP-encoded value being proven
+/// * `value` - The rlp-decoded value being proven
 #[cfg_attr(
     feature = "borsh",
     derive(borsh::BorshSerialize, borsh::BorshDeserialize)
@@ -37,7 +37,7 @@ pub struct EthereumMerkleProof {
     pub proof: Vec<Vec<u8>>,
     /// The key being proven
     pub key: Vec<u8>,
-    /// The RLP-encoded value being proven
+    /// The rlp-decoded value being proven
     pub value: Vec<u8>,
 }
 
@@ -47,7 +47,7 @@ impl EthereumMerkleProof {
     /// # Arguments
     /// * `proof` - The list of proof nodes in the Merkle path
     /// * `key` - The key being proven
-    /// * `value` - The RLP-encoded value being proven
+    /// * `value` - The rlp-decoded value being proven
     ///
     /// # Note
     /// The key is automatically hashed using keccak256 before being stored
@@ -68,7 +68,7 @@ impl EthereumMerkleProof {
 /// # Fields
 /// * `proof` - The list of proof nodes in the Merkle path
 /// * `key` - The original key before hashing
-/// * `value` - The RLP-encoded value being proven
+/// * `value` - The rlp-decoded value being proven
 #[cfg_attr(
     feature = "borsh",
     derive(borsh::BorshSerialize, borsh::BorshDeserialize)
@@ -80,7 +80,7 @@ pub struct EthereumRawMerkleProof {
     pub proof: Vec<Vec<u8>>,
     /// The original key before hashing
     pub key: Vec<u8>,
-    /// The RLP-encoded value being proven
+    /// The RLP-decoded value being proven
     pub value: Vec<u8>,
 }
 

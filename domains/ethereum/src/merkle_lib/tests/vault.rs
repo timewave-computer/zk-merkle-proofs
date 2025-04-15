@@ -24,7 +24,7 @@ mod tests {
     use url::Url;
 
     #[tokio::test]
-    async fn test_vault_contract_balance_on_sepolia() {
+    async fn test_vault_contract_shares_on_sepolia() {
         let sepolia_height = read_sepolia_height().await.unwrap();
         let address =
             alloy_primitives::Address::from_hex(read_sepolia_default_account_address()).unwrap();
@@ -58,7 +58,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_vault_contract_shares_on_sepolia() {
+    async fn test_vault_contract_balance_on_sepolia() {
         let sepolia_height = read_sepolia_height().await.unwrap();
         let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
 
