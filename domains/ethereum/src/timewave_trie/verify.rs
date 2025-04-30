@@ -41,8 +41,21 @@ use nybbles::Nibbles;
 
 /// Verify the proof for given key value pair against the provided state root.
 ///
-/// The expected node value can be either [Some] if it's expected to be present
-/// in the tree or [None] if this is an exclusion proof.
+/// # Arguments
+/// * `root` - The expected state root hash to verify against
+/// * `key` - The key to verify the proof for
+/// * `expected_value` - The expected value for the key, or None for exclusion proofs
+/// * `proof` - An iterator over the proof nodes
+///
+/// # Returns
+/// * `Ok(())` if the proof is valid
+/// * `Err(ProofVerificationError)` if the proof is invalid
+///
+/// # Errors
+/// * `RootMismatch` if the computed root doesn't match the expected root
+/// * `ValueMismatch` if the value doesn't match the expected value
+/// * `UnexpectedEmptyRoot` if an empty root node is encountered unexpectedly
+/// * `Rlp` if there's an error decoding the RLP data
 pub fn verify_proof<'a, I>(
     root: &[u8; 32],
     key: Nibbles,
@@ -56,7 +69,8 @@ where
     // If the proof is empty or contains only an empty node, the expected value must be None.
     if proof
         .peek()
-        .map_or(true, |node| node.as_ref() == [EMPTY_STRING_CODE])
+        .map(|node| node.as_ref() == [EMPTY_STRING_CODE])
+        .unwrap_or(true)
     {
         return if root == &EMPTY_ROOT_HASH_BYTES {
             if expected_value.is_none() {

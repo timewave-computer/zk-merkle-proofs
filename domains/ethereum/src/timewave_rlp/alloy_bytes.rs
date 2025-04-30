@@ -70,6 +70,9 @@ use core::{
 };
 
 /// Wrapper type around [`bytes::Bytes`] to support "0x" prefixed hex strings.
+///
+/// This type provides additional functionality for working with hex-encoded byte strings,
+/// including support for "0x" prefix in string representations.
 #[derive(Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
 pub struct Bytes(pub bytes::Bytes);
@@ -332,8 +335,8 @@ impl bytes::Buf for Bytes {
 impl Bytes {
     /// Creates a new empty `Bytes`.
     ///
-    /// This will not allocate and the returned `Bytes` handle will be empty.
-    ///
+    /// # Returns
+    /// A new empty `Bytes` instance
     #[inline]
     pub const fn new() -> Self {
         Self(bytes::Bytes::new())
@@ -341,15 +344,23 @@ impl Bytes {
 
     /// Creates a new `Bytes` from a static slice.
     ///
-    /// The returned `Bytes` will point directly to the static slice. There is
-    /// no allocating or copying.
+    /// # Arguments
+    /// * `bytes` - The static byte slice to wrap
     ///
+    /// # Returns
+    /// A new `Bytes` instance wrapping the static slice
     #[inline]
     pub const fn from_static(bytes: &'static [u8]) -> Self {
         Self(bytes::Bytes::from_static(bytes))
     }
 
     /// Creates a new `Bytes` instance from a slice by copying it.
+    ///
+    /// # Arguments
+    /// * `data` - The byte slice to copy
+    ///
+    /// # Returns
+    /// A new `Bytes` instance containing a copy of the input data
     #[inline]
     pub fn copy_from_slice(data: &[u8]) -> Self {
         Self(bytes::Bytes::copy_from_slice(data))
@@ -357,10 +368,11 @@ impl Bytes {
 
     /// Returns a slice of self for the provided range.
     ///
-    /// # Panics
+    /// # Arguments
+    /// * `range` - The range of bytes to slice
     ///
-    /// Requires that `begin <= end` and `end <= self.len()`, otherwise slicing
-    /// will panic.
+    /// # Returns
+    /// A new `Bytes` instance containing the specified range
     #[inline]
     pub fn slice(&self, range: impl RangeBounds<usize>) -> Self {
         Self(self.0.slice(range))
@@ -368,10 +380,11 @@ impl Bytes {
 
     /// Returns a slice of self that is equivalent to the given `subset`.
     ///
-    /// # Panics
+    /// # Arguments
+    /// * `subset` - The byte slice to match
     ///
-    /// Requires that the given `subset` slice is in fact contained within the
-    /// `Bytes` buffer; otherwise this function will panic.
+    /// # Returns
+    /// A new `Bytes` instance containing the matching slice
     #[inline]
     pub fn slice_ref(&self, subset: &[u8]) -> Self {
         Self(self.0.slice_ref(subset))
@@ -379,9 +392,11 @@ impl Bytes {
 
     /// Splits the bytes into two at the given index.
     ///
-    /// # Panics
+    /// # Arguments
+    /// * `at` - The index at which to split
     ///
-    /// Panics if `at > len`.
+    /// # Returns
+    /// A new `Bytes` instance containing the split-off portion
     #[must_use = "consider Bytes::truncate if you don't need the other half"]
     #[inline]
     pub fn split_off(&mut self, at: usize) -> Self {
@@ -390,9 +405,11 @@ impl Bytes {
 
     /// Splits the bytes into two at the given index.
     ///
-    /// # Panics
+    /// # Arguments
+    /// * `at` - The index at which to split
     ///
-    /// Panics if `at > len`.
+    /// # Returns
+    /// A new `Bytes` instance containing the split-off portion
     #[must_use = "consider Bytes::advance if you don't need the other half"]
     #[inline]
     pub fn split_to(&mut self, at: usize) -> Self {
