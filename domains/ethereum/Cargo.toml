@@ -14,7 +14,7 @@ dotenvy = { workspace = true, optional = true }
 hash-db = "0.15"
 plain_hasher = "0.2"
 triehash = "0.8.4"
-alloy = { version = "0.12.5", features = ["full"], optional = true }
+alloy = { version = "0.14.0", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true }
 alloy-primitives = { version = "0.8.25", optional = true }
 alloy-trie = { version = "0.7.9", optional = true }
