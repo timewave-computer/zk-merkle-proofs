@@ -16,6 +16,28 @@ use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
+/// Represents different types of Ethereum Merkle proofs.
+///
+/// This enum encapsulates the various types of Merkle proofs that can be used
+/// in Ethereum, including account proofs, storage proofs, combined proofs, and
+/// receipt proofs. Each variant contains the specific proof data needed for
+/// verification.
+///
+/// # Variants
+///
+/// * `Account(EthereumAccountProof)` - A proof for verifying an account's state in the state trie
+/// * `Storage(EthereumStorageProof)` - A proof for verifying a storage value in an account's storage trie
+/// * `Combined(EthereumCombinedProof)` - A combined proof containing both account and storage proofs
+/// * `Receipt(EthereumReceiptProof)` - A proof for verifying a transaction receipt in the receipt trie
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EthereumProofType {
+    Account(EthereumAccountProof),
+    Storage(EthereumStorageProof),
+    Combined(EthereumCombinedProof),
+    Receipt(EthereumReceiptProof),
+}
+
 /// Represents an Ethereum account in the state trie.
 ///
 /// This struct contains the essential data for an Ethereum account, including

@@ -16,7 +16,8 @@ use crate::{
     merkle_lib::{
         rlp_decode_bytes,
         types::{
-            EthereumAccountProof, EthereumCombinedProof, EthereumReceiptProof, EthereumStorageProof,
+            EthereumAccountProof, EthereumCombinedProof, EthereumProofType, EthereumReceiptProof,
+            EthereumStorageProof,
         },
     },
 };
@@ -249,20 +250,16 @@ impl EvmMerkleRpcClient {
     ///
     /// # Panics
     /// Panics if the block or receipts cannot be retrieved, or if the proof cannot be constructed
-    pub async fn get_receipt_proof(
-        &self,
-        block_height: u64,
-        target_index: u32,
-    ) -> Result<EthereumReceiptProof> {
+    pub async fn get_receipt_proof(&self, height: u64, index: u32) -> Result<EthereumReceiptProof> {
         let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url)?);
         let receipts: Vec<TransactionReceipt> = provider
             .get_block_receipts(alloy::eips::BlockId::Number(
-                alloy::eips::BlockNumberOrTag::Number(block_height),
+                alloy::eips::BlockNumberOrTag::Number(height),
             ))
             .await?
             .context("Failed to get block receipts")?;
         let retainer = ProofRetainer::new(vec![Nibbles::unpack(
-            crate::timewave_rlp::encode_fixed_size(&target_index),
+            crate::timewave_rlp::encode_fixed_size(&index),
         )]);
         let mut hb: HashBuilder = HashBuilder::default().with_proof_retainer(retainer);
         for i in 0..receipts.len() {
@@ -273,7 +270,7 @@ impl EvmMerkleRpcClient {
                 encode_receipt(&receipts[index])?.as_slice(),
             );
         }
-        let receipt_key: Vec<u8> = crate::timewave_rlp::encode(target_index);
+        let receipt_key: Vec<u8> = crate::timewave_rlp::encode(index);
         hb.root();
         let proof = hb
             .take_proof_nodes()
@@ -295,5 +292,21 @@ impl EvmMerkleRpcClient {
             .context("Failed to extract value from leaf")?
             .to_vec();
         Ok(EthereumReceiptProof::new(proof, receipt_key, receipt_rlp).into())
+    }
+
+    /// Wrapper entry point to get all kinds of different state proofs
+    ///
+    /// # Arguments
+    /// * `key` - The storage key to prove
+    /// * `address` - The account address to prove
+    /// * `height` - The block height to prove at
+    ///
+    /// # Returns an instance of the EthereumProofType enum
+    pub async fn get_state_proof(
+        &self,
+        key: &[String],
+        address: &str,
+    ) -> Result<EthereumProofType> {
+        todo!("Implement proof wrapper");
     }
 }
