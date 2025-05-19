@@ -38,7 +38,7 @@ mod tests {
             rpc_url: read_sepolia_url().to_string(),
         };
 
-        let (account_proof, storage_proof) = merkle_prover
+        let combined_proof = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&keccak_key),
                 &read_ethereum_vault_contract_address(),
@@ -53,12 +53,14 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert!(account_proof
+        assert!(combined_proof
+            .account_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
 
-        let account_decoded = rlp_decode_account(&account_proof.value).unwrap();
-        assert!(storage_proof
+        let account_decoded = rlp_decode_account(&combined_proof.account_proof.value).unwrap();
+        assert!(combined_proof
+            .storage_proof
             .verify(account_decoded.storage_root.as_slice())
             .unwrap());
     }
@@ -73,7 +75,7 @@ mod tests {
             rpc_url: read_sepolia_url().to_string(),
         };
 
-        let (account_proof, storage_proof) = merkle_prover
+        let combined_proof = merkle_prover
             .get_account_and_storage_proof(
                 &alloy::hex::encode(&storage_slot_key),
                 &read_ethereum_vault_contract_address(),
@@ -88,12 +90,14 @@ mod tests {
             .unwrap()
             .unwrap();
 
-        assert!(account_proof
+        assert!(combined_proof
+            .account_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
 
-        let account_decoded = rlp_decode_bytes(&account_proof.value).unwrap();
-        assert!(storage_proof
+        let account_decoded = rlp_decode_bytes(&combined_proof.account_proof.value).unwrap();
+        assert!(combined_proof
+            .storage_proof
             .verify(account_decoded.get(2).unwrap())
             .unwrap());
     }

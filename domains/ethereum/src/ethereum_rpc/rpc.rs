@@ -15,7 +15,9 @@ use crate::{
     ethereum_rpc::rlp::encode_receipt,
     merkle_lib::{
         rlp_decode_bytes,
-        types::{EthereumAccountProof, EthereumReceiptProof, EthereumStorageProof},
+        types::{
+            EthereumAccountProof, EthereumCombinedProof, EthereumReceiptProof, EthereumStorageProof,
+        },
     },
 };
 
@@ -75,7 +77,7 @@ impl EvmMerkleRpcClient {
         key: &str,
         address: &str,
         height: u64,
-    ) -> Result<(EthereumAccountProof, EthereumStorageProof)> {
+    ) -> Result<EthereumCombinedProof> {
         let proof = self.get_proof(key, address, height).await?;
         let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
         let account_proof: Vec<Vec<u8>> = proof_deserialized
@@ -128,7 +130,7 @@ impl EvmMerkleRpcClient {
                 .context("Failed to extract leaf from storage proof")?
                 .to_vec(),
         );
-        Ok((account_proof, storage_proof))
+        Ok(EthereumCombinedProof::new(account_proof, storage_proof))
     }
 
     /// Retrieves an account proof for a given address.
