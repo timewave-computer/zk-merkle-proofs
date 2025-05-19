@@ -1,5 +1,5 @@
 #[cfg(feature = "no-zkvm")]
-mod alloy;
+mod account;
 #[cfg(feature = "no-zkvm")]
 pub mod defaults;
 #[cfg(feature = "no-zkvm")]

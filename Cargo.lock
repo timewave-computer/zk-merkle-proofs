@@ -1872,6 +1872,7 @@ dependencies = [
  "dotenvy",
  "hash-db",
  "hex-literal",
+ "num-bigint",
  "nybbles",
  "plain_hasher",
  "reqwest 0.12.15",
@@ -2927,6 +2928,7 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
+ "serde",
 ]
 
 [[package]]

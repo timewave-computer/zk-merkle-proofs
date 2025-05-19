@@ -6,12 +6,12 @@
 //! to fetch and verify proofs from Ethereum nodes.
 use super::keccak::digest_keccak;
 use crate::{
-    timewave_rlp::{self, alloy_bytes::Bytes, Rlp},
+    timewave_rlp::{self, alloy_bytes::Bytes},
     timewave_trie::verify::verify_proof,
 };
-use alloy_primitives::U256;
 use anyhow::{anyhow, Context, Ok, Result};
 use common::merkle::types::MerkleVerifiable;
+use num_bigint::BigUint;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -184,11 +184,11 @@ pub fn rlp_decode_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumAccount {
     pub nonce: u64,
-    pub balance: U256,
+    pub balance: BigUint,
 }
 
 impl EthereumAccount {
-    pub fn new(nonce: u64, balance: U256) -> Self {
+    pub fn new(nonce: u64, balance: BigUint) -> Self {
         Self { nonce, balance }
     }
 }
@@ -204,20 +204,26 @@ impl EthereumAccount {
 /// # Errors
 /// Returns an error if the RLP decoding fails or if any of the required fields are missing
 pub fn rlp_decode_account(account_rlp: &[u8]) -> Result<EthereumAccount> {
-    // Decode the actual account object
-    let mut rlp = Rlp::new(account_rlp).expect("Failed to RLP decode account");
-
-    let nonce = rlp
-        .get_next::<u64>()
-        .expect("Failed to get nonce")
-        .expect("Failed to unwrap nonce as u64");
-
-    let balance_hex = rlp
-        .get_next::<String>()
-        .expect("Failed to get balance bytes")
-        .expect("Failed to fit balance bytes into vec");
-
-    let balance = U256::from_str_radix(&balance_hex.trim_start_matches("0x"), 16)?;
-
+    let account_rlp_bytes = rlp_decode_bytes(account_rlp)?;
+    let nonce = if let Some(nonce_bytes) = account_rlp_bytes.first() {
+        if nonce_bytes.is_empty() {
+            0u64
+        } else {
+            u64::from_be_bytes(
+                nonce_bytes
+                    .to_vec()
+                    .try_into()
+                    .expect("Failed to fit nonce into u64"),
+            )
+        }
+    } else {
+        0u64
+    };
+    let balance = BigUint::from_bytes_be(
+        account_rlp_bytes
+            .get(1)
+            .context("Failed to get balance")?
+            .as_ref(),
+    );
     Ok(EthereumAccount::new(nonce, balance))
 }

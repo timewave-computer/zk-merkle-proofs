@@ -142,19 +142,19 @@ impl EvmMerkleRpcClient {
     /// Panics if the proof cannot be retrieved or deserialized
     pub async fn get_account_proof(
         &self,
-        key: &str,
         address: &str,
         height: u64,
     ) -> Result<EthereumMerkleProof> {
-        let proof = self.get_proof(key, address, height).await?;
-        let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
-        let account_proof: Vec<Vec<u8>> = proof_deserialized
-            .account_proof
-            .iter()
-            .map(|b| b.to_vec())
-            .collect();
+        let address_object = Address::from_hex(address)?;
+        let provider = ProviderBuilder::new().on_http(Url::from_str(&self.rpc_url)?);
+        let proof: EIP1186AccountProofResponse = provider
+            .get_proof(address_object, vec![])
+            .block_id(height.into())
+            .await?;
+
+        let account_proof: Vec<Vec<u8>> = proof.account_proof.iter().map(|b| b.to_vec()).collect();
         let leaf_node_decoded = rlp_decode_bytes(
-            proof_deserialized
+            proof
                 .account_proof
                 .last()
                 .context("Failed to get leaf from account proof")?,
