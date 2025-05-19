@@ -21,24 +21,6 @@ pub struct Ics23MerkleProof {
     pub value: Vec<u8>,
 }
 
-/// A wrapper type that combines a Merkle proof with its expected root hash.
-///
-/// This type is used as input for verification operations, providing both
-/// the proof and the expected root hash that the proof should verify against.
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Ics23MerkleProofWithRoot {
-    /// The Merkle proof to verify
-    pub proof: Ics23MerkleProof,
-    /// The expected root hash
-    pub root: Vec<u8>,
-}
-
-impl MerkleVerifiable for Ics23MerkleProofWithRoot {
-    fn verify(&self, expected_root: &[u8]) -> Result<bool> {
-        self.proof.verify(expected_root)
-    }
-}
-
 impl MerkleVerifiable for Ics23MerkleProof {
     fn verify(&self, expected_root: &[u8]) -> Result<bool> {
         let proof_decoded = convert_tm_to_ics_merkle_proof(&self.proof)?;

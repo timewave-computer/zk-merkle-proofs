@@ -185,18 +185,11 @@ pub fn rlp_decode_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
 pub struct EthereumAccount {
     pub nonce: u64,
     pub balance: U256,
-    pub storage_root: Vec<u8>,
-    pub code_hash: Vec<u8>,
 }
 
 impl EthereumAccount {
-    pub fn new(nonce: u64, balance: U256, storage_root: Vec<u8>, code_hash: Vec<u8>) -> Self {
-        Self {
-            nonce,
-            balance,
-            storage_root,
-            code_hash,
-        }
+    pub fn new(nonce: u64, balance: U256) -> Self {
+        Self { nonce, balance }
     }
 }
 
@@ -219,29 +212,12 @@ pub fn rlp_decode_account(account_rlp: &[u8]) -> Result<EthereumAccount> {
         .expect("Failed to get nonce")
         .expect("Failed to unwrap nonce as u64");
 
-    let balance_bytes = rlp
-        .get_next::<Vec<u8>>()
+    let balance_hex = rlp
+        .get_next::<String>()
         .expect("Failed to get balance bytes")
-        .expect("Failed to unwrap balance bytes");
+        .expect("Failed to fit balance bytes into vec");
 
-    let mut balance_array = [0u8; 32];
-    balance_array.copy_from_slice(&balance_bytes);
-    let balance = U256::from_be_bytes(balance_array);
+    let balance = U256::from_str_radix(&balance_hex.trim_start_matches("0x"), 16)?;
 
-    let storage_root = rlp
-        .get_next::<Vec<u8>>()
-        .expect("Failed to get storage root")
-        .expect("Failed to unwrap storage root");
-
-    let code_hash = rlp
-        .get_next::<Vec<u8>>()
-        .expect("Failed to get code hash")
-        .expect("Failed to unwrap code hash");
-
-    Ok(EthereumAccount::new(
-        nonce,
-        balance,
-        storage_root,
-        code_hash,
-    ))
+    Ok(EthereumAccount::new(nonce, balance))
 }
