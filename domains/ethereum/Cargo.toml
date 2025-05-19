@@ -32,12 +32,6 @@ tracing.workspace = true
 tracing-subscriber.workspace = true
 num-bigint = { version = "0.4", features = ["serde"] }
 
-# ZKVM precompiles (hash functions)
-# when the sp1 feature is enabled, we leverage their precompile
-tiny-keccak-sp1 = { package = "tiny-keccak", git = "https://github.com/sp1-patches/tiny-keccak", tag = "patch-2.0.2-sp1-4.0.0", features = [
-    "keccak",
-], optional = true }
-
 [features]
 no-zkvm = [
     "tokio",
@@ -49,4 +43,3 @@ no-zkvm = [
     "alloy-primitives",
     "alloy-trie",
 ]
-sp1 = ["tiny-keccak-sp1"]

@@ -4,7 +4,7 @@
 //! including account proofs, storage proofs, and receipt proofs. It implements the common
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
-use super::{keccak::digest_keccak, rlp_decode_bytes};
+use super::{digest_keccak, rlp_decode_bytes};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
     timewave_trie::verify::verify_proof,

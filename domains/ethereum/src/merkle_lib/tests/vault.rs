@@ -4,14 +4,11 @@ mod tests {
     use crate::merkle_lib::tests::defaults::constants::{
         read_ethereum_vault_balances_storage_key, read_sepolia_url,
     };
-    use crate::merkle_lib::{
-        keccak::digest_keccak,
-        tests::defaults::constants::{
-            read_ethereum_vault_contract_address, read_sepolia_default_account_address,
-            read_sepolia_height,
-        },
+    use crate::merkle_lib::tests::defaults::constants::{
+        read_ethereum_vault_contract_address, read_sepolia_default_account_address,
+        read_sepolia_height,
     };
-    use crate::merkle_lib::{rlp_decode_account, rlp_decode_bytes};
+    use crate::merkle_lib::{digest_keccak, rlp_decode_account, rlp_decode_bytes};
     use alloy::hex;
     use alloy::{
         hex::FromHex,

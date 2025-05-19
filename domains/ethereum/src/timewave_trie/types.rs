@@ -3,7 +3,7 @@ use arrayvec::ArrayVec;
 use nybbles::Nibbles;
 
 use crate::{
-    merkle_lib::keccak::digest_keccak,
+    merkle_lib::digest_keccak,
     timewave_rlp::{self, alloy_bytes::Bytes, Decodable},
 };
 
