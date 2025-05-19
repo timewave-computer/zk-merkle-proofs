@@ -205,6 +205,16 @@ impl From<EthereumReceiptProof> for EthereumStorageProof {
     }
 }
 
+impl From<&EthereumReceiptProof> for EthereumStorageProof {
+    fn from(proof: &EthereumReceiptProof) -> Self {
+        Self {
+            proof: proof.proof.clone(),
+            key: proof.key.clone(),
+            value: proof.value.clone(),
+        }
+    }
+}
+
 /// Implementation of Merkle proof verification for Ethereum storage proofs.
 ///
 /// This implementation verifies proofs against the Ethereum storage trie by:
@@ -300,6 +310,13 @@ impl MerkleVerifiable for EthereumAccountProof {
                 anyhow::bail!("Proof verification failed: {:?}", e);
             }
         }
+    }
+}
+
+impl MerkleVerifiable for EthereumReceiptProof {
+    fn verify(&self, root: &[u8]) -> Result<bool> {
+        let storage_proof: EthereumStorageProof = self.into();
+        storage_proof.verify(root)
     }
 }
 
