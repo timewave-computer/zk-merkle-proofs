@@ -6,18 +6,16 @@ mod tests {
     use crate::{
         ethereum_rpc::rpc::EvmMerkleRpcClient,
         merkle_lib::{
-            keccak::digest_keccak,
             tests::defaults::constants::{
                 get_test_vector_eth_account_proof, get_test_vector_eth_block_root,
                 read_sepolia_height, read_sepolia_url,
             },
-            types::{rlp_decode_account, rlp_decode_bytes, EthereumMerkleProof},
+            types::{rlp_decode_account, EthereumMerkleProof},
         },
         timewave_rlp::alloy_bytes::Bytes,
         timewave_trie::verify::verify_proof,
     };
     use alloy::providers::{Provider, ProviderBuilder};
-    use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
     use hex::FromHex;
     use nybbles::Nibbles;
