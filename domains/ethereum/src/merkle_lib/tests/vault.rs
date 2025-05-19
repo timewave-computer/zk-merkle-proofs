@@ -4,7 +4,6 @@ mod tests {
     use crate::merkle_lib::tests::defaults::constants::{
         read_ethereum_vault_balances_storage_key, read_sepolia_url,
     };
-    use crate::merkle_lib::types::rlp_decode_bytes;
     use crate::merkle_lib::{
         keccak::digest_keccak,
         tests::defaults::constants::{
@@ -12,6 +11,7 @@ mod tests {
             read_sepolia_height,
         },
     };
+    use crate::merkle_lib::{rlp_decode_account, rlp_decode_bytes};
     use alloy::hex;
     use alloy::{
         hex::FromHex,
@@ -57,9 +57,9 @@ mod tests {
             .verify(block.header.state_root.as_slice())
             .unwrap());
 
-        let account_decoded = rlp_decode_bytes(&account_proof.value).unwrap();
+        let account_decoded = rlp_decode_account(&account_proof.value).unwrap();
         assert!(storage_proof
-            .verify(account_decoded.get(2).unwrap())
+            .verify(account_decoded.storage_root.as_slice())
             .unwrap());
     }
 

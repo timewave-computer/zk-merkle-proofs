@@ -1,4 +1,8 @@
-//! Proof verification logic.
+//! Proof verification logic for Ethereum state trie.
+//!
+//! This module provides functionality for verifying Merkle proofs against the
+//! Ethereum state trie. It handles the verification of account proofs, storage
+//! proofs, and receipt proofs.
 
 use core::ops::Deref;
 
@@ -11,6 +15,10 @@ use crate::{
     },
 };
 
+/// Errors that can occur during proof verification.
+///
+/// This enum represents the various ways in which a proof verification can fail,
+/// including root mismatches, value mismatches, and decoding errors.
 #[derive(PartialEq, Eq, Debug)]
 pub enum ProofVerificationError {
     /// State root does not match the expected.
@@ -40,6 +48,11 @@ use alloc::vec::Vec;
 use nybbles::Nibbles;
 
 /// Verify the proof for given key value pair against the provided state root.
+///
+/// This function verifies that a given key-value pair exists in the state trie
+/// by checking the provided proof against the expected state root. It traverses
+/// the proof nodes and verifies that they form a valid path from the leaf to
+/// the root.
 ///
 /// # Arguments
 /// * `root` - The expected state root hash to verify against
@@ -133,16 +146,16 @@ where
     }
 }
 
-/// The result of decoding a node from the proof.
+/// Result of decoding a trie node during proof verification.
 ///
-/// - [`TrieNode::Branch`] is decoded into a [`NodeDecodingResult::Value`] if the node at the
-///   specified nibble was decoded into an in-place encoded [`TrieNode::Leaf`], or into a
-///   [`NodeDecodingResult::Node`] otherwise.
-/// - [`TrieNode::Extension`] is always decoded into a [`NodeDecodingResult::Node`].
-/// - [`TrieNode::Leaf`] is always decoded into a [`NodeDecodingResult::Value`].
+/// This enum represents the possible outcomes when decoding a trie node during
+/// proof verification. It can either be a node that needs further processing
+/// or a value that has been found.
 #[derive(Debug, PartialEq, Eq)]
 enum NodeDecodingResult {
+    /// A node that needs further processing
     Node(RlpNode),
+    /// A value that has been found
     Value(Vec<u8>),
 }
 
@@ -157,6 +170,20 @@ impl Deref for NodeDecodingResult {
     }
 }
 
+/// Process a branch node during proof verification.
+///
+/// This function handles the processing of a branch node during proof verification,
+/// traversing the appropriate child node based on the current path.
+///
+/// # Arguments
+/// * `branch` - The branch node to process
+/// * `walked_path` - The path that has been traversed so far
+/// * `key` - The complete key being verified
+///
+/// # Returns
+/// * `Ok(Some(NodeDecodingResult))` if a node or value was found
+/// * `Ok(None)` if no matching node was found
+/// * `Err(ProofVerificationError)` if an error occurred during processing
 #[inline]
 fn process_branch(
     mut branch: BranchNode,

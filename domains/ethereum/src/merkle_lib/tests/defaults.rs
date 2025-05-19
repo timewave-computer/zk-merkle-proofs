@@ -65,7 +65,10 @@ mod tests {
 
     use crate::{
         ethereum_rpc::rpc::EvmMerkleRpcClient,
-        merkle_lib::tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
+        merkle_lib::{
+            tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
+            types::EthereumStorageProof,
+        },
     };
 
     #[tokio::test]
@@ -87,7 +90,7 @@ mod tests {
             .expect("Failed to get Block!")
             .expect("Block not found!");
 
-        assert!(receipt_proof
+        assert!(EthereumStorageProof::from(receipt_proof)
             .verify(block.header.receipts_root.as_slice())
             .unwrap());
     }

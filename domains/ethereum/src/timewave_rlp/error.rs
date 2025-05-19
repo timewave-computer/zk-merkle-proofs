@@ -1,35 +1,47 @@
+//! RLP (Recursive Length Prefix) error handling.
+//!
+//! This module defines the error types used in RLP encoding and decoding operations.
+//! It provides detailed error information for various failure cases that can occur
+//! during RLP processing.
+
 use core::fmt;
 
 /// RLP result type.
+///
+/// This is a type alias for the standard Result type, specialized for RLP operations.
+/// It uses the custom `Error` type defined in this module.
 pub type Result<T, E = Error> = core::result::Result<T, E>;
 
 /// RLP error type.
+///
+/// This enum represents the various ways in which RLP encoding or decoding can fail.
+/// Each variant provides specific information about the nature of the error.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Error {
-    /// Numeric Overflow.
+    /// Numeric overflow occurred during encoding or decoding.
     Overflow,
-    /// Leading zero disallowed.
+    /// A leading zero was found in a number, which is not allowed in RLP.
     LeadingZero,
-    /// Overran input while decoding.
+    /// The input buffer was exhausted before decoding was complete.
     InputTooShort,
-    /// Expected single byte, but got invalid value.
+    /// A single byte value was expected but an invalid value was found.
     NonCanonicalSingleByte,
-    /// Expected size, but got invalid value.
+    /// An invalid size value was encountered during decoding.
     NonCanonicalSize,
-    /// Expected a payload of a specific size, got an unexpected size.
+    /// The decoded payload had an unexpected length.
     UnexpectedLength,
-    /// Expected another type, got a string instead.
+    /// A string was found where another type was expected.
     UnexpectedString,
-    /// Expected another type, got a list instead.
+    /// A list was found where another type was expected.
     UnexpectedList,
-    /// Got an unexpected number of items in a list.
+    /// A list had an unexpected number of items.
     ListLengthMismatch {
-        /// Expected length.
+        /// The expected number of items in the list.
         expected: usize,
-        /// Actual length.
+        /// The actual number of items found in the list.
         got: usize,
     },
-    /// Custom error.
+    /// A custom error message for other failure cases.
     Custom(&'static str),
 }
 

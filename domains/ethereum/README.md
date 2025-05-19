@@ -49,7 +49,7 @@ including status, gas used, and logs.
 
 The library provides two main proof types:
 - `EthereumMerkleProof`: Standard proof type with hashed keys
-- `EthereumRawMerkleProof`: Proof type with raw (unhashed) keys
+- `EthereumReceiptProof`: Proof type with raw (unhashed) keys
 
 Both types implement the `MerkleVerifiable` trait, allowing verification against trusted roots.
 

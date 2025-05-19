@@ -114,6 +114,28 @@ impl RlpNode {
     }
 }
 
+/// Represents a node in the Ethereum state trie.
+///
+/// This enum defines the different types of nodes that can exist in an Ethereum
+/// state trie. Each variant represents a specific node type with its associated
+/// data structure.
+#[derive(Debug)]
+pub enum TrieNode {
+    /// An empty root node, representing an empty trie
+    EmptyRoot,
+    /// A branch node that can have up to 16 children
+    Branch(BranchNode),
+    /// An extension node that shares a common prefix with its child
+    Extension(ExtensionNode),
+    /// A leaf node containing the final value
+    Leaf(LeafNode),
+}
+
+/// A branch node in the trie that can have up to 16 children.
+///
+/// Branch nodes are used when multiple paths diverge at a particular point in
+/// the trie. Each branch node can have up to 16 children, one for each possible
+/// nibble value (0-15).
 #[derive(Debug, Default)]
 pub struct BranchNode {
     /// The collection of RLP encoded children.
@@ -122,6 +144,10 @@ pub struct BranchNode {
     pub state_mask: TrieMask,
 }
 
+/// A reference to a branch node's data.
+///
+/// This struct provides a view into a branch node's data without taking ownership.
+/// It's used for efficient traversal and verification of the trie structure.
 pub struct BranchNodeRef<'a> {
     /// Reference to the collection of RLP encoded nodes.
     /// NOTE: The referenced stack might have more items than the number of children
@@ -154,6 +180,11 @@ impl BranchNode {
     }
 }
 
+/// An extension node in the trie that shares a common prefix.
+///
+/// Extension nodes are used to optimize the trie by sharing common prefixes
+/// between multiple paths. They contain a key (the shared prefix) and a pointer
+/// to the next node.
 #[derive(Debug)]
 pub struct ExtensionNode {
     /// The key for this extension node.
@@ -168,6 +199,10 @@ impl ExtensionNode {
     }
 }
 
+/// A leaf node in the trie containing the final value.
+///
+/// Leaf nodes represent the end of a path in the trie and contain the actual
+/// value associated with the key.
 #[derive(Debug)]
 pub struct LeafNode {
     /// The key for this leaf node.
@@ -180,18 +215,6 @@ impl LeafNode {
     pub fn new(key: Nibbles, value: Vec<u8>) -> Self {
         Self { key, value }
     }
-}
-
-#[derive(Debug)]
-pub enum TrieNode {
-    /// Variant representing empty root node.
-    EmptyRoot,
-    /// Variant representing a [BranchNode].
-    Branch(BranchNode),
-    /// Variant representing a [ExtensionNode].
-    Extension(ExtensionNode),
-    /// Variant representing a [LeafNode].
-    Leaf(LeafNode),
 }
 
 impl Decodable for TrieNode {
