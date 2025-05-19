@@ -6,9 +6,10 @@
 //! to fetch and verify proofs from Ethereum nodes.
 use super::keccak::digest_keccak;
 use crate::{
-    timewave_rlp::{self, alloy_bytes::Bytes},
+    timewave_rlp::{self, alloy_bytes::Bytes, Rlp},
     timewave_trie::verify::verify_proof,
 };
+use alloy_primitives::U256;
 use anyhow::{anyhow, Context, Ok, Result};
 use common::merkle::types::MerkleVerifiable;
 use nybbles::Nibbles;
@@ -121,7 +122,7 @@ impl MerkleVerifiable for EthereumMerkleProof {
             .iter()
             .map(|node| Bytes::copy_from_slice(node))
             .collect();
-        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = decode_rlp_bytes(
+        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = rlp_decode_bytes(
             proof_nodes
                 .to_vec()
                 .last()
@@ -163,8 +164,84 @@ impl MerkleVerifiable for EthereumMerkleProof {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-pub fn decode_rlp_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
+pub fn rlp_decode_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
     let decoded = timewave_rlp::decode_exact(bytes)
         .map_err(|e| anyhow!("Failed to decode RLP bytes: {:?}", e))?;
     Ok(decoded)
+}
+
+/// Represents an Ethereum account with its state data.
+///
+/// This struct contains the core state data for an Ethereum account, including
+/// its nonce, balance, storage root, and code hash. These fields represent the
+/// essential components of an account's state in the Ethereum state trie.
+///
+/// # Fields
+/// * `nonce` - The number of transactions sent from this account
+/// * `balance` - The account's balance in wei
+/// * `storage_root` - The root hash of the account's storage trie
+/// * `code_hash` - The hash of the account's contract code (or empty if not a contract)
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EthereumAccount {
+    pub nonce: u64,
+    pub balance: U256,
+    pub storage_root: Vec<u8>,
+    pub code_hash: Vec<u8>,
+}
+
+impl EthereumAccount {
+    pub fn new(nonce: u64, balance: U256, storage_root: Vec<u8>, code_hash: Vec<u8>) -> Self {
+        Self {
+            nonce,
+            balance,
+            storage_root,
+            code_hash,
+        }
+    }
+}
+
+/// Decodes an RLP-encoded Ethereum account into an `EthereumAccount` struct.
+///
+/// # Arguments
+/// * `account_rlp` - The RLP-encoded account data to decode
+///
+/// # Returns
+/// A `Result` containing either the decoded `EthereumAccount` or an error if decoding fails
+///
+/// # Errors
+/// Returns an error if the RLP decoding fails or if any of the required fields are missing
+pub fn rlp_decode_account(account_rlp: &[u8]) -> Result<EthereumAccount> {
+    // Decode the actual account object
+    let mut rlp = Rlp::new(account_rlp).expect("Failed to RLP decode account");
+
+    let nonce = rlp
+        .get_next::<u64>()
+        .expect("Failed to get nonce")
+        .expect("Failed to unwrap nonce as u64");
+
+    let balance_bytes = rlp
+        .get_next::<Vec<u8>>()
+        .expect("Failed to get balance bytes")
+        .expect("Failed to unwrap balance bytes");
+
+    let mut balance_array = [0u8; 32];
+    balance_array.copy_from_slice(&balance_bytes);
+    let balance = U256::from_be_bytes(balance_array);
+
+    let storage_root = rlp
+        .get_next::<Vec<u8>>()
+        .expect("Failed to get storage root")
+        .expect("Failed to unwrap storage root");
+
+    let code_hash = rlp
+        .get_next::<Vec<u8>>()
+        .expect("Failed to get code hash")
+        .expect("Failed to unwrap code hash");
+
+    Ok(EthereumAccount::new(
+        nonce,
+        balance,
+        storage_root,
+        code_hash,
+    ))
 }

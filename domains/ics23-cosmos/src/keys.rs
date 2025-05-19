@@ -4,8 +4,8 @@
 //! different types of state on the Ics23 blockchain, including bank balances,
 //! WASM contract state, and other storage types.
 
-use core::fmt;
 use anyhow::Result;
+use core::fmt;
 use std::fmt::Display;
 
 use anyhow::Context;

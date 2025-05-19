@@ -1,5 +1,7 @@
 #[cfg(test)]
 pub(crate) mod constants {
+    use crate::rpc::Ics23MerkleRpcClient;
+
     use {dotenvy::dotenv, std::env};
 
     pub(crate) fn read_rpc_url() -> String {
@@ -7,17 +9,12 @@ pub(crate) mod constants {
         env::var("NEUTRON_RPC").expect("Missing Neutron RPC url!")
     }
 
-    pub(crate) fn read_test_vector_height() -> u64 {
-        dotenv().ok();
-        env::var("HEIGHT_NEUTRON")
-            .expect("Missing Neutron TEST VECTOR: HEIGHT!")
-            .parse::<u64>()
-            .expect("Failed to parse test vector as u64: Amount")
-    }
-
-    pub(crate) fn read_test_vector_merkle_root() -> String {
-        dotenv().ok();
-        env::var("MERKLE_ROOT_NEUTRON").expect("Missing Neutron TEST VECTOR: ROOT!")
+    pub(crate) async fn get_latest_root_and_height() -> (Vec<u8>, u64) {
+        let client = Ics23MerkleRpcClient {
+            rpc_url: read_rpc_url(),
+        };
+        let (root, height) = client.get_latest_root_and_height().await;
+        (root, height)
     }
 
     pub(crate) fn read_pion_1_vault_contract_address() -> String {

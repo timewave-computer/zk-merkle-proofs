@@ -4,7 +4,7 @@ mod tests {
     use crate::merkle_lib::tests::defaults::constants::{
         read_ethereum_vault_balances_storage_key, read_sepolia_url,
     };
-    use crate::merkle_lib::types::decode_rlp_bytes;
+    use crate::merkle_lib::types::rlp_decode_bytes;
     use crate::merkle_lib::{
         keccak::digest_keccak,
         tests::defaults::constants::{
@@ -51,7 +51,7 @@ mod tests {
         assert!(account_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
-        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        let account_decoded = rlp_decode_bytes(&account_proof.value).unwrap();
         assert!(storage_proof
             .verify(account_decoded.get(2).unwrap())
             .unwrap());
@@ -82,7 +82,7 @@ mod tests {
         assert!(account_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
-        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        let account_decoded = rlp_decode_bytes(&account_proof.value).unwrap();
         assert!(storage_proof
             .verify(account_decoded.get(2).unwrap())
             .unwrap());
@@ -121,7 +121,7 @@ mod tests {
             .await
             .unwrap();
 
-        let account_decoded = decode_rlp_bytes(&account_proof.value).unwrap();
+        let account_decoded = rlp_decode_bytes(&account_proof.value).unwrap();
         assert!(storage_proof
             .verify(account_decoded.get(2).unwrap())
             .unwrap());

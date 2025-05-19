@@ -1,7 +1,10 @@
+use std::str::FromStr;
+
 use anyhow::{Context, Result};
+use base64::Engine;
 use common::merkle::types::MerkleClient;
 use tendermint::block::Height;
-use tendermint_rpc::{Client, HttpClient};
+use tendermint_rpc::{Client, HttpClient, Url as TendermintUrl};
 
 use crate::{keys::Ics23Key, merkle_lib::types::Ics23MerkleProof};
 
@@ -35,5 +38,23 @@ impl MerkleClient for Ics23MerkleRpcClient {
             key: neutron_key,
             value: response.value,
         })?)
+    }
+}
+
+impl Ics23MerkleRpcClient {
+    pub async fn get_latest_root_and_height(&self) -> (Vec<u8>, u64) {
+        let tendermint_client =
+            tendermint_rpc::HttpClient::new(TendermintUrl::from_str(&self.rpc_url).unwrap())
+                .unwrap();
+        let latest_block = tendermint_client.latest_block().await.unwrap();
+        let height = latest_block.block.header.height.value() - 1;
+        let app_hash = base64::engine::general_purpose::STANDARD
+            .encode(hex::decode(latest_block.block.header.app_hash.to_string()).unwrap());
+        (
+            base64::engine::general_purpose::STANDARD
+                .decode(app_hash)
+                .unwrap(),
+            height,
+        )
     }
 }

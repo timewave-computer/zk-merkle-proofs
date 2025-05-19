@@ -13,7 +13,7 @@ use url::Url;
 
 use crate::{
     ethereum_rpc::rlp::encode_receipt,
-    merkle_lib::types::{decode_rlp_bytes, EthereumMerkleProof, EthereumRawMerkleProof},
+    merkle_lib::types::{rlp_decode_bytes, EthereumMerkleProof, EthereumRawMerkleProof},
 };
 
 /// A Merkle prover implementation for Ethereum.
@@ -80,7 +80,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
             proof_deserialized
                 .account_proof
                 .last()
@@ -102,7 +102,7 @@ impl EvmMerkleRpcClient {
             .first()
             .context("Failed to get first storage proof");
         let first_storage_proof = first_storage_proof?;
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
             &first_storage_proof
                 .0
                 .to_vec()
@@ -153,12 +153,14 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded = decode_rlp_bytes(
+        let leaf_node_decoded = rlp_decode_bytes(
             proof_deserialized
                 .account_proof
                 .last()
                 .context("Failed to get leaf from account proof")?,
         )?;
+
+        // the rlp-encoded stored account
         let stored_account = leaf_node_decoded
             .last()
             .context("Failed to extract account root from leaf")?
@@ -274,7 +276,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|n| n.to_vec())
             .collect::<Vec<_>>();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = decode_rlp_bytes(
+        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
             proof
                 .to_vec()
                 .last()
