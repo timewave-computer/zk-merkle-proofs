@@ -8,7 +8,9 @@ mod tests {
         read_ethereum_vault_contract_address, read_sepolia_default_account_address,
         read_sepolia_height,
     };
-    use crate::merkle_lib::types::{EthereumAccountProof, EthereumStorageProof};
+    use crate::merkle_lib::types::{
+        EthereumAccountProof, EthereumSimpleProof, EthereumStorageProof,
+    };
     use crate::merkle_lib::{digest_keccak, rlp_decode_account, rlp_decode_bytes};
     use crate::timewave_rlp;
     use crate::timewave_trie::constants::{CHILD_INDEX_RANGE, EVEN_FLAG, ODD_FLAG};
@@ -140,7 +142,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_fancy_new_stuff() {
+    async fn test_simple_state_proof() {
         // try to combine account and storage proof
         let sepolia_height = read_sepolia_height().await.unwrap();
         let storage_slot_key = hex::decode(read_ethereum_vault_balances_storage_key()).unwrap();
@@ -164,83 +166,9 @@ mod tests {
             .await
             .unwrap();
 
-        let mut combined_nodes: Vec<Vec<u8>> = Vec::new();
-        let account_proof_len = combined_proof.account_proof.proof.len();
-        let storage_proof_len = combined_proof.storage_proof.proof.len();
-
-        // Add length information as the first two nodes
-        // We assume proof lengths will never exceed 65,535 bytes (u16::MAX)
-        combined_nodes.push((account_proof_len as u16).to_be_bytes().to_vec());
-        combined_nodes.push((storage_proof_len as u16).to_be_bytes().to_vec());
-
-        // Add the actual proof nodes
-        combined_nodes.extend(combined_proof.account_proof.proof.clone());
-        combined_nodes.extend(combined_proof.storage_proof.proof.clone());
-
-        let mut combined_key: Vec<u8> = Vec::new();
-        // Declare the keys
-        let account_key = combined_proof.account_proof.address.clone();
-        let storage_key = combined_proof.storage_proof.key.clone();
-
-        // Add key length information (using u16 to be consistent with node lengths)
-        // We assume key lengths will never exceed 65,535 bytes (u16::MAX)
-        let key_length = (account_key.len() + storage_key.len()) as u16;
-        combined_key.extend(key_length.to_be_bytes().to_vec());
-
-        // combine the address and storage proof nodes into a single, flattened proof
-        combined_key.extend(account_key);
-        combined_key.extend(storage_key);
-
-        // Declare the values
-        let account_value = combined_proof.account_proof.value.clone();
-        let storage_value = combined_proof.storage_proof.value.clone();
-
-        // Create combined values with length information
-        let mut combined_values: Vec<u8> = Vec::new();
-        // We assume value lengths will never exceed 65,535 bytes (u16::MAX)
-        let value_length = (account_value.len() + storage_value.len()) as u16;
-        combined_values.extend(value_length.to_be_bytes().to_vec());
-        combined_values.extend(account_value);
-        combined_values.extend(storage_value);
-
-        // Skip the length nodes when getting the actual proof nodes
-        let account_proof_nodes = combined_nodes[2..2 + account_proof_len].to_vec();
-        let storage_proof_nodes = combined_nodes[2 + account_proof_len..].to_vec();
-
-        // Skip the length bytes when getting the actual key parts (now using 2 bytes for length)
-        let account_key_part =
-            combined_key[2..2 + combined_proof.account_proof.address.len()].to_vec();
-        let storage_key_part =
-            combined_key[2 + combined_proof.account_proof.address.len()..].to_vec();
-
-        // Skip the length bytes when getting the actual value parts (now using 2 bytes for length)
-        let account_value_part =
-            combined_values[2..2 + combined_proof.account_proof.value.len()].to_vec();
-        let storage_value_part =
-            combined_values[2 + combined_proof.account_proof.value.len()..].to_vec();
-
-        // Assert that the storage proof is under the storage root used in the account proof
-        let account_decoded = rlp_decode_account(&combined_proof.account_proof.value).unwrap();
-
-        let account_proof = EthereumAccountProof::new(
-            account_proof_nodes.clone(),
-            account_key_part,
-            account_value_part,
-        );
-
-        let account_result = account_proof
+        let simple_proof = EthereumSimpleProof::from_combined_proof(combined_proof);
+        assert!(simple_proof
             .verify(block.header.state_root.as_slice())
-            .unwrap();
-        assert!(account_result);
-
-        let storage_proof = EthereumStorageProof::new(
-            storage_proof_nodes.clone(),
-            storage_key_part,
-            storage_value_part,
-        );
-
-        let storage_result = storage_proof.verify(&account_decoded.storage_root).unwrap();
-
-        assert!(storage_result);
+            .unwrap());
     }
 }
