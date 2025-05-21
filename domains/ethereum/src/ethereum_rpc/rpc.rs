@@ -16,8 +16,7 @@ use crate::{
     merkle_lib::{
         rlp_decode_bytes,
         types::{
-            EthereumAccountProof, EthereumCombinedProof, EthereumProofType, EthereumReceiptProof,
-            EthereumStorageProof,
+            EthereumAccountProof, EthereumCombinedProof, EthereumReceiptProof, EthereumStorageProof,
         },
     },
 };
@@ -292,21 +291,5 @@ impl EvmMerkleRpcClient {
             .context("Failed to extract value from leaf")?
             .to_vec();
         Ok(EthereumReceiptProof::new(proof, receipt_key, receipt_rlp).into())
-    }
-
-    /// Wrapper entry point to get all kinds of different state proofs
-    ///
-    /// # Arguments
-    /// * `key` - The storage key to prove
-    /// * `address` - The account address to prove
-    /// * `height` - The block height to prove at
-    ///
-    /// # Returns an instance of the EthereumProofType enum
-    pub async fn get_state_proof(
-        &self,
-        key: &[String],
-        address: &str,
-    ) -> Result<EthereumProofType> {
-        todo!("Implement proof wrapper");
     }
 }
