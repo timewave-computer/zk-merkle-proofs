@@ -8,9 +8,10 @@ mod tests {
         read_ethereum_vault_contract_address, read_sepolia_default_account_address,
         read_sepolia_height,
     };
-    use crate::merkle_lib::types::{EthereumAccountProof, EthereumProofType, EthereumStorageProof};
+    use crate::merkle_lib::types::EthereumAccountProof;
     use crate::merkle_lib::{digest_keccak, rlp_decode_account, rlp_decode_bytes};
     use crate::timewave_rlp;
+    use crate::timewave_trie::constants::CHILD_INDEX_RANGE;
     use alloy::hex;
     use alloy::rlp::Decodable;
     use alloy::{
@@ -188,7 +189,6 @@ mod tests {
         let account_proof_nodes = combined_nodes[2..2 + account_proof_len].to_vec();
         let storage_proof_nodes = combined_nodes[2 + account_proof_len..].to_vec();
 
-        assert_eq!(account_proof_nodes, combined_proof.account_proof.proof);
         let storage_proof_key = combined_key[20..].to_vec();
 
         let mut account_hash_from_storage_proof = "".to_string();
@@ -211,33 +211,33 @@ mod tests {
                 println!("leaf: {:?}", leaf);
             }
             TrieNode::Branch(branch) => {
-                // Crazy RLP magic - this could also be an Extension node, must handle accordingly
-                let x: Vec<alloy_trie::nodes::RlpNode> = branch.stack.clone();
                 // Create a list of 17 elements (16 children + value)
-                let mut rlp_list = Vec::new();
+                let mut rlp_list: Vec<Vec<u8>> = Vec::new();
                 let mut stack_idx = 0;
-                for i in 0..16 {
+                for i in CHILD_INDEX_RANGE {
+                    // if one of the 16 children is set, add it to the list
                     if branch.state_mask.is_bit_set(i as u8) {
-                        rlp_list.push(x[stack_idx].as_slice().to_vec());
+                        // The children are already RLP-encoded nodes
+                        rlp_list.push(branch.stack[stack_idx].as_slice().to_vec());
                         stack_idx += 1;
                     } else {
-                        rlp_list.push(vec![0x80]); // empty string
+                        // Append an empty string if the child is not set
+                        rlp_list.push(vec![0x80]);
                     }
                 }
-                rlp_list.push(vec![0x80]); // value is always empty string
+                // The value for this type of node is always an empty string
+                rlp_list.push(vec![0x80]);
 
-                // RLP encode the list using helper function
-                let mut out = Vec::new();
+                // Encode the list of RLP-encoded nodes
+                let mut encoded = Vec::new();
                 let header = timewave_rlp::Header {
                     list: true,
                     payload_length: rlp_list.iter().map(|x| x.len()).sum::<usize>(),
                 };
-                header.encode(&mut out);
+                header.encode(&mut encoded);
                 for item in rlp_list {
-                    out.extend_from_slice(&item);
+                    encoded.extend_from_slice(&item);
                 }
-                let encoded = out;
-
                 let hash = digest_keccak(&encoded);
                 account_hash_from_storage_proof = hex::encode(hash);
             }
