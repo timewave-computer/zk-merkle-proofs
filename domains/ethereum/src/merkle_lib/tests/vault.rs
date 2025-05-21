@@ -219,66 +219,8 @@ mod tests {
         let storage_value_part =
             combined_values[2 + combined_proof.account_proof.value.len()..].to_vec();
 
-        let mut account_hash_from_storage_proof = "".to_string();
-
-        let mut is_extension = false;
-
-        match TrieNode::decode(&mut &account_proof_nodes.last().unwrap()[..]).unwrap() {
-            TrieNode::Leaf(leaf) => {
-                println!("leaf: {:?}", leaf);
-            }
-            TrieNode::Branch(branch) => {
-                println!("branch: {:?}", branch);
-            }
-            TrieNode::Extension(extension) => {
-                println!("extension: {:?}", extension);
-            }
-            _ => panic!("Account proof is not a node of any kind"),
-        }
-
-        match TrieNode::decode(&mut &storage_proof_nodes.first().unwrap()[..]).unwrap() {
-            TrieNode::Branch(branch) => {
-                // Create a list of 17 elements (16 children + value)
-                let mut rlp_list: Vec<Vec<u8>> = Vec::new();
-                let mut stack_idx = 0;
-
-                // Process each child index in order
-                for i in CHILD_INDEX_RANGE {
-                    if branch.state_mask.is_bit_set(i as u8) {
-                        rlp_list.push(branch.stack[stack_idx].as_slice().to_vec());
-                        stack_idx += 1;
-                    } else {
-                        rlp_list.push(vec![0x80]); // Empty string for unset children
-                    }
-                }
-                rlp_list.push(vec![0x80]); // Empty value
-
-                // Encode the list
-                let mut encoded = Vec::new();
-                let header = timewave_rlp::Header {
-                    list: true,
-                    payload_length: rlp_list.iter().map(|x| x.len()).sum::<usize>(),
-                };
-                header.encode(&mut encoded);
-                for item in rlp_list {
-                    encoded.extend_from_slice(&item);
-                }
-                let hash = digest_keccak(&encoded);
-                account_hash_from_storage_proof = hex::encode(hash);
-            }
-            TrieNode::Extension(extension) => {
-                // we need to handle extension roots
-            }
-            TrieNode::Leaf(leaf) => {
-                // we need to handle leaf nodes
-            }
-            _ => panic!("Account proof is not a node of any kind"),
-        }
-
         // Assert that the storage proof is under the storage root used in the account proof
         let account_decoded = rlp_decode_account(&combined_proof.account_proof.value).unwrap();
-        let account_hash = hex::encode(account_decoded.storage_root.clone());
-        assert_eq!(account_hash, account_hash_from_storage_proof);
 
         let account_proof = EthereumAccountProof::new(
             account_proof_nodes.clone(),
@@ -297,13 +239,7 @@ mod tests {
             storage_value_part,
         );
 
-        let account_decoded = rlp_decode_bytes(&combined_proof.account_proof.value)
-            .unwrap()
-            .to_vec();
-
-        let storage_result = storage_proof
-            .verify(&account_decoded.get(2).unwrap())
-            .unwrap();
+        let storage_result = storage_proof.verify(&account_decoded.storage_root).unwrap();
 
         assert!(storage_result);
     }
