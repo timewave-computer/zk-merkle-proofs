@@ -133,11 +133,7 @@ impl EthereumStorageProof {
     /// # Note
     /// The key is automatically hashed using keccak256 before being stored
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
-        Self {
-            proof,
-            key: digest_keccak(&key).to_vec(),
-            value,
-        }
+        Self { proof, key, value }
     }
 }
 
@@ -269,7 +265,7 @@ impl MerkleVerifiable for EthereumStorageProof {
             info!("Stored value: {:?}", stored_value);
             return Ok(false);
         }
-        let key = Nibbles::unpack(&self.key);
+        let key = Nibbles::unpack(&digest_keccak(&self.key));
 
         let result = verify_proof(
             &root.try_into()?,
