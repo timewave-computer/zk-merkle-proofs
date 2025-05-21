@@ -8,21 +8,15 @@ mod tests {
         read_ethereum_vault_contract_address, read_sepolia_default_account_address,
         read_sepolia_height,
     };
-    use crate::merkle_lib::types::{
-        EthereumAccountProof, EthereumSimpleProof, EthereumStorageProof,
-    };
+    use crate::merkle_lib::types::EthereumSimpleProof;
     use crate::merkle_lib::{digest_keccak, rlp_decode_account, rlp_decode_bytes};
-    use crate::timewave_rlp;
-    use crate::timewave_trie::constants::{CHILD_INDEX_RANGE, EVEN_FLAG, ODD_FLAG};
     use alloy::hex;
-    use alloy::rlp::Decodable;
     use alloy::{
         hex::FromHex,
         providers::{Provider, ProviderBuilder},
     };
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
-    use alloy_trie::nodes::TrieNode;
     use common::merkle::types::MerkleVerifiable;
     use std::str::FromStr;
     use url::Url;
