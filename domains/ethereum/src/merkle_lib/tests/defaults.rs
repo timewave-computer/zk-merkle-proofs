@@ -38,22 +38,6 @@ pub(crate) mod constants {
             .expect("Failed to get Block!");
         Ok(block.header.number)
     }
-
-    pub(crate) fn get_test_vector_eth_storage_proof() -> Vec<u8> {
-        include_bytes!("data/storage_proof.bin").to_vec()
-    }
-
-    pub(crate) fn get_test_vector_eth_account_proof() -> Vec<u8> {
-        include_bytes!("data/account_proof.bin").to_vec()
-    }
-
-    pub(crate) fn get_test_vector_eth_block_root() -> Vec<u8> {
-        include_bytes!("data/block_root.bin").to_vec()
-    }
-
-    pub(crate) fn get_test_vector_eth_account_root() -> Vec<u8> {
-        include_bytes!("data/account_root.bin").to_vec()
-    }
 }
 
 #[cfg(test)]

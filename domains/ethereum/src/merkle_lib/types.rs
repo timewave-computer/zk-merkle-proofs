@@ -30,27 +30,60 @@ use tracing::info;
 /// * `Storage(EthereumStorageProof)` - A proof for verifying a storage value in an account's storage trie
 /// * `Combined(EthereumCombinedProof)` - A combined proof containing both account and storage proofs
 /// * `Receipt(EthereumReceiptProof)` - A proof for verifying a transaction receipt in the receipt trie
-
+/// * `Simple(EthereumSimpleProof)` - A simplified proof format that combines multiple proofs into a single structure
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum EthereumProofType {
+    /// A proof for verifying an account's state in the state trie
     Account(EthereumAccountProof),
+    /// A proof for verifying a storage value in an account's storage trie
     Storage(EthereumStorageProof),
+    /// A combined proof containing both account and storage proofs
     Combined(EthereumCombinedProof),
+    /// A proof for verifying a transaction receipt in the receipt trie
     Receipt(EthereumReceiptProof),
+    /// A simplified proof format that combines multiple proofs into a single structure
     Simple(EthereumSimpleProof),
 }
 
+/// Represents a simplified Ethereum Merkle proof that combines multiple proofs into a single structure.
+///
+/// This struct provides a flattened representation of Ethereum proofs, combining proof nodes,
+/// keys, and values into single vectors with length prefixes. This format is useful for
+/// serialization and transmission of proofs.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct EthereumSimpleProof {
+    /// The combined proof nodes with length prefixes
     pub proof: Vec<Vec<u8>>,
+    /// The combined keys with length prefixes
     pub key: Vec<u8>,
+    /// The combined values with length prefixes
     pub value: Vec<u8>,
 }
 
 impl EthereumSimpleProof {
+    /// Creates a new simplified Ethereum proof.
+    ///
+    /// # Arguments
+    /// * `proof` - The combined proof nodes with length prefixes
+    /// * `key` - The combined keys with length prefixes
+    /// * `value` - The combined values with length prefixes
+    ///
+    /// # Returns
+    /// A new `EthereumSimpleProof` instance
     pub fn new(proof: Vec<Vec<u8>>, key: Vec<u8>, value: Vec<u8>) -> Self {
         Self { proof, key, value }
     }
+
+    /// Creates a simplified proof from a combined proof.
+    ///
+    /// This method takes a combined proof containing both account and storage proofs
+    /// and converts it into a simplified format with length-prefixed components.
+    ///
+    /// # Arguments
+    /// * `combined_proof` - The combined proof to convert
+    ///
+    /// # Returns
+    /// A new `EthereumSimpleProof` instance
     pub fn from_combined_proof(combined_proof: EthereumCombinedProof) -> Self {
         let mut combined_nodes: Vec<Vec<u8>> = Vec::new();
         let account_proof_len = combined_proof.account_proof.proof.len();
@@ -96,6 +129,13 @@ impl EthereumSimpleProof {
     }
 }
 
+/// Implementation of Merkle proof verification for simplified Ethereum proofs.
+///
+/// This implementation verifies proofs by:
+/// 1. Extracting length-prefixed components from the combined structures
+/// 2. Verifying the account proof against the state root
+/// 3. Verifying the storage proof against the account's storage root
+/// 4. Returns true only if both verifications succeed
 impl MerkleVerifiable for EthereumSimpleProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
         let combined_nodes = &self.proof;
@@ -426,38 +466,65 @@ impl EthereumReceiptProof {
 
 impl MerkleVerifiable for EthereumReceiptProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
-        let storage_proof: EthereumStorageProof = self.into();
-        storage_proof.verify(root)
+        let proof_nodes: Vec<Bytes> = self
+            .proof
+            .iter()
+            .map(|node| Bytes::copy_from_slice(node))
+            .collect();
+
+        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = rlp_decode_bytes(
+            proof_nodes
+                .to_vec()
+                .last()
+                .context("Failed to extract leaf node from proof")?,
+        )?;
+
+        let stored_value = leaf_node_decoded
+            .last()
+            .context("Failed to get stored value from leaf")?
+            .to_vec();
+
+        if stored_value != self.value {
+            info!("Value mismatch!");
+            info!("Expected value: {:?}", self.value);
+            info!("Stored value: {:?}", stored_value);
+            return Ok(false);
+        }
+        let key = Nibbles::unpack(&self.key);
+
+        let result = verify_proof(
+            &root.try_into()?,
+            key,
+            Some(self.value.to_vec()),
+            proof_nodes.iter(),
+        );
+
+        match result {
+            std::result::Result::Ok(_) => Ok(true),
+            Err(e) => {
+                anyhow::bail!("Proof verification failed: {:?}", e);
+            }
+        }
     }
 }
 
+/// Implementation of From trait to convert EthereumReceiptProof to EthereumStorageProof.
+///
+/// This implementation preserves the proof nodes and value as-is, while
+/// using the original key directly. This is used when converting receipt
+/// proofs to storage proofs for verification purposes.
+///
+/// # Arguments
+/// * `proof` - The raw receipt proof to convert
+///
+/// # Returns
+/// A new `EthereumStorageProof` with the same proof nodes and value
 impl From<EthereumReceiptProof> for EthereumStorageProof {
-    /// Converts a raw receipt proof into a regular Ethereum storage proof.
-    ///
-    /// This implementation preserves the proof nodes and value as-is, while
-    /// using the original key directly. This is used when converting receipt
-    /// proofs to storage proofs for verification purposes.
-    ///
-    /// # Arguments
-    /// * `proof` - The raw receipt proof to convert
-    ///
-    /// # Returns
-    /// A new `EthereumStorageProof` with the same proof nodes and value
     fn from(proof: EthereumReceiptProof) -> Self {
         Self {
             proof: proof.proof,
             key: proof.key,
             value: proof.value,
-        }
-    }
-}
-
-impl From<&EthereumReceiptProof> for EthereumStorageProof {
-    fn from(proof: &EthereumReceiptProof) -> Self {
-        Self {
-            proof: proof.proof.clone(),
-            key: proof.key.clone(),
-            value: proof.value.clone(),
         }
     }
 }
