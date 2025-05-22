@@ -45,6 +45,19 @@ pub enum EthereumProofType {
     Simple(EthereumSimpleProof),
 }
 
+impl MerkleVerifiable for EthereumProofType {
+    fn verify(&self, root: &[u8]) -> Result<bool> {
+        // Match on the proof type and verify
+        match self {
+            EthereumProofType::Simple(simple_proof) => Ok(simple_proof.verify(root)?),
+            EthereumProofType::Account(account_proof) => Ok(account_proof.verify(root)?),
+            _ => {
+                panic!("Unsupported EthereumProofType: The MVP only supports SimpleProof and AccountProof");
+            }
+        }
+    }
+}
+
 /// Represents a simplified Ethereum Merkle proof that combines multiple proofs into a single structure.
 ///
 /// This struct provides a flattened representation of Ethereum proofs, combining proof nodes,
