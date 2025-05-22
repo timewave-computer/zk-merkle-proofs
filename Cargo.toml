@@ -8,7 +8,13 @@ ics23-cosmos = { path = "domains/ics23-cosmos" }
 base64 = "0.22.1"
 hex = "0.4"
 common = { path = "common" }
-tokio = { version = "1.44.2", features = ["full"] }
+tokio = { version = "1.45.0", features = [
+    "sync",
+    "macros",
+    "io-util",
+    "rt",
+    "time",
+] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = "0.12"
