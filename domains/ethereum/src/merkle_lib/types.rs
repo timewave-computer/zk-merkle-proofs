@@ -4,7 +4,7 @@
 //! including account proofs, storage proofs, and receipt proofs. It implements the common
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
-use super::{digest_keccak, rlp_decode_bytes, RlpDecodable};
+use super::{digest_keccak, rlp_decode_bytes};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
     timewave_trie::verify::verify_proof,
@@ -15,6 +15,12 @@ use num_bigint::BigUint;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use tracing::info;
+
+pub trait RlpDecodable {
+    fn rlp_decode(rlp: &[u8]) -> Result<Self>
+    where
+        Self: Sized;
+}
 
 /// Represents different types of Ethereum Merkle proofs.
 ///

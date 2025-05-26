@@ -6,6 +6,8 @@ use anyhow::Result;
 mod tests;
 pub mod types;
 
+pub use types::RlpDecodable;
+
 // Keccak-256 hash function implementation.
 //
 // This module provides functionality for computing Keccak-256 hashes, which is the
@@ -35,12 +37,6 @@ pub fn digest_keccak(bytes: &[u8]) -> [u8; 32] {
     hasher.update(bytes);
     hasher.finalize(&mut output);
     output
-}
-
-pub trait RlpDecodable {
-    fn rlp_decode(rlp: &[u8]) -> Result<Self>
-    where
-        Self: Sized;
 }
 
 /// Decodes RLP-encoded bytes into a vector of bytes.
