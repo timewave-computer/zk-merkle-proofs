@@ -4,9 +4,8 @@
 //! including account proofs, storage proofs, and receipt proofs. It implements the common
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
-use super::{digest_keccak, rlp_decode_bytes};
+use super::{digest_keccak, rlp_decode_bytes, RlpDecodable};
 use crate::{
-    merkle_lib::rlp_decode_account,
     timewave_rlp::{self, alloy_bytes::Bytes},
     timewave_trie::verify::verify_proof,
 };
@@ -175,7 +174,7 @@ impl MerkleVerifiable for EthereumSimpleProof {
         let storage_value_part = combined_values[2 + account_value_len..].to_vec();
 
         // Assert that the storage proof is under the storage root used in the account proof
-        let account_decoded = rlp_decode_account(&account_value_part).unwrap();
+        let account_decoded = EthereumAccount::rlp_decode(&account_value_part).unwrap();
 
         let account_proof = EthereumAccountProof::new(
             account_proof_nodes.clone(),
@@ -218,6 +217,45 @@ pub struct EthereumAccount {
     pub storage_root: Vec<u8>,
     /// The hash of the account's contract code (or empty if not a contract)
     pub code_hash: Vec<u8>,
+}
+
+impl RlpDecodable for EthereumAccount {
+    fn rlp_decode(rlp: &[u8]) -> Result<Self> {
+        let account_rlp_bytes = rlp_decode_bytes(rlp)?;
+        let nonce = if let Some(nonce_bytes) = account_rlp_bytes.first() {
+            if nonce_bytes.is_empty() {
+                0u64
+            } else {
+                u64::from_be_bytes({
+                    let mut padded = [0u8; 8];
+                    let nonce_slice = nonce_bytes.as_ref();
+                    let start = 8 - nonce_slice.len();
+                    padded[start..].copy_from_slice(nonce_slice);
+                    padded
+                })
+            }
+        } else {
+            0u64
+        };
+        let balance = BigUint::from_bytes_be(
+            account_rlp_bytes
+                .get(1)
+                .context("Failed to get balance")?
+                .as_ref(),
+        );
+
+        let storage_root = account_rlp_bytes
+            .get(2)
+            .context("Failed to get storage root")?
+            .to_vec();
+
+        let code_hash = account_rlp_bytes
+            .get(3)
+            .context("Failed to get code hash")?
+            .to_vec();
+
+        Ok(Self::new(nonce, balance, storage_root, code_hash))
+    }
 }
 
 impl EthereumAccount {

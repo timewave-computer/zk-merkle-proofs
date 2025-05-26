@@ -6,8 +6,9 @@ mod tests {
     use crate::{
         ethereum_rpc::rpc::EvmMerkleRpcClient,
         merkle_lib::{
-            rlp_decode_account,
             tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
+            types::EthereumAccount,
+            RlpDecodable,
         },
     };
     use alloy::providers::{Provider, ProviderBuilder};
@@ -47,7 +48,7 @@ mod tests {
 
         let state_root = block.header.state_root.as_slice();
 
-        let account_decoded = rlp_decode_account(&account_proof.value).unwrap();
+        let account_decoded = EthereumAccount::rlp_decode(&account_proof.value).unwrap();
         info!("Account Decoded: {:?}", account_decoded);
 
         assert!(account_proof.verify(&state_root).unwrap());

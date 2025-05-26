@@ -8,8 +8,8 @@ mod tests {
         read_ethereum_vault_contract_address, read_sepolia_default_account_address,
         read_sepolia_height,
     };
-    use crate::merkle_lib::types::EthereumSimpleProof;
-    use crate::merkle_lib::{digest_keccak, rlp_decode_account, rlp_decode_bytes};
+    use crate::merkle_lib::types::{EthereumAccount, EthereumSimpleProof};
+    use crate::merkle_lib::{digest_keccak, rlp_decode_bytes, RlpDecodable};
     use alloy::hex;
     use alloy::{
         hex::FromHex,
@@ -56,7 +56,8 @@ mod tests {
             .verify(block.header.state_root.as_slice())
             .unwrap());
 
-        let account_decoded = rlp_decode_account(&combined_proof.account_proof.value).unwrap();
+        let account_decoded =
+            EthereumAccount::rlp_decode(&combined_proof.account_proof.value).unwrap();
         assert!(combined_proof
             .storage_proof
             .verify(account_decoded.storage_root.as_slice())
