@@ -33,6 +33,7 @@ anyhow.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 num-bigint = { version = "0.4", features = ["serde"] }
+sha3 = "0.10"
 
 [features]
 no-zkvm = [

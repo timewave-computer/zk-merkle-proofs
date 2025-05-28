@@ -15,9 +15,10 @@ mod tests {
         hex::FromHex,
         providers::{Provider, ProviderBuilder},
     };
-    use alloy_primitives::U256;
+    use alloy_primitives::{Address, U256};
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
+    use sha3::{Digest, Keccak256};
     use std::str::FromStr;
     use url::Url;
 
@@ -165,5 +166,54 @@ mod tests {
         assert!(simple_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_decode_withdraw_mainnet() {
+        let string_slot_hex = "ec8156718a8372b1db44bb411437d0870f3e3790d4a08526d024ce1b0b668f6e";
+        let string_slot_key = hex::decode(string_slot_hex).unwrap();
+
+        let hashed_slot = Keccak256::digest(&string_slot_key);
+        let current_slot = U256::from_be_slice(&hashed_slot);
+        let merkle_prover = EvmMerkleRpcClient {
+            rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
+        };
+        let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
+        let block_number = 22580997;
+
+        let length_proof = merkle_prover
+            .get_storage_proof(&string_slot_hex, &contract_address, block_number)
+            .await
+            .unwrap();
+        let string_length =
+            U256::from((*length_proof.value.clone().first().unwrap() as u64 - 1) / 2);
+        println!("String length (bytes): {:?}", &string_length);
+
+        // Step 3: Determine how many full 32-byte chunks
+        let total_chunks = ((string_length.to::<usize>() + 31) / 32) as usize;
+        println!("Total 32-byte chunks: {}", total_chunks);
+
+        // Step 4: Fetch each chunk and verify proof
+        let mut full_string = Vec::new();
+        for i in 0..total_chunks {
+            let chunk_slot = current_slot + U256::from(i);
+            let chunk_slot_hex = format!("{:064x}", chunk_slot);
+            let chunk_proof = merkle_prover
+                .get_account_and_storage_proof(&chunk_slot_hex, &contract_address, block_number)
+                .await
+                .unwrap();
+            full_string.extend_from_slice(&chunk_proof.storage_proof.value[1..]);
+            let account_decoded =
+                EthereumAccount::rlp_decode(&chunk_proof.account_proof.value).unwrap();
+            assert!(chunk_proof
+                .storage_proof
+                .verify(&account_decoded.storage_root)
+                .unwrap());
+        }
+
+        // Step 5: Truncate to actual length and decode
+        full_string.truncate(string_length.to::<usize>());
+        let decoded_string = String::from_utf8_lossy(&full_string).to_string();
+        println!("Decoded receiver string: {:?}", decoded_string);
     }
 }
