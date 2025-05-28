@@ -92,6 +92,30 @@ impl EthereumSimpleProof {
         Self { proof, key, value }
     }
 
+    /// Extracts the storage proof value from the combined values structure.
+    ///
+    /// This method parses the length-prefixed combined values to extract
+    /// the storage value portion, skipping the account value and its length prefix.
+    ///
+    /// # Returns
+    /// The storage proof value as a `Vec<u8>`
+    ///
+    /// # Panics
+    /// Panics if the combined values structure is malformed or too short
+    pub fn get_stored_value(&self) -> Vec<u8> {
+        let combined_values = &self.value;
+
+        // Extract the account value length from the first 2 bytes
+        let account_value_len =
+            u16::from_be_bytes([combined_values[0], combined_values[1]]) as usize;
+
+        // Skip the length bytes (2) and the account value to get to the storage value
+        let storage_value_start = 2 + account_value_len;
+        let storage_value_part = combined_values[storage_value_start..].to_vec();
+
+        storage_value_part
+    }
+
     /// Creates a simplified proof from a combined proof.
     ///
     /// This method takes a combined proof containing both account and storage proofs
@@ -321,7 +345,8 @@ impl EthereumCombinedProof {
 /// 3. Returns true only if both verifications succeed
 impl MerkleVerifiable for EthereumCombinedProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
-        let storage_proof = self.storage_proof.verify(&self.account_proof.value)?;
+        let account_decoded = EthereumAccount::rlp_decode(&self.account_proof.value)?;
+        let storage_proof = self.storage_proof.verify(&account_decoded.storage_root)?;
         let account_proof = self.account_proof.verify(root)?;
         Ok(storage_proof && account_proof)
     }

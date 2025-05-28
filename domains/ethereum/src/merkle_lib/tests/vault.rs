@@ -173,14 +173,15 @@ mod tests {
         let string_slot_hex = "ec8156718a8372b1db44bb411437d0870f3e3790d4a08526d024ce1b0b668f6e";
         let string_slot_key = hex::decode(string_slot_hex).unwrap();
 
-        let hashed_slot = Keccak256::digest(&string_slot_key);
+        let hashed_slot = Keccak256::digest(&string_slot_hex);
+        let comp = Keccak256::digest(&string_slot_key);
+        assert_eq!(hashed_slot, comp);
         let current_slot = U256::from_be_slice(&hashed_slot);
         let merkle_prover = EvmMerkleRpcClient {
             rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
         };
         let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
         let block_number = 22580997;
-
         let length_proof = merkle_prover
             .get_storage_proof(&string_slot_hex, &contract_address, block_number)
             .await
@@ -198,10 +199,30 @@ mod tests {
         for i in 0..total_chunks {
             let chunk_slot = current_slot + U256::from(i);
             let chunk_slot_hex = format!("{:064x}", chunk_slot);
+            println!("Chunk slot hex: {:?}", chunk_slot_hex);
             let chunk_proof = merkle_prover
                 .get_account_and_storage_proof(&chunk_slot_hex, &contract_address, block_number)
                 .await
                 .unwrap();
+            let simple_proof: EthereumSimpleProof =
+                EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
+            simple_proof
+                .verify(
+                    hex::decode("aaeaf717f891f01e55287cd09f7291036d1c06a196e53456c5828bcbcb39250d")
+                        .unwrap()
+                        .as_slice(),
+                )
+                .unwrap();
+
+            assert!(chunk_proof
+                .verify(
+                    &hex::decode(
+                        "aaeaf717f891f01e55287cd09f7291036d1c06a196e53456c5828bcbcb39250d"
+                    )
+                    .unwrap()
+                )
+                .unwrap());
+
             full_string.extend_from_slice(&chunk_proof.storage_proof.value[1..]);
             let account_decoded =
                 EthereumAccount::rlp_decode(&chunk_proof.account_proof.value).unwrap();
