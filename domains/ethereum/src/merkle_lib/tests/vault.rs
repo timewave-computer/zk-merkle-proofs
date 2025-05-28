@@ -15,7 +15,7 @@ mod tests {
         hex::FromHex,
         providers::{Provider, ProviderBuilder},
     };
-    use alloy_primitives::{Address, U256};
+    use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
     use sha3::{Digest, Keccak256};
