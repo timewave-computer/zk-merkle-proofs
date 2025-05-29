@@ -173,9 +173,7 @@ mod tests {
         let string_slot_hex = "ec8156718a8372b1db44bb411437d0870f3e3790d4a08526d024ce1b0b668f6e";
         let string_slot_key = hex::decode(string_slot_hex).unwrap();
 
-        let hashed_slot = Keccak256::digest(&string_slot_hex);
-        let comp = Keccak256::digest(&string_slot_key);
-        assert_eq!(hashed_slot, comp);
+        let hashed_slot = Keccak256::digest(&string_slot_key);
         let current_slot = U256::from_be_slice(&hashed_slot);
         let merkle_prover = EvmMerkleRpcClient {
             rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
