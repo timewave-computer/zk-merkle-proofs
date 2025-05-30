@@ -1,5 +1,4 @@
 //! Ethereum-specific functionality for handling Merkle tree operations.
-
 #[cfg(feature = "no-zkvm")]
 pub mod ethereum_rpc;
 pub mod merkle_lib;

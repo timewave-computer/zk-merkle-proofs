@@ -4,6 +4,9 @@
 //! including account proofs, storage proofs, and receipt proofs. It implements the common
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
+extern crate alloc;
+use alloc::vec::Vec;
+
 use super::{digest_keccak, rlp_decode_bytes};
 use crate::{
     timewave_rlp::{self, alloy_bytes::Bytes},
@@ -425,7 +428,7 @@ impl MerkleVerifiable for EthereumStorageProof {
         );
 
         match result {
-            std::result::Result::Ok(_) => Ok(true),
+            core::result::Result::Ok(_) => Ok(true),
             Err(e) => {
                 anyhow::bail!("Proof verification failed: {:?}", e);
             }
@@ -508,7 +511,7 @@ impl MerkleVerifiable for EthereumAccountProof {
         );
 
         match result {
-            std::result::Result::Ok(_) => Ok(true),
+            core::result::Result::Ok(_) => Ok(true),
             Err(e) => {
                 anyhow::bail!("Proof verification failed: {:?}", e);
             }
@@ -582,7 +585,7 @@ impl MerkleVerifiable for EthereumReceiptProof {
         );
 
         match result {
-            std::result::Result::Ok(_) => Ok(true),
+            core::result::Result::Ok(_) => Ok(true),
             Err(e) => {
                 anyhow::bail!("Proof verification failed: {:?}", e);
             }

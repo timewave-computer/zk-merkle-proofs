@@ -349,6 +349,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::vec;
     use hex_literal::hex;
 
     fn encoded_list<T: Encodable + Clone>(t: &[T]) -> BytesMut {

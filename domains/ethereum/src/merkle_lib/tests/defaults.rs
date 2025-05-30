@@ -1,8 +1,7 @@
 #[allow(unused)]
 pub(crate) mod constants {
-    use std::env;
-
     use dotenvy::dotenv;
+    use std::env;
 
     pub(crate) fn read_ethereum_vault_contract_address() -> String {
         dotenv().ok();

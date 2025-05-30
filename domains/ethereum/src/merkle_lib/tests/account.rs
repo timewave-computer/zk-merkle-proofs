@@ -5,22 +5,15 @@ mod tests {
 
     use crate::{
         ethereum_rpc::rpc::EvmMerkleRpcClient,
-        merkle_lib::{
-            tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
-            types::EthereumAccount,
-            RlpDecodable,
-        },
+        merkle_lib::tests::defaults::constants::{read_sepolia_height, read_sepolia_url},
     };
     use alloy::providers::{Provider, ProviderBuilder};
     use common::merkle::types::MerkleVerifiable;
     use hex::FromHex;
-    use tracing::info;
     use url::Url;
 
     #[tokio::test]
     async fn test_account_balance_proof() {
-        tracing_subscriber::fmt::init();
-
         let sepolia_height = read_sepolia_height().await.unwrap();
         let address =
             alloy_primitives::Address::from_hex("0x89efEA02Dc92FD8CcCEefabb59a1104759dF352d")
@@ -47,10 +40,7 @@ mod tests {
             .unwrap();
 
         let state_root = block.header.state_root.as_slice();
-
-        let account_decoded = EthereumAccount::rlp_decode(&account_proof.value).unwrap();
-        info!("Account Decoded: {:?}", account_decoded);
-
+        //let account_decoded = EthereumAccount::rlp_decode(&account_proof.value).unwrap();
         assert!(account_proof.verify(&state_root).unwrap());
     }
 }

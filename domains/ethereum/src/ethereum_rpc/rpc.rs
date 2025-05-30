@@ -1,3 +1,6 @@
+extern crate alloc;
+
+use alloc::{string::String, vec, vec::Vec};
 use alloy::{
     hex::FromHex,
     providers::{Provider, ProviderBuilder},
@@ -8,7 +11,7 @@ use alloy_primitives::{Address, FixedBytes};
 use alloy_trie::{proof::ProofRetainer, root::adjust_index_for_rlp, HashBuilder, Nibbles};
 use anyhow::{Context, Result};
 use common::merkle::types::MerkleClient;
-use std::{io::Read, str::FromStr};
+use core::str::FromStr;
 use url::Url;
 
 use crate::{
@@ -120,12 +123,7 @@ impl EvmMerkleRpcClient {
             .context("Failed to extract leaf from storage proof");
         let storage_proof = EthereumStorageProof::new(
             first_storage_proof.0.clone(),
-            first_storage_proof
-                .1
-                .as_b256()
-                .bytes()
-                .collect::<Result<Vec<u8>, _>>()?
-                .to_vec(),
+            first_storage_proof.1.as_b256().to_vec(),
             stored_value
                 .context("Failed to extract leaf from storage proof")?
                 .to_vec(),
@@ -228,12 +226,7 @@ impl EvmMerkleRpcClient {
             .to_vec();
         Ok(EthereumStorageProof::new(
             first_storage_proof.0.clone(),
-            first_storage_proof
-                .1
-                .as_b256()
-                .bytes()
-                .collect::<Result<Vec<u8>, _>>()?
-                .to_vec(),
+            first_storage_proof.1.as_b256().to_vec(),
             stored_value,
         ))
     }

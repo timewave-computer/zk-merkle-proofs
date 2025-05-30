@@ -220,7 +220,7 @@ mod tests {
     use hex_literal::hex;
 
     #[allow(unused_imports)]
-    use alloc::{string::String, vec::Vec};
+    use alloc::{format, string::String, vec, vec::Vec};
 
     fn check_decode<'a, T, IT>(fixtures: IT)
     where

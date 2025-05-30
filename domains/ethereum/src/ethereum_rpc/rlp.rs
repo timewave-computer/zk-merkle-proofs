@@ -3,6 +3,9 @@
 //! This module provides functions for encoding Ethereum-specific data structures
 //! using the RLP encoding scheme. RLP is the main encoding method used to serialize
 //! objects in Ethereum's execution layer.
+extern crate alloc;
+use alloc::vec::Vec;
+
 use alloy::{
     consensus::{Receipt, ReceiptWithBloom, TxReceipt, TxType},
     rpc::types::TransactionReceipt,
@@ -67,6 +70,6 @@ pub fn encode_receipt(receipt: &TransactionReceipt) -> Result<Vec<u8>> {
 
     match tx_type {
         TxType::Legacy => Ok(encoded),
-        _ => Ok([vec![tx_type as u8], encoded].concat()),
+        _ => Ok([Vec::from([tx_type as u8]), encoded].concat()),
     }
 }

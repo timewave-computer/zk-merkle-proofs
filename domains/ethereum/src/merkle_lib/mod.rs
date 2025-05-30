@@ -1,4 +1,6 @@
 //! Ethereum Merkle proof library.
+extern crate alloc;
+use alloc::vec::Vec;
 
 use crate::timewave_rlp;
 use anyhow::Result;

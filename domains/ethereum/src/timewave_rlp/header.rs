@@ -245,6 +245,7 @@ unsafe fn advance_unchecked<'a>(buf: &mut &'a [u8], cnt: usize) -> &'a [u8] {
 mod tests {
     use super::*;
     use crate::timewave_rlp::Encodable;
+    use alloc::vec;
     use alloc::vec::Vec;
     use core::fmt::Debug;
 

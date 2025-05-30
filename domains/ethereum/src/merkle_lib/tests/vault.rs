@@ -1,5 +1,8 @@
 #[cfg(test)]
 mod tests {
+    extern crate alloc;
+    use core::str::FromStr;
+
     use crate::ethereum_rpc::rpc::EvmMerkleRpcClient;
     use crate::merkle_lib::tests::defaults::constants::{
         read_ethereum_vault_balances_storage_key, read_sepolia_url,
@@ -10,6 +13,7 @@ mod tests {
     };
     use crate::merkle_lib::types::{EthereumAccount, EthereumSimpleProof};
     use crate::merkle_lib::{digest_keccak, rlp_decode_bytes, RlpDecodable};
+    //use alloc::{format, string::String, vec::Vec};
     use alloy::hex;
     use alloy::{
         hex::FromHex,
@@ -18,8 +22,7 @@ mod tests {
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
-    use sha3::{Digest, Keccak256};
-    use std::str::FromStr;
+    //use sha3::{Digest, Keccak256};
     use url::Url;
 
     #[tokio::test]
@@ -181,7 +184,7 @@ mod tests {
             rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
         };
         let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
-        let block_number = 22594523;
+        let block_number = 22594934;
         let length_proof = merkle_prover
             .get_storage_proof(&string_slot_hex, &contract_address, block_number)
             .await
@@ -208,7 +211,7 @@ mod tests {
                 EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
             simple_proof
                 .verify(
-                    hex::decode("15d0e4fe0c56cae4cb084743e629f986b68d972d09c9734583e32ec477a96c64")
+                    hex::decode("a45566400dead2a48517528070c8e63b24575a7126562ee89547cb1b33da9dc6")
                         .unwrap()
                         .as_slice(),
                 )
@@ -217,7 +220,7 @@ mod tests {
             assert!(chunk_proof
                 .verify(
                     &hex::decode(
-                        "15d0e4fe0c56cae4cb084743e629f986b68d972d09c9734583e32ec477a96c64"
+                        "a45566400dead2a48517528070c8e63b24575a7126562ee89547cb1b33da9dc6"
                     )
                     .unwrap()
                 )

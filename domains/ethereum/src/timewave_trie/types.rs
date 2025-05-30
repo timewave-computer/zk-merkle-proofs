@@ -2,6 +2,9 @@ use crate::timewave_trie::constants::*;
 use arrayvec::ArrayVec;
 use nybbles::Nibbles;
 
+extern crate alloc;
+use alloc::vec::Vec;
+
 use crate::{
     merkle_lib::digest_keccak,
     timewave_rlp::{self, alloy_bytes::Bytes, Decodable},
@@ -53,8 +56,8 @@ impl AsRef<[u8]> for RlpNode {
     }
 }
 
-impl std::fmt::Debug for RlpNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Debug for RlpNode {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "RlpNode({})", hex::encode_prefixed(&self.0))
     }
 }
