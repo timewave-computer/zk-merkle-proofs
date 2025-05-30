@@ -168,7 +168,9 @@ mod tests {
             .unwrap());
     }
 
-    #[tokio::test]
+    // this test needs to be updated manually with a recent root and height
+    // because of this it's commented out and should only be used when needed
+    /*#[tokio::test]
     async fn test_decode_withdraw_mainnet() {
         let string_slot_hex = "ec8156718a8372b1db44bb411437d0870f3e3790d4a08526d024ce1b0b668f6e";
         let string_slot_key = hex::decode(string_slot_hex).unwrap();
@@ -179,7 +181,7 @@ mod tests {
             rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
         };
         let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
-        let block_number = 22580997;
+        let block_number = 22594523;
         let length_proof = merkle_prover
             .get_storage_proof(&string_slot_hex, &contract_address, block_number)
             .await
@@ -206,7 +208,7 @@ mod tests {
                 EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
             simple_proof
                 .verify(
-                    hex::decode("aaeaf717f891f01e55287cd09f7291036d1c06a196e53456c5828bcbcb39250d")
+                    hex::decode("15d0e4fe0c56cae4cb084743e629f986b68d972d09c9734583e32ec477a96c64")
                         .unwrap()
                         .as_slice(),
                 )
@@ -215,7 +217,7 @@ mod tests {
             assert!(chunk_proof
                 .verify(
                     &hex::decode(
-                        "aaeaf717f891f01e55287cd09f7291036d1c06a196e53456c5828bcbcb39250d"
+                        "15d0e4fe0c56cae4cb084743e629f986b68d972d09c9734583e32ec477a96c64"
                     )
                     .unwrap()
                 )
@@ -234,5 +236,5 @@ mod tests {
         full_string.truncate(string_length.to::<usize>());
         let decoded_string = String::from_utf8_lossy(&full_string).to_string();
         println!("Decoded receiver string: {:?}", decoded_string);
-    }
+    }*/
 }
