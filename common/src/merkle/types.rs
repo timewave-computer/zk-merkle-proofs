@@ -1,4 +1,6 @@
 use anyhow::Result;
+extern crate alloc;
+use alloc::vec::Vec;
 
 /// A trait for types that can generate Merkle proofs from RPC calls.
 ///
