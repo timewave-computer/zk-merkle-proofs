@@ -19,9 +19,12 @@ alloy-primitives = { version = "0.8.25", optional = true, default-features = fal
 alloy-trie = { version = "0.7.9", optional = true, default-features = false }
 bytes.workspace = true
 hex-literal.workspace = true
-hex = { package = "const-hex", version = "1.14", default-features = false }
+hex = { package = "const-hex", version = "1.14.1", default-features = false, features = [
+    "alloc",
+    "core-error",
+] }
 arrayvec = { version = "0.7", default-features = false }
-nybbles = "0.3.4"
+nybbles = { version = "0.3.4", default-features = false }
 anyhow.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
