@@ -16,7 +16,7 @@ pub use types::RlpDecodable;
 // hash function used in Ethereum. It supports both standard and SP1-specific
 // implementations through feature flags.
 
-use tiny_keccak::{Hasher, Keccak};
+use sha3::{Digest, Keccak256};
 
 /// Computes the Keccak-256 hash of the input bytes.
 ///
@@ -34,11 +34,9 @@ use tiny_keccak::{Hasher, Keccak};
 /// The implementation uses either the standard or SP1-specific Keccak implementation
 /// depending on the feature flags enabled at compile time.
 pub fn digest_keccak(bytes: &[u8]) -> [u8; 32] {
-    let mut hasher = Keccak::v256();
-    let mut output = [0u8; 32];
+    let mut hasher = Keccak256::new();
     hasher.update(bytes);
-    hasher.finalize(&mut output);
-    output
+    hasher.finalize().into()
 }
 
 /// Decodes RLP-encoded bytes into a vector of bytes.

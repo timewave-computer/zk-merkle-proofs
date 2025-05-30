@@ -1873,7 +1873,6 @@ dependencies = [
  "serde",
  "serde_json",
  "sha3",
- "tiny-keccak",
  "tokio",
  "tracing",
  "tracing-subscriber",
