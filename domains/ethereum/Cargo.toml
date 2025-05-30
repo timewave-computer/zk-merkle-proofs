@@ -15,9 +15,9 @@ hash-db = "0.15"
 plain_hasher = "0.2"
 triehash = "0.8.4"
 alloy = { version = "0.12.5", features = ["full"], optional = true }
-alloy-sol-types = { version = "0.8.23", optional = true }
-alloy-primitives = { version = "0.8.25", optional = true }
-alloy-trie = { version = "0.7.9", optional = true }
+alloy-sol-types = { version = "0.8.23", optional = true, default-features = false }
+alloy-primitives = { version = "0.8.25", optional = true, default-features = false }
+alloy-trie = { version = "0.7.9", optional = true, default-features = false }
 tiny-keccak = { version = "2.0.2", features = [
     "keccak",
 ], default-features = false }
@@ -32,8 +32,8 @@ nybbles = "0.3.4"
 anyhow.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
-num-bigint = { version = "0.4", features = ["serde"] }
-sha3 = "0.10"
+num-bigint = { version = "0.4", features = ["serde"], default-features = false }
+sha3 = { version = "0.10", default-features = false }
 
 [features]
 no-zkvm = [
