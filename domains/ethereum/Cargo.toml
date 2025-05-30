@@ -11,8 +11,8 @@ serde_json.workspace = true
 reqwest = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
-hash-db = "0.15"
-triehash = "0.8.4"
+hash-db = { version = "0.15", default-features = false }
+triehash = { version = "0.8.4", default-features = false }
 alloy = { version = "0.12.5", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true, default-features = false }
 alloy-primitives = { version = "0.8.25", optional = true, default-features = false }
