@@ -12,7 +12,6 @@ reqwest = { workspace = true, optional = true }
 url = { workspace = true, optional = true }
 dotenvy = { workspace = true, optional = true }
 hash-db = "0.15"
-plain_hasher = "0.2"
 triehash = "0.8.4"
 alloy = { version = "0.12.5", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true, default-features = false }

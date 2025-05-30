@@ -1868,7 +1868,6 @@ dependencies = [
  "hex-literal",
  "num-bigint",
  "nybbles",
- "plain_hasher",
  "reqwest 0.12.16",
  "serde",
  "serde_json",
@@ -3164,15 +3163,6 @@ name = "pkg-config"
 version = "0.3.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
-
-[[package]]
-name = "plain_hasher"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e19e6491bdde87c2c43d70f4c194bc8a758f2eb732df00f61e43f7362e3b4cc"
-dependencies = [
- "crunchy",
-]
 
 [[package]]
 name = "potential_utf"
