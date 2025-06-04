@@ -182,7 +182,8 @@ mod tests {
         let hashed_slot = digest_keccak(&string_slot_key);
         let current_slot = U256::from_be_slice(&hashed_slot);
         let merkle_prover = EvmMerkleRpcClient {
-            rpc_url: "https://rpc.ankr.com/eth/3021010a3fb9fc2c849dc6bd38774dbd248c4df99be6c8aa2d6841f308b95230".to_string(),
+            rpc_url: "https://eth-mainnet.g.alchemy.com/v2/D1CbidVntzlEbD4x7iyHnZZaPWzvDe9I"
+                .to_string(),
         };
         let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
         let block_number = 22632564 - (32 * 10);
