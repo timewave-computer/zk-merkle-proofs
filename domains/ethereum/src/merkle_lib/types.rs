@@ -164,6 +164,29 @@ impl EthereumSimpleProof {
         address_part
     }
 
+    /// Extracts the storage key from the combined keys structure.
+    ///
+    /// This method parses the length-prefixed combined keys to extract
+    /// the storage key portion, skipping the account address and its length prefix.
+    ///
+    /// # Returns
+    /// The storage key as a `Vec<u8>`
+    ///
+    /// # Panics
+    /// Panics if the combined keys structure is malformed or too short
+    pub fn get_key(&self) -> Vec<u8> {
+        let combined_key = &self.key;
+
+        // Extract the account key length from the first 2 bytes
+        let account_key_len = u16::from_be_bytes([combined_key[0], combined_key[1]]) as usize;
+
+        // Skip the length bytes (2) and the account key to get to the storage key
+        let storage_key_start = 2 + account_key_len;
+        let storage_key_part = combined_key[storage_key_start..].to_vec();
+
+        storage_key_part
+    }
+
     /// Creates a simplified proof from a combined proof.
     ///
     /// This method takes a combined proof containing both account and storage proofs

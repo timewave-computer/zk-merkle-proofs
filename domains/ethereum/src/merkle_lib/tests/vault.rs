@@ -207,6 +207,10 @@ mod tests {
 
             let simple_proof: EthereumSimpleProof =
                 EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
+
+            let address = simple_proof.get_address();
+            let address_hex = hex::encode(address);
+            println!("Address: {:?}", address_hex);
             /*assert!(simple_proof
                 .verify(
                     hex::decode("915b13c8d2fa07ab14cac8272ca3a02a2ea4e97b9d06d30ac7c1d80824e8f0b7")
