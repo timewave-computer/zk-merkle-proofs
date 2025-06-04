@@ -197,6 +197,7 @@ impl EvmMerkleRpcClient {
         height: u64,
     ) -> Result<EthereumStorageProof> {
         let proof = self.get_proof(key, address, height).await?;
+        println!("Proof: {:?}", proof);
         let proof_deserialized: EIP1186AccountProofResponse = serde_json::from_slice(&proof)?;
         let raw_storage_proofs: Vec<(Vec<Vec<u8>>, JsonStorageKey)> = proof_deserialized
             .storage_proof

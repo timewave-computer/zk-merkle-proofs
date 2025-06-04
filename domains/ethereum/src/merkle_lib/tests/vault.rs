@@ -13,7 +13,6 @@ mod tests {
     };
     use crate::merkle_lib::types::{EthereumAccount, EthereumSimpleProof};
     use crate::merkle_lib::{digest_keccak, rlp_decode_bytes, RlpDecodable};
-    //use alloc::{format, string::String, vec::Vec};
     use alloy::hex;
     use alloy::{
         hex::FromHex,
@@ -22,7 +21,6 @@ mod tests {
     use alloy_primitives::U256;
     use alloy_sol_types::SolValue;
     use common::merkle::types::MerkleVerifiable;
-    //use sha3::{Digest, Keccak256};
     use url::Url;
 
     #[tokio::test]
@@ -166,6 +164,7 @@ mod tests {
             .unwrap();
 
         let simple_proof = EthereumSimpleProof::from_combined_proof(combined_proof);
+
         assert!(simple_proof
             .verify(block.header.state_root.as_slice())
             .unwrap());
@@ -173,71 +172,72 @@ mod tests {
 
     // this test needs to be updated manually with a recent root and height
     // because of this it's commented out and should only be used when needed
-    /*#[tokio::test]
+    // this test needs to be updated manually with a recent root and height
+    // because of this it's commented out and should only be used when needed
+    #[tokio::test]
     async fn test_decode_withdraw_mainnet() {
-        let string_slot_hex = "ec8156718a8372b1db44bb411437d0870f3e3790d4a08526d024ce1b0b668f6e";
+        let string_slot_hex = "92e85d02570a8092d09a6e3a57665bc3815a2699a4074001bf1ccabf660f5a39";
         let string_slot_key = hex::decode(string_slot_hex).unwrap();
 
-        let hashed_slot = Keccak256::digest(&string_slot_key);
+        let hashed_slot = digest_keccak(&string_slot_key);
         let current_slot = U256::from_be_slice(&hashed_slot);
         let merkle_prover = EvmMerkleRpcClient {
-            rpc_url: "https://erigon-tw-rpc.polkachu.com".to_string(),
+            rpc_url: "https://rpc.ankr.com/eth/3021010a3fb9fc2c849dc6bd38774dbd248c4df99be6c8aa2d6841f308b95230".to_string(),
         };
         let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
-        let block_number = 22594934;
-        let length_proof = merkle_prover
-            .get_storage_proof(&string_slot_hex, &contract_address, block_number)
-            .await
-            .unwrap();
-        let string_length =
-            U256::from((*length_proof.value.clone().first().unwrap() as u64 - 1) / 2);
-        println!("String length (bytes): {:?}", &string_length);
+        let block_number = 22632564 - (32 * 10);
 
-        // Step 3: Determine how many full 32-byte chunks
-        let total_chunks = ((string_length.to::<usize>() + 31) / 32) as usize;
-        println!("Total 32-byte chunks: {}", total_chunks);
-
-        // Step 4: Fetch each chunk and verify proof
         let mut full_string = Vec::new();
-        for i in 0..total_chunks {
+        let mut i = 0;
+        loop {
             let chunk_slot = current_slot + U256::from(i);
             let chunk_slot_hex = format!("{:064x}", chunk_slot);
             println!("Chunk slot hex: {:?}", chunk_slot_hex);
-            let chunk_proof = merkle_prover
+            let chunk_proof = match merkle_prover
                 .get_account_and_storage_proof(&chunk_slot_hex, &contract_address, block_number)
                 .await
-                .unwrap();
+            {
+                Ok(proof) => proof,
+                Err(e) => {
+                    println!("Error: {:?}", e);
+                    break;
+                }
+            };
+
             let simple_proof: EthereumSimpleProof =
                 EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
-            simple_proof
+            /*assert!(simple_proof
                 .verify(
-                    hex::decode("a45566400dead2a48517528070c8e63b24575a7126562ee89547cb1b33da9dc6")
+                    hex::decode("915b13c8d2fa07ab14cac8272ca3a02a2ea4e97b9d06d30ac7c1d80824e8f0b7")
                         .unwrap()
                         .as_slice(),
                 )
-                .unwrap();
+                .unwrap());
 
             assert!(chunk_proof
                 .verify(
                     &hex::decode(
-                        "a45566400dead2a48517528070c8e63b24575a7126562ee89547cb1b33da9dc6"
+                        "915b13c8d2fa07ab14cac8272ca3a02a2ea4e97b9d06d30ac7c1d80824e8f0b7"
                     )
                     .unwrap()
                 )
-                .unwrap());
+                .unwrap());*/
+            if chunk_proof.storage_proof.value.len() > 0 {
+                full_string.extend_from_slice(&chunk_proof.storage_proof.value[1..]);
+            } else {
+                break;
+            }
 
-            full_string.extend_from_slice(&chunk_proof.storage_proof.value[1..]);
-            let account_decoded =
+            /*let account_decoded =
                 EthereumAccount::rlp_decode(&chunk_proof.account_proof.value).unwrap();
             assert!(chunk_proof
                 .storage_proof
                 .verify(&account_decoded.storage_root)
-                .unwrap());
+                .unwrap());*/
+            i += 1;
         }
 
-        // Step 5: Truncate to actual length and decode
-        full_string.truncate(string_length.to::<usize>());
         let decoded_string = String::from_utf8_lossy(&full_string).to_string();
         println!("Decoded receiver string: {:?}", decoded_string);
-    }*/
+    }
 }

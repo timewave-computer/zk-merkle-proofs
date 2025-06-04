@@ -119,6 +119,51 @@ impl EthereumSimpleProof {
         storage_value_part
     }
 
+    /// Extracts the account value from the combined values structure.
+    ///
+    /// This method parses the length-prefixed combined values to extract
+    /// the account value portion from the beginning of the structure.
+    ///
+    /// # Returns
+    /// The account value as a `Vec<u8>`
+    ///
+    /// # Panics
+    /// Panics if the combined values structure is malformed or too short
+    pub fn get_account(&self) -> Vec<u8> {
+        let combined_values = &self.value;
+
+        // Extract the account value length from the first 2 bytes
+        let account_value_len =
+            u16::from_be_bytes([combined_values[0], combined_values[1]]) as usize;
+
+        // Skip the length bytes (2) and extract the account value
+        let account_value_part = combined_values[2..2 + account_value_len].to_vec();
+
+        account_value_part
+    }
+
+    /// Extracts the account address from the combined keys structure.
+    ///
+    /// This method parses the length-prefixed combined keys to extract
+    /// the account address portion from the beginning of the structure.
+    ///
+    /// # Returns
+    /// The account address as a `Vec<u8>`
+    ///
+    /// # Panics
+    /// Panics if the combined keys structure is malformed or too short
+    pub fn get_address(&self) -> Vec<u8> {
+        let combined_key = &self.key;
+
+        // Extract the account key length from the first 2 bytes
+        let account_key_len = u16::from_be_bytes([combined_key[0], combined_key[1]]) as usize;
+
+        // Skip the length bytes (2) and extract the account address
+        let address_part = combined_key[2..2 + account_key_len].to_vec();
+
+        address_part
+    }
+
     /// Creates a simplified proof from a combined proof.
     ///
     /// This method takes a combined proof containing both account and storage proofs
@@ -337,6 +382,30 @@ impl EthereumCombinedProof {
             account_proof,
             storage_proof,
         }
+    }
+
+    /// Extracts the storage proof value from the storage proof.
+    ///
+    /// # Returns
+    /// The storage proof value as a `Vec<u8>`
+    pub fn get_stored_value(&self) -> Vec<u8> {
+        self.storage_proof.value.clone()
+    }
+
+    /// Extracts the account value from the account proof.
+    ///
+    /// # Returns
+    /// The account value as a `Vec<u8>`
+    pub fn get_account(&self) -> Vec<u8> {
+        self.account_proof.value.clone()
+    }
+
+    /// Extracts the account address from the account proof.
+    ///
+    /// # Returns
+    /// The account address as a `Vec<u8>`
+    pub fn get_address(&self) -> Vec<u8> {
+        self.account_proof.address.clone()
     }
 }
 
