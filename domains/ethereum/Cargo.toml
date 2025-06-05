@@ -18,8 +18,8 @@ hash-db = { version = "0.15", default-features = false }
 triehash = { version = "0.8.4", default-features = false }
 alloy = { version = "0.12.5", features = ["full"], optional = true }
 alloy-sol-types = { version = "0.8.23", optional = true, default-features = false }
-alloy-primitives = { version = "0.8.25", optional = true, default-features = false }
-alloy-trie = { version = "0.7.9", optional = true, default-features = false }
+alloy-primitives = { version = "0.8.25", default-features = false }
+alloy-trie = { version = "0.7.9", default-features = false }
 bytes.workspace = true
 hex-literal.workspace = true
 hex = { package = "const-hex", version = "1.14.1", default-features = false, features = [
@@ -35,13 +35,4 @@ num-bigint = { version = "0.4", features = ["serde"], default-features = false }
 sha3 = { version = "0.10", default-features = false }
 
 [features]
-no-zkvm = [
-    "tokio",
-    "reqwest",
-    "url",
-    "dotenvy",
-    "alloy",
-    "alloy-sol-types",
-    "alloy-primitives",
-    "alloy-trie",
-]
+no-zkvm = ["tokio", "reqwest", "url", "dotenvy", "alloy", "alloy-sol-types"]
