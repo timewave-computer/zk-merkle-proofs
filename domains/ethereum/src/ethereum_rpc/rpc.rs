@@ -7,6 +7,7 @@ use alloy::{
     rpc::types::{EIP1186AccountProofResponse, TransactionReceipt},
     serde::JsonStorageKey,
 };
+
 use alloy_primitives::{Address, FixedBytes};
 use alloy_trie::{proof::ProofRetainer, root::adjust_index_for_rlp, HashBuilder, Nibbles};
 use anyhow::{Context, Result};
@@ -88,7 +89,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|b| b.to_vec())
             .collect();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<alloy_rlp::Bytes> = rlp_decode_bytes(
             proof_deserialized
                 .account_proof
                 .last()
@@ -110,7 +111,7 @@ impl EvmMerkleRpcClient {
             .first()
             .context("Failed to get first storage proof");
         let first_storage_proof = first_storage_proof?;
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<alloy_rlp::Bytes> = rlp_decode_bytes(
             &first_storage_proof
                 .0
                 .to_vec()
@@ -208,19 +209,18 @@ impl EvmMerkleRpcClient {
         let first_storage_proof = raw_storage_proofs
             .first()
             .context("Failed to get first storage proof")?;
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> =
-            match crate::timewave_rlp::decode_exact(
-                first_storage_proof
-                    .0
-                    .to_vec()
-                    .last()
-                    .context("Failed to extract leaf from storage proof")?,
-            ) {
-                Ok(decoded) => decoded,
-                Err(e) => {
-                    return Err(anyhow::anyhow!("Failed to decode RLP bytes: {:?}", e));
-                }
-            };
+        let leaf_node_decoded: Vec<alloy_rlp::Bytes> = match alloy_rlp::decode_exact(
+            first_storage_proof
+                .0
+                .to_vec()
+                .last()
+                .context("Failed to extract leaf from storage proof")?,
+        ) {
+            Ok(decoded) => decoded,
+            Err(e) => {
+                return Err(anyhow::anyhow!("Failed to decode RLP bytes: {:?}", e));
+            }
+        };
         let stored_value = leaf_node_decoded
             .last()
             .context("Failed to extract value from leaf")?
@@ -251,19 +251,18 @@ impl EvmMerkleRpcClient {
             ))
             .await?
             .context("Failed to get block receipts")?;
-        let retainer = ProofRetainer::new(vec![Nibbles::unpack(
-            crate::timewave_rlp::encode_fixed_size(&index),
-        )]);
+        let retainer =
+            ProofRetainer::new(vec![Nibbles::unpack(alloy_rlp::encode_fixed_size(&index))]);
         let mut hb: HashBuilder = HashBuilder::default().with_proof_retainer(retainer);
         for i in 0..receipts.len() {
             let index = adjust_index_for_rlp(i, receipts.len());
-            let index_buffer = crate::timewave_rlp::encode_fixed_size(&index);
+            let index_buffer = alloy_rlp::encode_fixed_size(&index);
             hb.add_leaf(
                 Nibbles::unpack(&index_buffer),
                 encode_receipt(&receipts[index])?.as_slice(),
             );
         }
-        let receipt_key: Vec<u8> = crate::timewave_rlp::encode(index);
+        let receipt_key: Vec<u8> = alloy_rlp::encode(index);
         hb.root();
         let proof = hb
             .take_proof_nodes()
@@ -274,7 +273,7 @@ impl EvmMerkleRpcClient {
             .iter()
             .map(|n| n.to_vec())
             .collect::<Vec<_>>();
-        let leaf_node_decoded: Vec<crate::timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<alloy_rlp::Bytes> = rlp_decode_bytes(
             proof
                 .to_vec()
                 .last()

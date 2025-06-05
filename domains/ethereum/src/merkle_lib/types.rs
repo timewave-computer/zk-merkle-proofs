@@ -5,13 +5,11 @@
 //! Merkle proof traits for Ethereum-specific data structures and provides functionality
 //! to fetch and verify proofs from Ethereum nodes.
 extern crate alloc;
-use alloc::vec::Vec;
-
 use super::{digest_keccak, rlp_decode_bytes};
-use crate::{
-    timewave_rlp::{self, alloy_bytes::Bytes},
-    timewave_trie::verify::verify_proof,
-};
+use alloc::vec::Vec;
+use alloy_primitives::FixedBytes;
+use alloy_rlp::{self, Bytes};
+use alloy_trie::proof::verify_proof;
 use anyhow::{Context, Ok, Result};
 use common::merkle::types::MerkleVerifiable;
 use num_bigint::BigUint;
@@ -486,13 +484,13 @@ impl EthereumStorageProof {
 /// 3. Ensuring the computed root matches the expected root
 impl MerkleVerifiable for EthereumStorageProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
-        let proof_nodes: Vec<Bytes> = self
+        let proof_nodes: Vec<alloy_primitives::Bytes> = self
             .proof
             .iter()
-            .map(|node| Bytes::copy_from_slice(node))
+            .map(|node| alloy_primitives::Bytes::copy_from_slice(node))
             .collect();
 
-        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<Bytes> = rlp_decode_bytes(
             proof_nodes
                 .to_vec()
                 .last()
@@ -513,7 +511,7 @@ impl MerkleVerifiable for EthereumStorageProof {
         let key = Nibbles::unpack(&digest_keccak(&self.key));
 
         let result = verify_proof(
-            &root.try_into()?,
+            FixedBytes::from_slice(&root),
             key,
             Some(self.value.to_vec()),
             proof_nodes.iter(),
@@ -571,13 +569,13 @@ impl EthereumAccountProof {
 /// 3. Ensuring the computed root matches the expected root
 impl MerkleVerifiable for EthereumAccountProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
-        let proof_nodes: Vec<Bytes> = self
+        let proof_nodes: Vec<alloy_primitives::Bytes> = self
             .proof
             .iter()
-            .map(|node| Bytes::copy_from_slice(node))
+            .map(|node| alloy_primitives::Bytes::copy_from_slice(node))
             .collect();
 
-        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<Bytes> = rlp_decode_bytes(
             proof_nodes
                 .to_vec()
                 .last()
@@ -596,7 +594,7 @@ impl MerkleVerifiable for EthereumAccountProof {
         let key = Nibbles::unpack(&digest_keccak(&self.address));
 
         let result = verify_proof(
-            &root.try_into()?,
+            FixedBytes::from_slice(&root),
             key,
             Some(self.value.to_vec()),
             proof_nodes.iter(),
@@ -643,13 +641,13 @@ impl EthereumReceiptProof {
 
 impl MerkleVerifiable for EthereumReceiptProof {
     fn verify(&self, root: &[u8]) -> Result<bool> {
-        let proof_nodes: Vec<Bytes> = self
+        let proof_nodes: Vec<alloy_primitives::Bytes> = self
             .proof
             .iter()
-            .map(|node| Bytes::copy_from_slice(node))
+            .map(|node| alloy_primitives::Bytes::copy_from_slice(node))
             .collect();
 
-        let leaf_node_decoded: Vec<timewave_rlp::Bytes> = rlp_decode_bytes(
+        let leaf_node_decoded: Vec<Bytes> = rlp_decode_bytes(
             proof_nodes
                 .to_vec()
                 .last()
@@ -670,7 +668,7 @@ impl MerkleVerifiable for EthereumReceiptProof {
         let key = Nibbles::unpack(&self.key);
 
         let result = verify_proof(
-            &root.try_into()?,
+            FixedBytes::from_slice(&root),
             key,
             Some(self.value.to_vec()),
             proof_nodes.iter(),

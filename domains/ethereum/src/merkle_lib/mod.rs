@@ -2,7 +2,6 @@
 extern crate alloc;
 use alloc::vec::Vec;
 
-use crate::timewave_rlp;
 use anyhow::Result;
 
 mod tests;
@@ -49,8 +48,8 @@ pub fn digest_keccak(bytes: &[u8]) -> [u8; 32] {
 ///
 /// # Panics
 /// Panics if the bytes cannot be decoded
-pub fn rlp_decode_bytes(bytes: &[u8]) -> Result<Vec<timewave_rlp::Bytes>> {
-    let decoded = timewave_rlp::decode_exact(bytes)
+pub fn rlp_decode_bytes(bytes: &[u8]) -> Result<Vec<alloy_rlp::Bytes>> {
+    let decoded = alloy_rlp::decode_exact(bytes)
         .map_err(|e| anyhow::anyhow!("Failed to decode RLP bytes: {:?}", e))?;
     Ok(decoded)
 }

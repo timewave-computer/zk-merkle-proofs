@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-rlp = { version = "0.3.12", default-features = false }
+rlp = { version = "0.6.1", default-features = false }
+ethereum-types = { version = "0.15.1", default-features = false }
 common.workspace = true
 tokio = { workspace = true, optional = true }
 serde.workspace = true

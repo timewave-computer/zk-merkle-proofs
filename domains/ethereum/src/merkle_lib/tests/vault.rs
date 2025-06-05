@@ -176,7 +176,7 @@ mod tests {
     // because of this it's commented out and should only be used when needed
     #[tokio::test]
     async fn test_decode_withdraw_mainnet() {
-        let string_slot_hex = "92e85d02570a8092d09a6e3a57665bc3815a2699a4074001bf1ccabf660f5a39";
+        let string_slot_hex = "92e85d02570a8092d09a6e3a57665bc3815a2699a4074001bf1ccabf660f5a36";
         let string_slot_key = hex::decode(string_slot_hex).unwrap();
 
         let hashed_slot = digest_keccak(&string_slot_key);
@@ -185,8 +185,15 @@ mod tests {
             rpc_url: "https://eth-mainnet.g.alchemy.com/v2/D1CbidVntzlEbD4x7iyHnZZaPWzvDe9I"
                 .to_string(),
         };
-        let contract_address = "0xf2B85C389A771035a9Bd147D4BF87987A7F9cf98".to_string();
-        let block_number = 22632564 - (32 * 10);
+        let contract_address = "0x0b3b3a2c11d6676816fe214b7f23446d12d762ff".to_string();
+        let block_number = 22639439;
+
+        let proof = merkle_prover
+            .get_account_and_storage_proof(string_slot_hex, &contract_address, block_number)
+            .await
+            .unwrap();
+
+        println!("Proof: {:?}", proof.get_stored_value());
 
         let mut full_string = Vec::new();
         let mut i = 0;
@@ -208,9 +215,6 @@ mod tests {
             let simple_proof: EthereumSimpleProof =
                 EthereumSimpleProof::from_combined_proof(chunk_proof.clone());
 
-            let address = simple_proof.get_address();
-            let address_hex = hex::encode(address);
-            println!("Address: {:?}", address_hex);
             /*assert!(simple_proof
                 .verify(
                     hex::decode("915b13c8d2fa07ab14cac8272ca3a02a2ea4e97b9d06d30ac7c1d80824e8f0b7")
